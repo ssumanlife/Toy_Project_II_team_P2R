@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { css, jsx } from '@emotion/react';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
+import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
 
 const PayrollHistory = () => {
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([
@@ -63,7 +64,16 @@ const PayrollHistory = () => {
       pay: '2,200,000원',
     },
   ]);
+  const [modal, setModal] = useState(false);
+  const [approval, setApproval] = useState(false);
 
+  const handleApproval = () => {
+    approval ? setModal(true) : setModal(false);
+  };
+
+  const onModal = () => {
+    modal ? setModal(false) : setModal(true);
+  };
   return (
     <div css={wrapper}>
       <div css={salaryCorrectionArea}>
@@ -105,14 +115,18 @@ const PayrollHistory = () => {
             {salaryCorrectionLists.map((item, index) => (
               <SalaryList
                 key={index}
+                id={index}
                 name={item.name}
                 monthly={item.monthly}
                 title={item.title}
                 content={item.content}
+                approval={approval}
+                onModal={onModal}
               />
             ))}
           </tbody>
         </table>
+        {modal ? <ApprovalModal handleApproval={handleApproval} /> : null}
       </div>
     </div>
   );

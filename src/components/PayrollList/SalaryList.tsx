@@ -1,14 +1,18 @@
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { useState } from 'react';
 interface SalaryCorrection {
+  id: string;
   name: string;
   monthly: string;
-
   title: string;
   content: string;
+  onModal: any;
 }
 
-const SalaryList = ({ name, monthly, title, content }: SalaryCorrection) => {
+const SalaryList = ({ id, name, monthly, title, content, onModal }: SalaryCorrection) => {
+  const [result, setResult] = useState([{ check: 'check', close: 'close' }]);
+
   return (
     <tr css={tr}>
       <td>{name}</td>
@@ -16,14 +20,14 @@ const SalaryList = ({ name, monthly, title, content }: SalaryCorrection) => {
       <td>{title}</td>
       <td>{content}</td>
       <td css={{ textAlign: 'center' }}>
-        <button css={corretionBtn}>
+        <button id={id} css={stateCheckBtn} onClick={() => onModal()}>
           <span css={{ color: '#578AEA' }} className="material-symbols-outlined">
-            check
+            {result[0].check}
           </span>
         </button>
-        <button css={corretionBtn}>
+        <button id={id} css={stateCheckBtn}>
           <span css={{ color: '#888' }} className="material-symbols-outlined">
-            close
+            {result[0].close}
           </span>
         </button>
       </td>
@@ -33,12 +37,12 @@ const SalaryList = ({ name, monthly, title, content }: SalaryCorrection) => {
 
 export default SalaryList;
 
-const corretionBtn = css`
+const stateCheckBtn = css`
   border: none;
   background: transparent;
   cursor: pointer;
   transition: 0.3s;
-  margin-left: 10px;
+  margin-right: 5px;
   &:hover {
     transform: scale(130%);
   }
