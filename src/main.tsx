@@ -75,22 +75,17 @@ const userRouter = createBrowserRouter([
 ]);
 
 function Root() {
-  // const { user } = useAuthContext();
-  // console.log(user?.isAdmin);
-
-  // return <RouterProvider router={user?.isAdmin ? adminRouter : userRouter} />;
-  return <RouterProvider router={adminRouter} />;
+  const { user } = useAuthContext();
+  return <RouterProvider router={user?.isAdmin ? adminRouter : userRouter} />;
 }
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <React.StrictMode>
-      <AuthContextProvider>
-        <Root />
-      </AuthContextProvider>
-    </React.StrictMode>,
+    <AuthContextProvider>
+      <Root />
+    </AuthContextProvider>,
   );
 } else {
   console.log('No root element found');
