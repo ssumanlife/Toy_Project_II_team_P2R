@@ -1,15 +1,27 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import React from 'react';
+import Button from '../Button.tsx';
 
-const ApprovalModal = ({ handleApproval }) => {
+const btnWrapper = css`
+  display: flex;
+  gap: 20px;
+`;
+
+const ApprovalModal = ({ handleApproval, id, onModal }) => {
+  let text = '';
+  if (id.slice(0, 1) === 'v') {
+    text = '승인';
+  } else if (id.slice(0, 1) === 'x') {
+    text = '반려';
+  }
   return (
     <div css={ApprovalModalWrapper}>
       <div css={ApprovalModalpage}>
-        <p css={{ fontSize: '20px' }}>승인 하시겠습니까?</p>
-        <div>
-          <button onClick={() => handleApproval()}>예</button>
-          <button>아니오</button>
+        <p css={{ fontSize: '20px', marginBottom: '60px', color: '#333' }}>{text} 하시겠습니까?</p>
+        <div css={btnWrapper}>
+          <Button onClick={() => handleApproval('approval', id)} children={'예'} variant="primary" />
+          <Button onClick={() => onModal()} children={'아니오'} variant="secondary" />
         </div>
       </div>
     </div>
@@ -32,8 +44,8 @@ const ApprovalModalWrapper = css`
   z-index: 1000;
 `;
 const ApprovalModalpage = css`
-  width: 250px;
-  height: 180px;
+  width: 350px;
+  height: 210px;
   display: flex;
   flex-direction: column;
   background: #fff;

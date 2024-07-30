@@ -1,19 +1,45 @@
 /** @jsxImportSource @emotion/react */
 import { css, jsx } from '@emotion/react';
+import { EmployeeSalaryType } from '../../Pages/Payroll/Payroll-History.tsx';
+import SpacificationModal from './SpacificationModal.tsx';
+import { useState } from 'react';
 
-interface employeeSalaryType {
-  id: number;
-  name: string;
-  pay: string;
-}
+const PayList = ({ id, name, payData }: employeeSalaryType) => {
+  const [modal, setModal] = useState(false);
+  const onSpacificationModal = () => {
+    modal ? setModal(false) : setModal(true);
+  };
 
-const PayList = ({ id, name, pay }: employeeSalaryType) => {
+  let totalPay =
+    payData.basicPay +
+    payData.weeklyPay +
+    payData.additionalPay -
+    (payData.nationalPension + payData.healthInsurance + payData.care + payData.employmentInsurance);
+
+  totalPay = totalPay.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   return (
     <li css={liItem}>
+      {modal ? (
+        <SpacificationModal
+          payData={payData}
+          name={name}
+          totalPay={totalPay}
+          onSpacificationModal={onSpacificationModal}
+        />
+      ) : null}
       <p>6월 {name} 급여명세서</p>
       <p css={{ color: '#666' }}>2024.07.15 지급 예정</p>
-      <p css={{ color: '#ff3737' }}>{pay}</p>
-      {id <= 2 ? <button css={unreadBtn}>미열람</button> : <button css={readBtn}>열람</button>}
+      <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
+      {id <= 2 ? (
+        <button css={unreadBtn} onClick={onSpacificationModal}>
+          미열람
+        </button>
+      ) : (
+        <button css={readBtn} onClick={onSpacificationModal}>
+          열람
+        </button>
+      )}
     </li>
   );
 };
