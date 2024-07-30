@@ -4,6 +4,7 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase.ts';
 
 const useSetUserData = (name: string, phone: string, email: string, pw: string, bankAccountNumber: string) => {
+  const [userData, setUserData] = useState({});
   useEffect(() => {
     const addUserData = async () => {
       try {
@@ -14,13 +15,14 @@ const useSetUserData = (name: string, phone: string, email: string, pw: string, 
           pw,
           bankAccountNumber,
         });
-        console.log(docRef.id);
+        setUserData(docRef.id);
       } catch (error) {
         console.log('Add user data Error');
       }
     };
     addUserData();
-  }, [name]);
+  }, [userData]);
+  return userData;
 };
 
 const useGetUserData = (docName: string) => {

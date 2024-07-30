@@ -5,74 +5,167 @@ import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
 
+interface PayData {
+  basicPay: number;
+  weeklyPay: number;
+  additionalPay: number;
+  nationalPension: number;
+  healthInsurance: number;
+  care: number;
+  employmentInsurance: number;
+}
+
+export interface SalaryCorrection {
+  id: number;
+  name: string;
+  monthly: string;
+  title: string;
+  content: string;
+  onModal?: any;
+  approval?: string;
+  state: string;
+}
+export interface EmployeeSalaryType {
+  id: number;
+  name: string;
+  payData: PayData;
+}
+
 const PayrollHistory = () => {
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([
     {
+      id: 1,
       name: '김수민',
       monthly: '6월',
       title: '연장근무 미반영',
       content: '6월 22일 주말피크 2시간 연장근무 급여 누락 된 것 습니다.',
-    },
-    {
-      name: '양해석',
-      monthly: '6월',
-      title: '추가근무 미반영',
-      content: '5월 15일 수민님 대타 출근한 4시간 급여 누락되었습니다.',
-    },
-    {
-      name: '임효정',
-      monthly: '2월',
-      title: '무급휴가 사용 미반영',
-      content: '2월27일 무급 휴가 사용한거 반영이 안되었습니다!',
-    },
-    {
-      name: '김승민',
-      monthly: '1월',
-      title: '연장근무 미 반영',
-      content: '1월 1일 연장근무 4시간 급여 누락 된 것 습니다.',
-    },
-  ]);
-  const [employeeSalary, setEmployeeSalary] = useState<employeeSalaryType[]>([
-    {
-      id: 1,
-      name: '김수민',
-      pay: '2,400,000원',
+      state: 'normal',
     },
     {
       id: 2,
       name: '양해석',
-      pay: '2,400,000원',
+      monthly: '6월',
+      title: '추가근무 미반영',
+      content: '5월 15일 수민님 대타 출근한 4시간 급여 누락되었습니다.',
+      state: 'normal',
     },
     {
       id: 3,
       name: '임효정',
-      pay: '2,400,000원',
+      monthly: '2월',
+      title: '무급휴가 사용 미반영',
+      content: '2월27일 무급 휴가 사용한거 반영이 안되었습니다!',
+      state: 'normal',
     },
     {
       id: 4,
       name: '김승민',
-      pay: '2,400,000원',
+      monthly: '1월',
+      title: '연장근무 미 반영',
+      content: '1월 1일 연장근무 4시간 급여 누락 된 것 습니다.',
+      state: 'normal',
+    },
+  ]);
+  const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([
+    {
+      id: 1,
+      name: '김수민',
+      payData: {
+        basicPay: 2300000,
+        weeklyPay: 300000,
+        additionalPay: 25000,
+        nationalPension: 100000,
+        healthInsurance: 100000,
+        care: 50000,
+        employmentInsurance: 60000,
+      },
+    },
+    {
+      id: 2,
+      name: '양해석',
+      payData: {
+        basicPay: 2210000,
+        weeklyPay: 370000,
+        additionalPay: 39000,
+        nationalPension: 100000,
+        healthInsurance: 100000,
+        care: 50000,
+        employmentInsurance: 60000,
+      },
+    },
+    {
+      id: 3,
+      name: '임효정',
+      payData: {
+        basicPay: 2270000,
+        weeklyPay: 320000,
+        additionalPay: 30000,
+        nationalPension: 100000,
+        healthInsurance: 100000,
+        care: 50000,
+        employmentInsurance: 60000,
+      },
+    },
+    {
+      id: 4,
+      name: '김승민',
+      payData: {
+        basicPay: 2300000,
+        weeklyPay: 310000,
+        additionalPay: 25000,
+        nationalPension: 100000,
+        healthInsurance: 100000,
+        care: 50000,
+        employmentInsurance: 60000,
+      },
     },
     {
       id: 5,
       name: '강동원',
-      pay: '2,200,000원',
+      payData: {
+        basicPay: 2200000,
+        weeklyPay: 300000,
+        additionalPay: 25000,
+        nationalPension: 100000,
+        healthInsurance: 100000,
+        care: 50000,
+        employmentInsurance: 60000,
+      },
     },
     {
       id: 6,
       name: '김우빈',
-      pay: '2,200,000원',
+      payData: {
+        basicPay: 30000,
+        weeklyPay: 300000,
+        additionalPay: 25000,
+        nationalPension: 12000,
+        healthInsurance: 10000,
+        care: 5000,
+        employmentInsurance: 6000,
+      },
     },
   ]);
   const [modal, setModal] = useState(false);
-  const [approval, setApproval] = useState(false);
+  const [id, setId] = useState(null);
 
   const handleApproval = () => {
-    approval ? setModal(true) : setModal(false);
+    let idState = id.slice(0, 1);
+    if (idState === 'v') {
+      let idValue = id.slice(1);
+      let changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
+      changeList[0].state = 'approval';
+    } else if (idState === 'x') {
+      let idValue = id.slice(1);
+      let changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
+      changeList[0].state = 'reject';
+    }
+    setModal(false);
   };
 
-  const onModal = () => {
+  const onModal = (id) => {
     modal ? setModal(false) : setModal(true);
+    setId(id);
   };
   return (
     <div css={wrapper}>
@@ -90,7 +183,7 @@ const PayrollHistory = () => {
         </div>
         <ul css={{ padding: 0, width: '100%' }}>
           {employeeSalary.map((item, index) => (
-            <PayList key={index} id={item.id} name={item.name} pay={item.pay} />
+            <PayList key={index} id={item.id} name={item.name} payData={item.payData} />
           ))}
         </ul>
         <div css={salaryCorrectionheader}>
@@ -112,21 +205,21 @@ const PayrollHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {salaryCorrectionLists.map((item, index) => (
+            {salaryCorrectionLists.map((item) => (
               <SalaryList
-                key={index}
-                id={index}
+                key={item.id}
+                id={item.id}
                 name={item.name}
                 monthly={item.monthly}
                 title={item.title}
                 content={item.content}
-                approval={approval}
+                state={item.state}
                 onModal={onModal}
               />
             ))}
           </tbody>
         </table>
-        {modal ? <ApprovalModal handleApproval={handleApproval} /> : null}
+        {modal ? <ApprovalModal id={id} handleApproval={handleApproval} onModal={onModal} /> : null}
       </div>
     </div>
   );
