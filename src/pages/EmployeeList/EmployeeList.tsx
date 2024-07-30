@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../../Components/Button.tsx';
 import EmployeeSpecificModal, { Employee } from './EmployeeSpecificModal.tsx';
+import EmployeeAddModal from './EmployeeAdd.tsx';
 
 const employeeData = [
   { id: '1', name: '김수민', phone: '010-1234-1234', workHours: '월~수 17:00~21:00', account: '국민  123456715679813', salary: '300,000' },
@@ -56,13 +57,20 @@ const tdStyles = css`
 
 const EmployeeList: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleRowClick = (employee: Employee) => {
     setSelectedEmployee(employee);
   };
 
+  const handleSaveEmployee = (employee: Employee) => {
+    employeeData.push(employee);
+    setIsAddModalOpen(false);
+  };
+
   const closeModal = () => {
     setSelectedEmployee(null);
+    setIsAddModalOpen(false);
   };
 
   return (
@@ -71,7 +79,7 @@ const EmployeeList: React.FC = () => {
         <h3 css={{ fontWeight: 'bold', color: 'var(--text-gray)' }}>직원 리스트</h3>
         <div css={{ display: 'flex', gap: '20px' }}>
           <Button variant="secondary" onClick={() => console.log('직원 삭제 클릭됨')}>직원 삭제</Button>
-          <Button customWidth="50px" customFontSize="40px" onClick={() => console.log('직원 추가 클릭됨')}>+</Button>
+          <Button customWidth="50px" customFontSize="40px" onClick={() => setIsAddModalOpen(true)}>+</Button>
         </div>
       </div>
       <div css={tableContainerStyles}>
@@ -97,15 +105,22 @@ const EmployeeList: React.FC = () => {
             ))}
           </tbody>
         </table>
+        </div>
+        {selectedEmployee && (
+          <EmployeeSpecificModal
+            isOpen={!!selectedEmployee}
+            onClose={closeModal}
+            employee={selectedEmployee}
+          />
+        )}
+        {isAddModalOpen && (
+          <EmployeeAddModal
+            isOpen={isAddModalOpen}
+            onClose={closeModal}
+            onSave={handleSaveEmployee}
+          />
+        )}
       </div>
-      {selectedEmployee && (
-        <EmployeeSpecificModal
-          isOpen={!!selectedEmployee}
-          onClose={closeModal}
-          employee={selectedEmployee}
-        />
-      )}
-    </div>
   );
 };
 
