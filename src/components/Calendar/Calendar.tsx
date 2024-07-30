@@ -7,6 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react'; // Import css from @emotion/react
 import Button from '../Button';
 import CalendarDeleteModal from './Calendar-delete';
+import CalendarDetailModal from './Calendar-detail';
 import CalendarAddModal from './Calendar-add';
 
 const MyCalendar = () => {
@@ -200,9 +201,44 @@ const MyCalendar = () => {
   `;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const openDeleteModal = (event) => {
+    setEventToDelete(event);
+    setIsDeleteModalOpen(true);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (eventToDelete) {
+      setEvents(events.filter((e) => e !== eventToDelete));
+      setIsDeleteModalOpen(false);
+      setEventToDelete(null);
+      setIsModalOpen(false);
+    }
+  };
 
   const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
     setSelectedDate(arg.date);
+  };
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+    setIsModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+    setIsModalOpen(false);
+  };
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsDetailModalOpen(true);
+    setIsModalOpen(true);
   };
 
   const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
@@ -230,13 +266,7 @@ const MyCalendar = () => {
     const date = new Date(`${dateString}T00:00:00`);
     return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
-  };
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
-  };
   useEffect(() => {
     setSelectedDate(new Date());
   }, []);
@@ -261,7 +291,7 @@ const MyCalendar = () => {
             </div>
           ))}
         </div>
-        {!isAddModalOpen && (
+        {!isModalOpen && (
           <div css={calendarStyle}>
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
@@ -322,6 +352,7 @@ const MyCalendar = () => {
                         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         position: relative;
                       `}
+                      onClick={() => handleEventClick(event)}
                     >
                       <span
                         css={css`
@@ -330,6 +361,10 @@ const MyCalendar = () => {
                           right: 5px;
                           cursor: pointer;
                         `}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(event);
+                        }}
                       >
                         x
                       </span>
@@ -363,6 +398,23 @@ const MyCalendar = () => {
         </div>
       </div>
       <CalendarAddModal isOpen={isAddModalOpen} onClose={closeAddModal} />
+      <CalendarDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setIsModalOpen(false);
+        }}
+        onConfirm={closeDeleteModal}
+        eventTitle={eventToDelete ? eventToDelete.title : ''}
+      />
+      <CalendarDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setIsModalOpen(false);
+        }}
+        event={selectedEvent}
+      />
     </div>
   );
 };
