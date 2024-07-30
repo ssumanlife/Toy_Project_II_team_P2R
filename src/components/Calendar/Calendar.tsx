@@ -5,28 +5,41 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react'; // Import css from @emotion/react
+import Button from '../Button';
+import CalendarDeleteModal from './Calendar-delete';
+import CalendarAddModal from './Calendar-add';
 
 const MyCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedCategories, setSelectedCategories] = useState(['업무', '개인용무', '건강']);
+  const [selectedCategories, setSelectedCategories] = useState([
+    'pink',
+    'yellow',
+    'peach',
+    'green',
+    'skyblue',
+    'blue',
+    'purple',
+    'gray',
+  ]);
   const [events, setEvents] = useState([
-    { title: '미팅', start: '2024-07-26', end: '2024-07-26', category: '업무' },
-    { title: '점심 약속', start: '2024-07-27', end: '2024-07-27', category: '개인용무' },
-    { title: '운동', start: '2024-07-27', end: '2024-07-27', category: '건강' },
-    { title: '프로젝트 기간', start: '2024-07-15', end: '2024-07-29', category: '업무' },
-    { title: '가족 모임', start: '2024-07-21', end: '2024-07-21', category: '개인용무' },
+    { title: '미팅', start: '2024-07-26', end: '2024-07-26', category: 'skyblue' },
+    { title: '점심 약속', start: '2024-07-27', end: '2024-07-27', category: 'green' },
+    { title: '운동', start: '2024-07-27', end: '2024-07-27', category: 'pink' },
+    { title: '프로젝트 기간', start: '2024-07-15', end: '2024-07-29', category: 'skyblue' },
+    { title: '가족 모임', start: '2024-07-21', end: '2024-07-21', category: 'peach' },
   ]);
 
-  const categories = ['업무', '개인용무', '건강'];
+  const categories = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
 
   const categoryColors = {
-    업무: 'var(--calendar-skyblue)',
-    개인용무: 'var(--calendar-peach)',
-    건강: 'var(--calendar-pink)',
-  };
-
-  const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
-    setSelectedDate(arg.date);
+    pink: 'var(--calendar-pink)',
+    yellow: 'var(--calendar-yellow)',
+    peach: 'var(--calendar-peach)',
+    green: 'var(--calendar-green)',
+    skyblue: 'var(--calendar-skyblue)',
+    blue: 'var(--calendar-blue)',
+    purple: 'var(--calendar-purple)',
+    gray: 'var(--calendar-gray)',
   };
 
   const outerContainerStyle = css`
@@ -39,6 +52,7 @@ const MyCalendar = () => {
 
   const containerStyle = css`
     display: flex;
+    position: relative;
     margin: 100px;
     flex: 3;
     border-radius: 20px;
@@ -179,6 +193,18 @@ const MyCalendar = () => {
     }
   `;
 
+  const buttonStyle = css`
+    position: absolute; // 버튼을 절대 위치로 설정
+    bottom: 20px; // 아래에서 20px
+    right: 20px; // 오른쪽에서 20px
+  `;
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
+    setSelectedDate(arg.date);
+  };
+
   const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
 
   const getEventsForSelectedDate = () => {
@@ -204,7 +230,13 @@ const MyCalendar = () => {
     const date = new Date(`${dateString}T00:00:00`);
     return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
 
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+  };
   useEffect(() => {
     setSelectedDate(new Date());
   }, []);
@@ -229,39 +261,42 @@ const MyCalendar = () => {
             </div>
           ))}
         </div>
-        <div css={calendarStyle}>
-          <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            events={getFilteredEvents().map((event) => ({
-              ...event,
-              backgroundColor: categoryColors[event.category],
-              borderColor: categoryColors[event.category],
-            }))}
-            dateClick={handleDateClick}
-            headerToolbar={{
-              left: 'prev',
-              center: 'title',
-              right: 'next',
-            }}
-            eventContent={(eventInfo) => (
-              <div
-                style={{
-                  color: 'white',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                <b>{eventInfo.timeText}</b>
-                <i>{eventInfo.event.title}</i>
-              </div>
-            )}
-          />
-        </div>
+        {!isAddModalOpen && (
+          <div css={calendarStyle}>
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={getFilteredEvents().map((event) => ({
+                ...event,
+                backgroundColor: categoryColors[event.category],
+                borderColor: categoryColors[event.category],
+              }))}
+              dateClick={handleDateClick}
+              headerToolbar={{
+                left: 'prev',
+                center: 'title',
+                right: 'next',
+              }}
+              eventContent={(eventInfo) => (
+                <div
+                  style={{
+                    color: 'white',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <b>{eventInfo.timeText}</b>
+                  <i>{eventInfo.event.title}</i>
+                </div>
+              )}
+            />
+          </div>
+        )}
+
         <div css={eventListStyle}>
           {selectedDate && (
             <>
@@ -279,21 +314,25 @@ const MyCalendar = () => {
                     <li
                       key={index}
                       css={css`
+                        position: relative;
                         margin-bottom: 15px;
                         background-color: white;
                         border-left: 5px solid ${categoryColors[event.category]};
                         padding: 10px;
                         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        position: relative;
                       `}
                     >
-                      <h4
+                      <span
                         css={css`
-                          margin: 0 0 5px 0;
-                          color: ${categoryColors[event.category]};
+                          position: absolute;
+                          top: 5px;
+                          right: 5px;
+                          cursor: pointer;
                         `}
                       >
-                        {event.category}
-                      </h4>
+                        x
+                      </span>
                       <p
                         css={css`
                           margin: 0 0 5px 0;
@@ -305,7 +344,7 @@ const MyCalendar = () => {
                       <p
                         css={css`
                           margin: 0;
-                          color: #666;
+                          color: var(--text-light-gray);
                         `}
                       >
                         {formatTime(event.start)} - {formatTime(event.end)}
@@ -314,10 +353,16 @@ const MyCalendar = () => {
                   ))}
                 </ul>
               )}
+              <div css={buttonStyle}>
+                <Button customWidth="50px" customFontSize="40px" onClick={openAddModal}>
+                  +
+                </Button>
+              </div>
             </>
           )}
         </div>
       </div>
+      <CalendarAddModal isOpen={isAddModalOpen} onClose={closeAddModal} />
     </div>
   );
 };

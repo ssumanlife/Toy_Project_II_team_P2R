@@ -53,7 +53,7 @@ const ButtonStyles = css`
 const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; employee: Employee }> = ({
   isOpen,
   onClose,
-  employee
+  employee,
 }) => {
   if (!isOpen) return null;
 
@@ -81,9 +81,9 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
             <div css={titleStyles}>근무 시간</div>
             <DaysOfWeek workHours={employee.workHours} />
           </div>
-          <div css={[titleStyles, { gridColumn: 'span 2'}]}>
+          <div css={[titleStyles, { gridColumn: 'span 2' }]}>
             <div css={titleStyles}>스케줄 정정 요청 내역</div>
-            < EmployeeScheduleRequests />
+            <EmployeeScheduleRequests />
           </div>
         </div>
         <div css={ButtonStyles}>
