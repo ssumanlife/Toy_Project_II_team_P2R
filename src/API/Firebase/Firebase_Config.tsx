@@ -1,6 +1,4 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-// import { getDatabase } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore';
 
 declare global {
@@ -14,7 +12,6 @@ declare global {
       readonly VITE_FIREBASE_STORAGE_BUCKET: string;
       readonly VITE_FIREBASE_MESSAGING_ID: string;
       readonly VITE_FIREBASE_APP_ID: string;
-      readonly VITE_FIREBASE_MEASUREMENT_ID: string;
     };
   }
 }
@@ -26,11 +23,10 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
-const authService = getAuth();
 
-export { authService, db };
+// eslint-disable-next-line import/prefer-default-export
+export { db };
