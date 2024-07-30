@@ -15,14 +15,14 @@ interface Employee {
   salary: string;
 }
 
-const modalContentStyles = css`
+export const modalContentStyles = css`
   display: flex;
   flex-direction: column;
   height: 100%;
   justify-content: space-between;
 `;
 
-const containerStyles = css`
+export const containerStyles = css`
   padding-top: 50px;
   margin: 0 20px;
   display: grid;
@@ -30,7 +30,7 @@ const containerStyles = css`
   gap: 60px;
 `;
 
-const titleStyles = css`
+export const titleStyles = css`
   font-size: var(--font-size-h4);
   font-weight: var(--font-weight-bold);
   color: var(--text-dark-gray);
