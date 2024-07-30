@@ -140,6 +140,7 @@ const baseStyle = css`
     --text-light-gray: #a0a0a0;
     --text-white-gray: #dddddd;
     --text-blue: #578aea;
+    --text-white: #ffffff;
 
     /* Background Colors */
     --background-main: #ffffff;
@@ -201,6 +202,7 @@ const baseStyle = css`
 
   button {
     cursor: pointer;
+    border: none;
   }
 
   a {
