@@ -17,6 +17,10 @@ const inputStyles = css`
     border-bottom-color: var(--primary-blue);
     outline: none;
   }
+
+  &::placeholder {
+    ${valueStyles}
+  }
 `;
 
 const ButtonStyles = css`
@@ -90,15 +94,17 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           </div>
           <div>
             <div css={titleStyles}>계좌 번호</div>
-            <SelectComponent/>
-            <input
-              type="text"
-              name="account"
-              placeholder="-없이 입력"
-              value={newEmployee.account}
-              onChange={handleChange}
-              css={inputStyles}
-            />
+            <div css= {{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <SelectComponent/>
+              <input
+                type="text"
+                name="account"
+                placeholder="-없이 입력"
+                value={newEmployee.account}
+                onChange={handleChange}
+                css={inputStyles}
+              />
+            </div>
           </div>
           <div>
             <div css={titleStyles}>기본 급여</div>
