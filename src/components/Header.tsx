@@ -3,7 +3,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
-import workcheck from '../../public/images/workcheck_logo.png';
+import workcheck from '../../public/images/workcheck_logo_header.png';
 import check from '../../public/images/check_logo.svg';
 import logout from '../../public/icons/logout.svg';
 import { useAuthContext } from '../Context/AuthContext.tsx';
@@ -17,6 +17,7 @@ const headerStyles = css`
   top: 0;
   left: 0;
   right: 0;
+  z-index: 100;
 `;
 
 const containerStyles = css`
@@ -48,8 +49,9 @@ const buttonStyles = css`
   }
 `;
 
-const loginoutButtonStyles = css`
+const logoutButtonStyles = css`
   border-radius: 10px;
+  border: 1px solid rgba(215, 215, 215, 0.9);
   box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
   padding: 7px;
   margin-left: 10px;
@@ -62,48 +64,65 @@ const loginoutButtonStyles = css`
   }
 `;
 
+const emptyDivStyle = css`
+  height: 80px;
+  width: 100%;
+`;
+
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthContext();
+  const { user, setUser } = useAuthContext();
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   return (
-    <header css={headerStyles}>
-      <div css={containerStyles}>
-        <div>
-          <img src={workcheck} alt="logo" />
-          <img src={check} alt="logo" />
+    <>
+      <div css={emptyDivStyle} />
+      <header css={headerStyles}>
+        <div css={containerStyles}>
+          <div>
+            <img src={workcheck} alt="logo" />
+            <img src={check} alt="logo" />
+          </div>
+          <nav>
+            <ul css={listStyles}>
+              <li>
+                <button css={buttonStyles} onClick={() => navigate('/home')}>
+                  홈
+                </button>
+              </li>
+              <li>
+                <button css={buttonStyles} onClick={() => navigate('/schedule')}>
+                  일정 관리
+                </button>
+              </li>
+              {user?.isAdmin && (
+                <li>
+                  <button css={buttonStyles} onClick={() => navigate('/employees')}>
+                    직원 리스트
+                  </button>
+                </li>
+              )}
+              <li>
+                <button css={buttonStyles} onClick={() => navigate(user?.isAdmin ? '/employees' : '/salary')}>
+                  {user?.isAdmin ? '직원 급여 내역' : '급여 내역'}
+                </button>
+              </li>
+            </ul>
+          </nav>
+          <div>
+            {user?.name} 님
+            <button css={logoutButtonStyles} onClick={handleLogout}>
+              <img src={logout} alt="로그아웃 버튼" />
+            </button>
+          </div>
         </div>
-        <nav>
-          <ul css={listStyles}>
-            <li>
-              <button css={buttonStyles} onClick={() => navigate('/home')}>
-                홈
-              </button>
-            </li>
-            <li>
-              <button css={buttonStyles} onClick={() => navigate('/schedule')}>
-                일정관리
-              </button>
-            </li>
-            <li>
-              <button css={buttonStyles} onClick={() => navigate('/employees')}>
-                직원리스트
-              </button>
-            </li>
-            <li>
-              <button css={buttonStyles} onClick={() => navigate('/payroll')}>
-                직원급여내역
-              </button>
-            </li>
-          </ul>
-        </nav>
-        <div>
-          {user?.name} 님
-          <button css={loginoutButtonStyles}>
-            <img src={logout} alt="로그아웃 버튼" />
-          </button>
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 };
 

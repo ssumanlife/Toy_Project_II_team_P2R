@@ -44,6 +44,7 @@ const MyCalendar = () => {
     border-radius: 20px;
     box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
     background-color: var(--background-sub);
+    height: 90vh;
     .fc {
       height: 100%;
     }
