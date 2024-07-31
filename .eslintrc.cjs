@@ -19,7 +19,17 @@ module.exports = {
     'react/prefer-stateless-function': 'off',
     'react/jsx-filename-extension': 'off',
     'react/jsx-one-expression-per-line': 'off',
+    'react/function-component-definition': 'off',
     'no-nested-ternary': 'off',
-    'prettier/prettier': 'error',
+    'react/button-has-type': 'off',
+    'react/no-unknown-property': 'off',
+    'no-use-before-define': 'off',
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
+    'import/no-extraneous-dependencies': 'off',
   },
 };
