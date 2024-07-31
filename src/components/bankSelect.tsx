@@ -90,7 +90,7 @@ const selectBox2 = css`
   }
 `;
 
-const SelectComponent: React.FC = () => {
+const BankSelectComponent: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState('은행 선택');
 
@@ -120,4 +120,4 @@ const SelectComponent: React.FC = () => {
   );
 };
 
-export default SelectComponent;
+export default BankSelectComponent;

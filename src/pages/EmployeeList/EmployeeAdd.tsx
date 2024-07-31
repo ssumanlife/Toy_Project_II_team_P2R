@@ -5,7 +5,7 @@ import Modal from '../../Components/Modal.tsx';
 import Button from '../../Components/Button.tsx';
 import { Employee } from './EmployeeSpecificModal.tsx';
 import { modalContentStyles, containerStyles, titleStyles, valueStyles } from './EmployeeSpecificModal.tsx';
-import SelectComponent from '../../Components/bankSelect.tsx';
+import BankSelectComponent from '../../Components/bankSelect.tsx';
 
 const inputStyles = css`
   ${valueStyles}
@@ -95,7 +95,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           <div>
             <div css={titleStyles}>계좌 번호</div>
             <div css= {{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <SelectComponent/>
+              <BankSelectComponent/>
               <input
                 type="text"
                 name="account"
