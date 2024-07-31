@@ -65,7 +65,7 @@ const logoutButtonStyles = css`
 `;
 
 const emptyDivStyle = css`
-  height: 80px;
+  height: 76px;
   width: 100%;
 `;
 
@@ -108,7 +108,7 @@ const Header: React.FC = () => {
                 </li>
               )}
               <li>
-                <button css={buttonStyles} onClick={() => navigate(user?.isAdmin ? '/employees' : '/salary')}>
+                <button css={buttonStyles} onClick={() => navigate('/payroll')}>
                   {user?.isAdmin ? '직원 급여 내역' : '급여 내역'}
                 </button>
               </li>
