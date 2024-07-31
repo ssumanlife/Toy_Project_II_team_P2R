@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { css } from '@emotion/react'; // Import css from @emotion/react
+import { css } from '@emotion/react';
 import Button from '../Button';
 import CalendarDeleteModal from './Calendar-delete';
 import CalendarDetailModal from './Calendar-detail';
@@ -203,14 +203,14 @@ const MyCalendar = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
 
   const openDeleteModal = (event) => {
     setEventToDelete(event);
     setIsDeleteModalOpen(true);
-    setIsModalOpen(true);
   };
 
   const closeDeleteModal = () => {
@@ -218,7 +218,6 @@ const MyCalendar = () => {
       setEvents(events.filter((e) => e !== eventToDelete));
       setIsDeleteModalOpen(false);
       setEventToDelete(null);
-      setIsModalOpen(false);
     }
   };
 
@@ -227,19 +226,24 @@ const MyCalendar = () => {
   };
   const openAddModal = () => {
     setIsAddModalOpen(true);
-    setIsModalOpen(true);
   };
 
   const closeAddModal = () => {
     setIsAddModalOpen(false);
-    setIsModalOpen(false);
   };
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
-    setIsModalOpen(true);
   };
+
+  const calendarContainerStyle = css`
+    ${calendarStyle}
+    ${isAnyModalOpen &&
+    css`
+      pointer-events: none;
+    `}
+  `;
 
   const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
 
@@ -291,41 +295,39 @@ const MyCalendar = () => {
             </div>
           ))}
         </div>
-        {!isModalOpen && (
-          <div css={calendarStyle}>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={getFilteredEvents().map((event) => ({
-                ...event,
-                backgroundColor: categoryColors[event.category],
-                borderColor: categoryColors[event.category],
-              }))}
-              dateClick={handleDateClick}
-              headerToolbar={{
-                left: 'prev',
-                center: 'title',
-                right: 'next',
-              }}
-              eventContent={(eventInfo) => (
-                <div
-                  style={{
-                    color: 'white',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                  }}
-                >
-                  <b>{eventInfo.timeText}</b>
-                  <i>{eventInfo.event.title}</i>
-                </div>
-              )}
-            />
-          </div>
-        )}
+        <div css={calendarContainerStyle}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={getFilteredEvents().map((event) => ({
+              ...event,
+              backgroundColor: categoryColors[event.category],
+              borderColor: categoryColors[event.category],
+            }))}
+            dateClick={handleDateClick}
+            headerToolbar={{
+              left: 'prev',
+              center: 'title',
+              right: 'next',
+            }}
+            eventContent={(eventInfo) => (
+              <div
+                style={{
+                  color: 'white',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <b>{eventInfo.timeText}</b>
+                <i>{eventInfo.event.title}</i>
+              </div>
+            )}
+          />
+        </div>
 
         <div css={eventListStyle}>
           {selectedDate && (
@@ -402,7 +404,6 @@ const MyCalendar = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
-          setIsModalOpen(false);
         }}
         onConfirm={closeDeleteModal}
         eventTitle={eventToDelete ? eventToDelete.title : ''}
@@ -411,7 +412,6 @@ const MyCalendar = () => {
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
-          setIsModalOpen(false);
         }}
         event={selectedEvent}
       />

@@ -12,17 +12,18 @@ const modalOverlay = css`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 `;
 
 const modalContent = css`
   background: var(--background-main);
   padding: 20px;
   border-radius: var(--border-radius-medium);
-  width: 1063px;
-  height: 700px;
+  // width: 1063px;
+  // height: 700px;
   position: relative;
+  z-index: 1001;
 `;
-
 
 const closeButton = css`
   position: absolute;
@@ -54,10 +55,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
   return (
     <div css={modalOverlay} onClick={onClose}>
-      <div css={modalContent} onClick={e => e.stopPropagation()}>
+      <div css={modalContent} onClick={(e) => e.stopPropagation()}>
         <button css={closeButton} onClick={onClose}>
           <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">
-            <path d="M2.68135 2.68132L30.0441 30.044M30.0441 2.68132L2.68135 30.044" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M2.68135 2.68132L30.0441 30.044M30.0441 2.68132L2.68135 30.044"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
         {children}

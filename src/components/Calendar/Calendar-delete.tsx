@@ -19,6 +19,8 @@ const modalContentStyle = css`
 
 const messageStyle = css`
   font-size: 24px;
+  padding-top: 20px;
+  width: 300px;
   margin-bottom: 20px;
   text-align: center;
 `;
@@ -41,27 +43,19 @@ const confirmButtonStyle = css`
   ${buttonStyle}
   background-color: var(--primary-blue);
   color: white;
-
-  &:hover {
-    background-color: var(--primary-dark-blue);
-  }
 `;
 
 const cancelButtonStyle = css`
   ${buttonStyle}
   background-color: var(--background-sub);
   color: var(--text-gray);
-
-  &:hover {
-    background-color: var(--background-gray);
-  }
 `;
 
 const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onConfirm, eventTitle }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyle}>
-        <p css={messageStyle}>삭제하시겠습니까?</p>
+        <div css={messageStyle}>삭제하시겠습니까?</div>
         <div css={buttonContainerStyle}>
           <button css={confirmButtonStyle} onClick={onConfirm}>
             예
