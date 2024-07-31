@@ -266,14 +266,6 @@ const MyCalendar = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const closeDeleteModal = () => {
-    if (eventToDelete) {
-      setEvents(events.filter((e) => e !== eventToDelete));
-      setIsDeleteModalOpen(false);
-      setEventToDelete(null);
-    }
-  };
-
   const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
     setSelectedDate(arg.date);
   };
@@ -285,7 +277,7 @@ const MyCalendar = () => {
     setIsAddModalOpen(false);
   };
 
-  const handleEventClick = (event: Event) => {
+  const openDetailModal = (event: Event) => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
   };
@@ -322,31 +314,29 @@ const MyCalendar = () => {
 
   if (isHomePage) {
     return (
-      <div css={outerContainerStyle}>
-        <div css={containerStyle}>
-          <div css={calendarContainerStyle}>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={getFilteredEvents().map((event) => ({
-                ...event,
-                backgroundColor: categoryColors[event.category],
-                borderColor: categoryColors[event.category],
-              }))}
-              dateClick={handleDateClick}
-              headerToolbar={{
-                left: 'prev',
-                center: 'title',
-                right: 'next',
-              }}
-              eventContent={(eventInfo) => (
-                <div css={eventContentStyle}>
-                  <b>{eventInfo.timeText}</b>
-                  <i>{eventInfo.event.title}</i>
-                </div>
-              )}
-            />
-          </div>
+      <div css={containerStyle}>
+        <div css={calendarContainerStyle}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={getFilteredEvents().map((event) => ({
+              ...event,
+              backgroundColor: categoryColors[event.category],
+              borderColor: categoryColors[event.category],
+            }))}
+            dateClick={handleDateClick}
+            headerToolbar={{
+              left: 'prev',
+              center: 'title',
+              right: 'next',
+            }}
+            eventContent={(eventInfo) => (
+              <div css={eventContentStyle}>
+                <b>{eventInfo.timeText}</b>
+                <i>{eventInfo.event.title}</i>
+              </div>
+            )}
+          />
         </div>
       </div>
     );
@@ -404,7 +394,7 @@ const MyCalendar = () => {
               ) : (
                 <ul css={ulStyle}>
                   {getEventsForSelectedDate().map((event, index) => (
-                    <li key={index} css={liStyle(event.category)} onClick={() => handleEventClick(event)}>
+                    <li key={index} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
                       <span
                         css={spanStyle}
                         onClick={(e) => {
@@ -437,8 +427,6 @@ const MyCalendar = () => {
         onClose={() => {
           setIsDeleteModalOpen(false);
         }}
-        onConfirm={closeDeleteModal}
-        eventTitle={eventToDelete ? eventToDelete.title : ''}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}

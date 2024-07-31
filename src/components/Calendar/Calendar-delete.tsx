@@ -6,10 +6,9 @@ import Button from '../Button';
 interface CalendarDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
 }
 
-const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onConfirm, eventTitle }) => {
+const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
