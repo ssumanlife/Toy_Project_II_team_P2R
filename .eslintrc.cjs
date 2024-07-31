@@ -22,6 +22,8 @@ module.exports = {
     'react/function-component-definition': 'off',
     'no-nested-ternary': 'off',
     'react/button-has-type': 'off',
+    'react/no-unknown-property': 'off',
+    'no-use-before-define': 'off',
     'prettier/prettier': [
       'error',
       {

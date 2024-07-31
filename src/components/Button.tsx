@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unknown-property */
+/* eslint-disable react/require-default-props */
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
@@ -17,10 +19,10 @@ const primaryButtonStyles = css`
   ${baseButtonStyles};
   border: none;
   background-color: var(--primary-blue);
-  color: var(--text-white);
+  color: var(--whitefff, #fff);
 
   &:hover {
-    background-color: #2A63D1;
+    background-color: #2a63d1;
   }
 `;
 
@@ -41,6 +43,7 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary';
   customWidth?: string;
   customFontSize?: string;
+  customBorderRadius?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -48,8 +51,9 @@ const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   customWidth,
-  customFontSize
- }) => {
+  customFontSize,
+  customBorderRadius,
+}) => {
   let buttonStyle;
 
   switch (variant) {
@@ -62,6 +66,7 @@ const Button: React.FC<ButtonProps> = ({
         ${primaryButtonStyles};
         ${customWidth && `width: ${customWidth};`}
         ${customFontSize && `font-size: ${customFontSize};`}
+        ${customBorderRadius && `border-radius: ${customBorderRadius};`}
       `;
   }
 

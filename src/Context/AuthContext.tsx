@@ -1,15 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react';
-// import { onUserStateChange } from '../API/Firebase';
+import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
 
 interface User {
   name: string;
-  employeeNumber: string;
+  employeeId: string;
   isAdmin: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
-  loginout: string;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
@@ -20,23 +18,20 @@ interface AuthContextProviderProps {
 }
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // user.name = SpongeBob 으로 고정
   useEffect(() => {
-    setUser({ name: 'SpongeBob', employeeNumber: '1234', isAdmin: true });
-  }, []);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
-  // Uncomment and use the following code in your production environment
-  // useEffect(() => {
-  //   onUserStateChange((updatedUser) => {
-  //     setUser(updatedUser);
-  //   });
-  // }, []);
-
-  const loginout = useMemo(() => (user ? 'Logout' : 'Login'), [user]);
-
-  const contextValue = useMemo(() => ({ user, loginout, setUser }), [user, loginout, setUser]);
+  const contextValue = useMemo(() => ({ user, setUser }), [user]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
