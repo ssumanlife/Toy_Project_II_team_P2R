@@ -15,6 +15,71 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
+const CalendarAddModal = ({ isOpen, onClose }) => {
+  const [title, setTitle] = useState('');
+  const [startDateTime, setStartDateTime] = useState('');
+  const [endDateTime, setEndDateTime] = useState('');
+  const [selectedColor, setSelectedColor] = useState('yellow');
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div css={containerStyle}>
+        <div css={titleStyle}>
+          <h2>스케줄 추가</h2>
+        </div>
+        <div css={sectionStyle}>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="일정 제목"
+            css={inputStyle}
+          />
+        </div>
+        <div css={sectionStyle}>
+          <label css={labelStyle}>시간 설정</label>
+          <div css={dateTimeContainerStyle}>
+            <input
+              type="datetime-local"
+              value={startDateTime}
+              onChange={(e) => setStartDateTime(e.target.value)}
+              css={dateTimeInputStyle}
+            />
+            <span css={separatorStyle}>-</span>
+            <input
+              type="datetime-local"
+              value={endDateTime}
+              onChange={(e) => setEndDateTime(e.target.value)}
+              css={dateTimeInputStyle}
+            />
+          </div>
+        </div>
+        <div css={sectionStyle}>
+          <label css={labelStyle}>컬러</label>
+          <div css={colorContainerStyle}>
+            {Object.entries(categoryColors).map(([colorKey, colorValue]) => (
+              <div
+                key={colorKey}
+                onClick={() => setSelectedColor(colorKey)}
+                css={[
+                  colorCircleStyle,
+                  { backgroundColor: colorValue },
+                  selectedColor === colorKey && selectedColorCircleStyle,
+                ]}
+              />
+            ))}
+          </div>
+        </div>
+        <div css={buttonContainerStyle}>
+          <Button onClick={onClose}>작성</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default CalendarAddModal;
+
 const containerStyle = css`
   padding: 20px;
   display: flex;
@@ -103,69 +168,3 @@ const titleStyle = css`
   border-bottom: 1px solid var(--text-white-gray);
   padding-bottom: 20px;
 `;
-
-const CalendarAddModal = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [startDateTime, setStartDateTime] = useState('');
-  const [endDateTime, setEndDateTime] = useState('');
-  const [selectedColor, setSelectedColor] = useState('yellow');
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div css={containerStyle}>
-        <div css={titleStyle}>
-          <h2>스케줄 추가</h2>
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}></label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="일정 제목"
-            css={inputStyle}
-          />
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}>시간 설정</label>
-          <div css={dateTimeContainerStyle}>
-            <input
-              type="datetime-local"
-              value={startDateTime}
-              onChange={(e) => setStartDateTime(e.target.value)}
-              css={dateTimeInputStyle}
-            />
-            <span css={separatorStyle}>-</span>
-            <input
-              type="datetime-local"
-              value={endDateTime}
-              onChange={(e) => setEndDateTime(e.target.value)}
-              css={dateTimeInputStyle}
-            />
-          </div>
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}>컬러</label>
-          <div css={colorContainerStyle}>
-            {Object.entries(categoryColors).map(([colorKey, colorValue]) => (
-              <div
-                key={colorKey}
-                onClick={() => setSelectedColor(colorKey)}
-                css={[
-                  colorCircleStyle,
-                  { backgroundColor: colorValue },
-                  selectedColor === colorKey && selectedColorCircleStyle,
-                ]}
-              />
-            ))}
-          </div>
-        </div>
-        <div css={buttonContainerStyle}>
-          <Button onClick={onClose}>작성</Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-export default CalendarAddModal;

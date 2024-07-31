@@ -15,6 +15,91 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
+const CalendarDetailModal = ({ isOpen, onClose, event }) => {
+  const [title, setTitle] = useState('');
+  const [startDateTime, setStartDateTime] = useState('');
+  const [endDateTime, setEndDateTime] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+
+  useEffect(() => {
+    if (event) {
+      setTitle(event.title);
+      setStartDateTime(formatDate(event.start));
+      setEndDateTime(formatDate(event.end));
+      setSelectedColor(event.category);
+    }
+  }, [event]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16);
+  };
+
+  const handleSave = () => {
+    console.log('Saving:', { title, startDateTime, endDateTime, selectedColor });
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div css={containerStyle}>
+        <div css={titleStyle}>
+          <h2>스케줄 상세</h2>
+        </div>
+        <div css={sectionStyle}>
+          <label css={labelStyle}></label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={event ? event.title : '일정 제목'}
+            css={inputStyle}
+          />
+        </div>
+        <div css={sectionStyle}>
+          <label css={labelStyle}>시간 설정</label>
+          <div css={dateTimeContainerStyle}>
+            <input
+              type="datetime-local"
+              value={startDateTime}
+              onChange={(e) => setStartDateTime(e.target.value)}
+              css={dateTimeInputStyle}
+            />
+            <span css={separatorStyle}>-</span>
+            <input
+              type="datetime-local"
+              value={endDateTime}
+              onChange={(e) => setEndDateTime(e.target.value)}
+              css={dateTimeInputStyle}
+            />
+          </div>
+        </div>
+        <div css={sectionStyle}>
+          <label css={labelStyle}>컬러</label>
+          <div css={colorContainerStyle}>
+            {Object.entries(categoryColors).map(([colorKey, colorValue]) => (
+              <div
+                key={colorKey}
+                onClick={() => setSelectedColor(colorKey)}
+                css={[
+                  colorCircleStyle,
+                  { backgroundColor: colorValue },
+                  selectedColor === colorKey && selectedColorCircleStyle,
+                ]}
+              />
+            ))}
+          </div>
+        </div>
+        <div css={buttonContainerStyle}>
+          <Button onClick={handleSave}>수정</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default CalendarDetailModal;
+
 const containerStyle = css`
   padding: 20px;
   display: flex;
@@ -105,88 +190,3 @@ const titleStyle = css`
   border-bottom: 1px solid var(--text-white-gray);
   padding-bottom: 20px;
 `;
-
-const CalendarDetailModal = ({ isOpen, onClose, event }) => {
-  const [title, setTitle] = useState('');
-  const [startDateTime, setStartDateTime] = useState('');
-  const [endDateTime, setEndDateTime] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-
-  useEffect(() => {
-    if (event) {
-      setTitle(event.title);
-      setStartDateTime(formatDate(event.start));
-      setEndDateTime(formatDate(event.end));
-      setSelectedColor(event.category);
-    }
-  }, [event]);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toISOString().slice(0, 16);
-  };
-
-  const handleSave = () => {
-    console.log('Saving:', { title, startDateTime, endDateTime, selectedColor });
-    onClose();
-  };
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div css={containerStyle}>
-        <div css={titleStyle}>
-          <h2>스케줄 상세</h2>
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}></label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={event ? event.title : '일정 제목'}
-            css={inputStyle}
-          />
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}>시간 설정</label>
-          <div css={dateTimeContainerStyle}>
-            <input
-              type="datetime-local"
-              value={startDateTime}
-              onChange={(e) => setStartDateTime(e.target.value)}
-              css={dateTimeInputStyle}
-            />
-            <span css={separatorStyle}>-</span>
-            <input
-              type="datetime-local"
-              value={endDateTime}
-              onChange={(e) => setEndDateTime(e.target.value)}
-              css={dateTimeInputStyle}
-            />
-          </div>
-        </div>
-        <div css={sectionStyle}>
-          <label css={labelStyle}>컬러</label>
-          <div css={colorContainerStyle}>
-            {Object.entries(categoryColors).map(([colorKey, colorValue]) => (
-              <div
-                key={colorKey}
-                onClick={() => setSelectedColor(colorKey)}
-                css={[
-                  colorCircleStyle,
-                  { backgroundColor: colorValue },
-                  selectedColor === colorKey && selectedColorCircleStyle,
-                ]}
-              />
-            ))}
-          </div>
-        </div>
-        <div css={buttonContainerStyle}>
-          <Button onClick={handleSave}>수정</Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-export default CalendarDetailModal;
