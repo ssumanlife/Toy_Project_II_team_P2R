@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { valueStyles } from '../Pages/EmployeeList/EmployeeSpecificModal';
+import { valueStyles } from './EnployeeList/EmployeeSpecificModal';
 
-const selectBox2 = css`
+const selectBox = css`
   position: relative;
-  width: 150px;
+  width: 140px;
   height: 35px;
   border: none;
   cursor: pointer;
@@ -20,7 +20,6 @@ const selectBox2 = css`
     top: 0;
     right: 35px;
   }
-
 
   .label {
     ${valueStyles}
@@ -47,13 +46,13 @@ const selectBox2 = css`
     list-style-type: none;
     border: 1px solid #d9d9d9; 
     border-radius: 4px;
-    overflow: hidden;
+    overflow-y: auto;
     max-height: 0;
     transition: max-height 0.3s ease-in;
     z-index: 1;
 
     &::-webkit-scrollbar {
-      width: 6px;
+      width: 5px;
     }
 
     &::-webkit-scrollbar-track {
@@ -61,24 +60,23 @@ const selectBox2 = css`
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #303030;
-      border-radius: 45px;
+      background: var(--primary-blue);
+      border-radius: 5px;
     }
 
     &::-webkit-scrollbar-thumb:hover {
-      background: #303030;
+      background: #2A63D1;
     }
   }
 
   &.active .optionList {
-    max-height: 300px;
+    max-height: 150px;
     border-color: var(--primary-blue);
   }
 
   .optionItem {
     padding: 8px 20px;
     transition: background 0.1s;
-
 
     &:hover {
       color: var(--text-blue);
@@ -90,9 +88,16 @@ const selectBox2 = css`
   }
 `;
 
-const BankSelectComponent: React.FC = () => {
+interface SelectProps {
+  options: string[];
+  defaultLabel: string;
+  onSelect: (option: string) => void;
+  className?: string;
+}
+
+const Select: React.FC<SelectProps> = ({ options, defaultLabel, onSelect, className }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState('은행 선택');
+  const [selected, setSelected] = useState(defaultLabel);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -101,16 +106,17 @@ const BankSelectComponent: React.FC = () => {
   const selectOption = (option: string) => {
     setSelected(option);
     setIsOpen(false);
+    onSelect(option);
   };
 
   return (
-    <div css={selectBox2} className={isOpen ? 'active' : ''}>
+    <div css={selectBox} className={`${className} ${isOpen ? 'active' : ''}`}>
       <div className="label" onClick={toggleDropdown}>
         <span>{selected}</span>
         <span css={{ position: 'absolute', right: '5px' }}>▾</span>
       </div>
       <ul className="optionList">
-        {['국민', '농협', '하나', '카카오뱅크'].map((option, index) => (
+        {options.map((option, index) => (
           <li key={index} className="optionItem" onClick={() => selectOption(option)}>
             {option}
           </li>
@@ -120,4 +126,4 @@ const BankSelectComponent: React.FC = () => {
   );
 };
 
-export default BankSelectComponent;
+export default Select;

@@ -1,11 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import Modal from '../../Components/Modal.tsx';
-import Button from '../../Components/Button.tsx';
+import Modal from '../Modal.tsx';
+import Button from '../Button.tsx';
 import { Employee } from './EmployeeSpecificModal.tsx';
 import { modalContentStyles, containerStyles, titleStyles, valueStyles } from './EmployeeSpecificModal.tsx';
-import BankSelectComponent from '../../Components/bankSelect.tsx';
+import BankSelectComponent from './bankSelect.tsx';
+import DaysOfWeek from '../DaysOfWeek.tsx';
+import WorkTimePicker from './WorkTimePicker.tsx';
 
 const inputStyles = css`
   ${valueStyles}
@@ -26,7 +28,8 @@ const inputStyles = css`
 const ButtonStyles = css`
   display: flex;
   justify-content: flex-end;
-  margin-top: 30px;
+  grid-column: span 2;
+  margin-bottom: 10px;
 `;
 
 const modaltitleStyles = css`
@@ -53,13 +56,31 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
     salary: ''
   });
 
+  const [workHours, setWorkHours] = useState<string | null>(null);
+
+  useEffect(() => {
+    const time = newEmployee.workHours.split(' ')[1] || '';
+    setWorkHours(time);
+  }, [newEmployee.workHours]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewEmployee({ ...newEmployee, [name]: value });
   };
 
+  const handleTimeChange = (value: string | null) => {
+    if (value) {
+      setWorkHours(value);
+    }
+  };
+
+  const handleDayClick = (updatedDays: string) => {
+    setNewEmployee({ ...newEmployee, workHours: `${updatedDays} ${workHours ?? ''}`.trim() });
+  };
+
   const handleSave = () => {
-    onSave(newEmployee);
+    const days = newEmployee.workHours.split(' ')[0].split(',').filter(Boolean).sort().join(',');
+    onSave({ ...newEmployee, workHours: `${days} ${workHours ?? ''}`.trim() });
     onClose();
   };
 
@@ -68,8 +89,8 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyles}>
-        <div css={containerStyles}>
-          <h3 css={modaltitleStyles}>직원 리스트</h3>
+        <div css={[containerStyles, { paddingTop: '20px' }]}>
+          <h3 css={modaltitleStyles}>직원 추가</h3>
           <div>
             <div css={titleStyles}>이름</div>
             <input
@@ -94,8 +115,8 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           </div>
           <div>
             <div css={titleStyles}>계좌 번호</div>
-            <div css= {{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <BankSelectComponent/>
+            <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <BankSelectComponent />
               <input
                 type="text"
                 name="account"
@@ -118,16 +139,20 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
             />
             <span css={[valueStyles, { marginLeft: '6px' }]}>원</span>
           </div>
-          <div>
+          <div css={{ gridColumn: 'span 2' }}>
             <div css={titleStyles}>근무 시간</div>
-            <input
-              type="text"
-              name="workHours"
-              placeholder="근무시간"
-              value={newEmployee.workHours}
-              onChange={handleChange}
-              css={inputStyles}
-            />
+            <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <DaysOfWeek workHours={newEmployee.workHours} onDayClick={handleDayClick} editable={true} />
+              <WorkTimePicker
+                value={workHours}
+                onChange={handleTimeChange}
+              />
+              <div css={valueStyles}>~</div>
+              <WorkTimePicker
+                value={workHours}
+                onChange={handleTimeChange}
+              />
+            </div>
           </div>
           <div css={ButtonStyles}>
             <Button onClick={handleSave}>저장</Button>

@@ -168,11 +168,12 @@ const baseStyle = css`
 
     /* Font Sizes */
     --font-size-base: 1rem; /* 기본 폰트 사이즈 (16px) */
-    --font-size-h1: 2.25rem; /* 36px */
-    --font-size-h2: 2rem; /* 32px */
-    --font-size-h3: 1.5rem; /* 24px */
+    --font-size-h1: 2rem; /* 32px */
+    --font-size-h2: 1.5rem; /* 24px */
+    --font-size-h3: 1.375rem; /* 22px */
     --font-size-h4: 1.25rem; /* 20px */
-    --font-size-h5: 1rem; /* 16px */
+    --font-size-h5: 1.125rem; /* 18px */
+    --font-size-h6: 1rem; /* 16px */
 
     /* Shadows */
     --shadow-default: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
@@ -181,7 +182,7 @@ const baseStyle = css`
     --border-default: 1px solid;
     --border-radius-small: 10px;
     --border-radius-medium: 20px;
-    --border-radius-large: 25px;
+    --border-radius-large: 22px;
   }
 
   * {

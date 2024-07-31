@@ -34,8 +34,8 @@ const closeButton = css`
   cursor: pointer;
 
   svg {
-    width: 33px;
-    height: 33px;
+    width: 28px;
+    height: 28px;
     stroke: var(--text-light-gray);
   }
 

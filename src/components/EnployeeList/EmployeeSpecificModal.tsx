@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import Modal from '../../Components/Modal.tsx';
-import Button from '../../Components/Button.tsx';
-import EmployeeScheduleRequests from './EmployeeScheduleRequests.tsx';
-import DaysOfWeek from '../../Components/DaysOfWeek.tsx';
+import Modal from '../Modal.tsx';
+import Button from '../Button.tsx';
+import EmployeeScheduleRequests from '../../Pages/EmployeeList/EmployeeScheduleRequests.tsx';
+import DaysOfWeek from '../DaysOfWeek.tsx';
 
 interface Employee {
   id: string;
