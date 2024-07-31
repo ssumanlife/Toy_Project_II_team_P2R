@@ -1,9 +1,16 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import Button from '../Button.tsx';
 
-const SpacificationModal = ({ payData, onSpacificationModal, name, totalPay }) => {
+const SpacificationModal = ({ id, payData, onSpacificationModal, name, totalPay, handleAdditionalPay }) => {
+  const [readOnly, setReadOnly] = useState(true);
+  const inputRef = useRef(null);
+
+  const handleReadOnly = () => {
+    readOnly ? setReadOnly(false) : setReadOnly(true);
+    // readOnly ? null : handleAdditionalPay(inputRef.current.value, id);
+  };
   // 총 지급액
   let sumPay = (payData.basicPay + payData.weeklyPay + payData.additionalPay)
     .toFixed(0)
@@ -24,6 +31,30 @@ const SpacificationModal = ({ payData, onSpacificationModal, name, totalPay }) =
     );
   }
 
+  const ulArea = css`
+    width: 80%;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      input {
+        width: 120px;
+        height: 20px;
+        border: none;
+        text-align: right;
+        color: #333;
+        font-size: 16px;
+        outline: none;
+      }
+      & .edit {
+        border-bottom: ${readOnly ? 'none' : '3px solid #c1c1c1'};
+      }
+    }
+  `;
+  // console.log(inputRef.current.value);
   return (
     <div css={spacificationModalWrapper}>
       <div css={spacificationModalpage}>
@@ -54,15 +85,17 @@ const SpacificationModal = ({ payData, onSpacificationModal, name, totalPay }) =
           <ul css={ulArea}>
             <li>
               <p>기본급</p>
-              <p>{payArr[0]}원</p>
+              <input value={payArr[0] + '원'} readOnly />
             </li>
             <li>
               <p>주휴수당</p>
-              <p>{payArr[1]}원</p>
+              <input value={payArr[1] + '원'} readOnly />
             </li>
             <li>
               <p>추가수당</p>
-              <p>{payArr[2]}원</p>
+              <div className="edit">
+                <input ref={inputRef} defaultValue={payArr[2]} readOnly={readOnly} />원
+              </div>
             </li>
             <li css={{ fontSize: '18px', fontWeight: '500' }}>
               <p>총지급액</p>
@@ -72,19 +105,19 @@ const SpacificationModal = ({ payData, onSpacificationModal, name, totalPay }) =
           <ul css={ulArea}>
             <li>
               <p>국민연금</p>
-              <p>{payArr[3]}원</p>
+              <input value={payArr[3] + '원'} readOnly />
             </li>
             <li>
               <p>건강보험</p>
-              <p>{payArr[4]}원</p>
+              <input value={payArr[4] + '원'} readOnly />
             </li>
             <li>
               <p>장기요양</p>
-              <p>{payArr[5]}원</p>
+              <input value={payArr[5] + '원'} readOnly />
             </li>
             <li>
               <p>고용보험</p>
-              <p>{payArr[6]}원</p>
+              <input value={payArr[6] + '원'} readOnly />
             </li>
             <li css={{ fontSize: '18px', fontWeight: '500' }}>
               <p>총공제액</p>
@@ -98,7 +131,18 @@ const SpacificationModal = ({ payData, onSpacificationModal, name, totalPay }) =
             </li>
           </ul>
           <div css={{ margin: '20px 0' }}>
-            <Button children={'급여 수정'} variant="secondary" />
+            {readOnly ? (
+              <Button onClick={() => handleReadOnly()} children={'급여 수정'} variant="secondary" />
+            ) : (
+              <Button
+                onClick={() => {
+                  handleReadOnly();
+                  handleAdditionalPay(inputRef.current.value, id);
+                }}
+                children={'수정 완료'}
+                variant="primary"
+              />
+            )}
           </div>
         </div>
       </div>
@@ -163,16 +207,4 @@ const listWrapper = css`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-`;
-
-const ulArea = css`
-  width: 80%;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px 0;
-  }
 `;

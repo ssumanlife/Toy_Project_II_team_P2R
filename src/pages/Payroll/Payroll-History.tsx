@@ -28,7 +28,9 @@ export interface SalaryCorrection {
 export interface EmployeeSalaryType {
   id: number;
   name: string;
+  date: string;
   payData: PayData;
+  isViewd: boolean;
 }
 
 const PayrollHistory = () => {
@@ -47,7 +49,7 @@ const PayrollHistory = () => {
       monthly: '6월',
       title: '추가근무 미반영',
       content: '5월 15일 수민님 대타 출근한 4시간 급여 누락되었습니다.',
-      state: 'normal',
+      state: 'approval',
     },
     {
       id: 3,
@@ -55,7 +57,7 @@ const PayrollHistory = () => {
       monthly: '2월',
       title: '무급휴가 사용 미반영',
       content: '2월27일 무급 휴가 사용한거 반영이 안되었습니다!',
-      state: 'normal',
+      state: 'approval',
     },
     {
       id: 4,
@@ -63,13 +65,14 @@ const PayrollHistory = () => {
       monthly: '1월',
       title: '연장근무 미 반영',
       content: '1월 1일 연장근무 4시간 급여 누락 된 것 습니다.',
-      state: 'normal',
+      state: 'reject',
     },
   ]);
   const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([
     {
       id: 1,
       name: '김수민',
+      date: '2024.06',
       payData: {
         basicPay: 2300000,
         weeklyPay: 300000,
@@ -79,10 +82,12 @@ const PayrollHistory = () => {
         care: 50000,
         employmentInsurance: 60000,
       },
+      isViewd: false,
     },
     {
       id: 2,
       name: '양해석',
+      date: '2024.06',
       payData: {
         basicPay: 2210000,
         weeklyPay: 370000,
@@ -92,10 +97,12 @@ const PayrollHistory = () => {
         care: 50000,
         employmentInsurance: 60000,
       },
+      isViewd: false,
     },
     {
       id: 3,
       name: '임효정',
+      date: '2024.06',
       payData: {
         basicPay: 2270000,
         weeklyPay: 320000,
@@ -105,10 +112,12 @@ const PayrollHistory = () => {
         care: 50000,
         employmentInsurance: 60000,
       },
+      isViewd: false,
     },
     {
       id: 4,
       name: '김승민',
+      date: '2024.06',
       payData: {
         basicPay: 2300000,
         weeklyPay: 310000,
@@ -118,10 +127,12 @@ const PayrollHistory = () => {
         care: 50000,
         employmentInsurance: 60000,
       },
+      isViewd: false,
     },
     {
       id: 5,
       name: '강동원',
+      date: '2024.06',
       payData: {
         basicPay: 2200000,
         weeklyPay: 300000,
@@ -131,10 +142,12 @@ const PayrollHistory = () => {
         care: 50000,
         employmentInsurance: 60000,
       },
+      isViewd: false,
     },
     {
       id: 6,
       name: '김우빈',
+      date: '2024.06',
       payData: {
         basicPay: 30000,
         weeklyPay: 300000,
@@ -144,6 +157,7 @@ const PayrollHistory = () => {
         care: 5000,
         employmentInsurance: 6000,
       },
+      isViewd: false,
     },
   ]);
   const [modal, setModal] = useState(false);
@@ -167,13 +181,66 @@ const PayrollHistory = () => {
     modal ? setModal(false) : setModal(true);
     setId(id);
   };
+
+  const stateFilter = (stateValue) => {
+    let newStateList = [];
+    for (let i = 0; i < salaryCorrectionLists.length; i++) {
+      if (salaryCorrectionLists[i].state === stateValue) {
+        newStateList.push(salaryCorrectionLists[i]);
+      }
+    }
+    setSalaryCorrectionLists(newStateList);
+  };
+
+  const handleIsViewd = (id) => {
+    let newIsViwedEmploySalary = [...employeeSalary];
+    for (let iv = 0; iv < newIsViwedEmploySalary.length; iv++) {
+      if (newIsViwedEmploySalary[iv].id === id) {
+        newIsViwedEmploySalary[iv].isViewd = true;
+        break;
+      }
+    }
+    setEmployeeSalary(newIsViwedEmploySalary);
+  };
+
+  const handleAdditionalPay = (value, id) => {
+    if (/,/g.test(value)) {
+      let additionalPayChange = value.replaceAll(',', '');
+      if (/^\d+$/.test(additionalPayChange)) {
+        let newEmploySalary = [...employeeSalary];
+        for (let es = 0; es < newEmploySalary.length; es++) {
+          if (newEmploySalary[es].id === id) {
+            newEmploySalary[es].payData.additionalPay = Number(additionalPayChange);
+            break;
+          }
+        }
+        setEmployeeSalary(newEmploySalary);
+      } else {
+        alert('숫자만 입력 가능합니다.');
+        // setEmployeeSalary(employeeSalary);
+      }
+    } else if (/^\d+$/.test(value)) {
+      let newEmploySalary = [...employeeSalary];
+      for (let es = 0; es < newEmploySalary.length; es++) {
+        if (newEmploySalary[es].id === id) {
+          newEmploySalary[es].payData.additionalPay = Number(value);
+          break;
+        }
+      }
+      setEmployeeSalary(newEmploySalary);
+    } else {
+      alert('숫자만 입력 가능합니다.');
+      // setEmployeeSalary(employeeSalary);
+    }
+  };
+
   return (
     <div css={wrapper}>
       <div css={salaryCorrectionArea}>
         <div css={salaryCorrectionheader}>
           <h3>직원 급여 내역</h3>
           <div>
-            <select id={'day'} css={select}>
+            <select id="day" css={select}>
               <option value="2024 6월">2024 6월</option>
               <option value="2024 5월">2024 5월</option>
               <option value="2024 4월">2024 4월</option>
@@ -181,17 +248,31 @@ const PayrollHistory = () => {
             </select>
           </div>
         </div>
-        <ul css={{ padding: 0, width: '100%' }}>
-          {employeeSalary.map((item, index) => (
-            <PayList key={index} id={item.id} name={item.name} payData={item.payData} />
+        <ul css={{ padding: 0, width: '100%', height: '450px', overflowY: 'auto', marginBottom: '15px' }}>
+          {employeeSalary.map((item) => (
+            <PayList
+              key={item.id}
+              id={item.id}
+              name={item.name}
+              payData={item.payData}
+              handleAdditionalPay={handleAdditionalPay}
+              isViewd={item.isViewd}
+              handleIsViewd={handleIsViewd}
+            />
           ))}
         </ul>
         <div css={salaryCorrectionheader}>
           <h3>급여 정정 요청 내역</h3>
           <div>
-            <button css={[headerBtn, gray]}>대기중</button>
-            <button css={[headerBtn, blue]}>승인</button>
-            <button css={[headerBtn, red]}>반려</button>
+            <button onClick={() => stateFilter('normal')} css={[headerBtn, gray]}>
+              대기중
+            </button>
+            <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
+              승인
+            </button>
+            <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
+              반려
+            </button>
           </div>
         </div>
         <table css={listTable}>
@@ -228,7 +309,6 @@ const PayrollHistory = () => {
 export default PayrollHistory;
 const wrapper = css`
   width: 100vw;
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -243,7 +323,7 @@ const salaryCorrectionheader = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px 0;
+  margin: 20px 0 10px;
   border-bottom: 1px solid #f0f0f0;
 `;
 const select = css`
