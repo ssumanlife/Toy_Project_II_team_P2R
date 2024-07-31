@@ -5,11 +5,11 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 const baseButtonStyles = css`
-  width: 150px;
-  height: 50px;
+  width: 120px;
+  height: 44px;
   border-radius: var(--border-radius-large);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-h5);
   display: flex;
   justify-content: center;
   align-items: center;
