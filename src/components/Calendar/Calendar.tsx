@@ -5,12 +5,16 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react';
+import { useLocation } from 'react-router-dom';
 import Button from '../Button';
 import CalendarDeleteModal from './Calendar-delete';
 import CalendarDetailModal from './Calendar-detail';
 import CalendarAddModal from './Calendar-add';
 
 const MyCalendar = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/home';
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCategories, setSelectedCategories] = useState([
     'pink',
@@ -42,24 +46,30 @@ const MyCalendar = () => {
     purple: 'var(--calendar-purple)',
     gray: 'var(--calendar-gray)',
   };
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
 
   const outerContainerStyle = css`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: calc(100vh - 76px);
     width: 100vw;
   `;
 
   const containerStyle = css`
     display: flex;
     position: relative;
-    margin: 100px;
+    margin: 50px;
     flex: 3;
     border-radius: 20px;
     box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
     background-color: var(--background-sub);
-    height: 90vh;
+    height: auto;
     .fc {
       height: 100%;
     }
@@ -120,16 +130,17 @@ const MyCalendar = () => {
     overflow-y: auto;
     div,
     h3 {
-      margin-bottom: 15px; // 각 카테고리 사이 간격 추가
+      margin-bottom: 15px;
     }
     label {
-      margin-left: 15px; // 체크박스와 라벨 사이 간격 추가
+      margin-left: 15px;
     }
   `;
 
   const calendarStyle = css`
     flex: 3;
     padding: 20px;
+    cursor: pointer;
     background-color: var(--background-main);
     .fc {
       height: 100%;
@@ -141,7 +152,7 @@ const MyCalendar = () => {
     padding: 20px;
     overflow-y: auto;
     h3 {
-      margin-bottom: 15px; // 각 카테고리 사이 간격 추가
+      margin-bottom: 15px;
     }
   `;
 
@@ -195,19 +206,61 @@ const MyCalendar = () => {
   `;
 
   const buttonStyle = css`
-    position: absolute; // 버튼을 절대 위치로 설정
-    bottom: 20px; // 아래에서 20px
-    right: 20px; // 오른쪽에서 20px
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
   `;
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const ulStyle = css`
+    list-style-type: none;
+    padding: 0;
+  `;
 
-  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
+  const liStyle = (category: string) => css`
+    position: relative;
+    margin-bottom: 15px;
+    background-color: white;
+    border-left: 5px solid ${categoryColors[category]};
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    cursor: pointer;
+  `;
 
+  const spanStyle = css`
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+  `;
+
+  const pTitleStyle = css`
+    margin: 0 0 5px 0;
+    font-weight: bold;
+  `;
+
+  const pTimeStyle = css`
+    margin: 0;
+    color: var(--text-light-gray);
+  `;
+
+  const eventContentStyle = css`
+    color: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  `;
+
+  const calendarContainerStyle = css`
+    ${calendarStyle}
+    ${isAnyModalOpen &&
+    css`
+      pointer-events: none;
+    `}
+  `;
   const openDeleteModal = (event) => {
     setEventToDelete(event);
     setIsDeleteModalOpen(true);
@@ -236,14 +289,6 @@ const MyCalendar = () => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
   };
-
-  const calendarContainerStyle = css`
-    ${calendarStyle}
-    ${isAnyModalOpen &&
-    css`
-      pointer-events: none;
-    `}
-  `;
 
   const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
 
@@ -275,6 +320,37 @@ const MyCalendar = () => {
     setSelectedDate(new Date());
   }, []);
 
+  if (isHomePage) {
+    return (
+      <div css={outerContainerStyle}>
+        <div css={containerStyle}>
+          <div css={calendarContainerStyle}>
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={getFilteredEvents().map((event) => ({
+                ...event,
+                backgroundColor: categoryColors[event.category],
+                borderColor: categoryColors[event.category],
+              }))}
+              dateClick={handleDateClick}
+              headerToolbar={{
+                left: 'prev',
+                center: 'title',
+                right: 'next',
+              }}
+              eventContent={(eventInfo) => (
+                <div css={eventContentStyle}>
+                  <b>{eventInfo.timeText}</b>
+                  <i>{eventInfo.event.title}</i>
+                </div>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div css={outerContainerStyle}>
       <div css={containerStyle}>
@@ -311,17 +387,7 @@ const MyCalendar = () => {
               right: 'next',
             }}
             eventContent={(eventInfo) => (
-              <div
-                style={{
-                  color: 'white',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}
-              >
+              <div css={eventContentStyle}>
                 <b>{eventInfo.timeText}</b>
                 <i>{eventInfo.event.title}</i>
               </div>
@@ -336,33 +402,11 @@ const MyCalendar = () => {
               {getEventsForSelectedDate().length === 0 ? (
                 <p>이 날짜에는 일정이 없습니다.</p>
               ) : (
-                <ul
-                  css={css`
-                    list-style-type: none;
-                    padding: 0;
-                  `}
-                >
+                <ul css={ulStyle}>
                   {getEventsForSelectedDate().map((event, index) => (
-                    <li
-                      key={index}
-                      css={css`
-                        position: relative;
-                        margin-bottom: 15px;
-                        background-color: white;
-                        border-left: 5px solid ${categoryColors[event.category]};
-                        padding: 10px;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                        position: relative;
-                      `}
-                      onClick={() => handleEventClick(event)}
-                    >
+                    <li key={index} css={liStyle(event.category)} onClick={() => handleEventClick(event)}>
                       <span
-                        css={css`
-                          position: absolute;
-                          top: 5px;
-                          right: 5px;
-                          cursor: pointer;
-                        `}
+                        css={spanStyle}
                         onClick={(e) => {
                           e.stopPropagation();
                           openDeleteModal(event);
@@ -370,20 +414,8 @@ const MyCalendar = () => {
                       >
                         x
                       </span>
-                      <p
-                        css={css`
-                          margin: 0 0 5px 0;
-                          font-weight: bold;
-                        `}
-                      >
-                        {event.title}
-                      </p>
-                      <p
-                        css={css`
-                          margin: 0;
-                          color: var(--text-light-gray);
-                        `}
-                      >
+                      <p css={pTitleStyle}>{event.title}</p>
+                      <p css={pTimeStyle}>
                         {formatTime(event.start)} - {formatTime(event.end)}
                       </p>
                     </li>

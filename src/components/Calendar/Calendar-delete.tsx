@@ -1,13 +1,69 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import Modal from '../Modal';
+import Button from '../Button';
 
 interface CalendarDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
+
+const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onConfirm, eventTitle }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div css={modalOverlay} onClick={onClose}>
+      <div css={modalContent} onClick={(e) => e.stopPropagation()}>
+        <div css={modalContentStyle}>
+          <div css={messageStyle}>삭제하시겠습니까?</div>
+          <div css={buttonContainerStyle}>
+            <Button onClick={onClose} variant="primary">
+              예
+            </Button>
+            <Button onClick={onClose} variant="secondary">
+              아니오
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CalendarDeleteModal;
+
+const modalOverlay = css`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(69, 69, 69, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const modalContent = css`
+  width: 350px;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  padding: 20px 20px 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 70px;
+  z-index: 1001;
+`;
 
 const modalContentStyle = css`
   display: flex;
@@ -19,9 +75,7 @@ const modalContentStyle = css`
 
 const messageStyle = css`
   font-size: 24px;
-  padding-top: 20px;
-  width: 300px;
-  margin-bottom: 20px;
+  margin-bottom: 60px;
   text-align: center;
 `;
 
@@ -29,44 +83,3 @@ const buttonContainerStyle = css`
   display: flex;
   gap: 20px;
 `;
-
-const buttonStyle = css`
-  padding: 10px 20px;
-  font-size: 18px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-`;
-
-const confirmButtonStyle = css`
-  ${buttonStyle}
-  background-color: var(--primary-blue);
-  color: white;
-`;
-
-const cancelButtonStyle = css`
-  ${buttonStyle}
-  background-color: var(--background-sub);
-  color: var(--text-gray);
-`;
-
-const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onConfirm, eventTitle }) => {
-  return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div css={modalContentStyle}>
-        <div css={messageStyle}>삭제하시겠습니까?</div>
-        <div css={buttonContainerStyle}>
-          <button css={confirmButtonStyle} onClick={onConfirm}>
-            예
-          </button>
-          <button css={cancelButtonStyle} onClick={onClose}>
-            아니오
-          </button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-export default CalendarDeleteModal;

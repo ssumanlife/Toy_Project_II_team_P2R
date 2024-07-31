@@ -1,8 +1,9 @@
 import React from 'react';
+import MyCalendar from '../Components/Calendar/Calendar';
 
 const Home: React.FC = () => (
   <div>
-    <h1>Welcome to the Home page!</h1>
+    <MyCalendar />
   </div>
 );
 
