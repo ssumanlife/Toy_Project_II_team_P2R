@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import Button from '../../Components/Button.tsx';
-import EmployeeSpecificModal, { Employee } from '../../Components/EnployeeList/EmployeeSpecificModal.tsx';
-import EmployeeAddModal from '../../Components/EnployeeList/EmployeeAdd.tsx';
+import EmployeeSpecificModal, { Employee } from '../../Components/EmployeeList/EmployeeSpecificModal.tsx';
+import EmployeeAddModal from '../../Components/EmployeeList/EmployeeAdd.tsx';
 
 const employeeData = [
   {

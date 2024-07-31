@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { valueStyles } from './EnployeeList/EmployeeSpecificModal';
+import { valueStyles } from './EmployeeList/EmployeeSpecificModal';
 
 const selectBox = css`
   position: relative;
