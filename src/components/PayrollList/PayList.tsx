@@ -4,7 +4,7 @@ import { EmployeeSalaryType } from '../../Pages/Payroll/Payroll-History.tsx';
 import SpacificationModal from './SpacificationModal.tsx';
 import { useState } from 'react';
 
-const PayList = ({ id, name, payData }: employeeSalaryType) => {
+const PayList = ({ id, name, payData, handleAdditionalPay, isViewd, handleIsViewd }: employeeSalaryType) => {
   const [modal, setModal] = useState(false);
   const onSpacificationModal = () => {
     modal ? setModal(false) : setModal(true);
@@ -22,22 +22,30 @@ const PayList = ({ id, name, payData }: employeeSalaryType) => {
     <li css={liItem}>
       {modal ? (
         <SpacificationModal
+          id={id}
           payData={payData}
           name={name}
           totalPay={totalPay}
           onSpacificationModal={onSpacificationModal}
+          handleAdditionalPay={handleAdditionalPay}
         />
       ) : null}
       <p>6월 {name} 급여명세서</p>
       <p css={{ color: '#666' }}>2024.07.15 지급 예정</p>
       <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
-      {id <= 2 ? (
+      {isViewd ? (
         <button css={unreadBtn} onClick={onSpacificationModal}>
-          미열람
+          열람
         </button>
       ) : (
-        <button css={readBtn} onClick={onSpacificationModal}>
-          열람
+        <button
+          css={readBtn}
+          onClick={() => {
+            onSpacificationModal();
+            handleIsViewd(id);
+          }}
+        >
+          미열람
         </button>
       )}
     </li>
