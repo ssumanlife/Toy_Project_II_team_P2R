@@ -265,7 +265,6 @@ const MyCalendar = () => {
     setEventToDelete(event);
     setIsDeleteModalOpen(true);
   };
-
   const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
     setSelectedDate(arg.date);
   };
@@ -306,6 +305,13 @@ const MyCalendar = () => {
   const formatTime = (dateString: string) => {
     const date = new Date(`${dateString}T00:00:00`);
     return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const handleDeleteEvent = () => {
+    if (eventToDelete) {
+      setEvents((prevEvents) => prevEvents.filter((event) => event !== eventToDelete));
+      setEventToDelete(null);
+    }
   };
 
   useEffect(() => {
@@ -413,7 +419,7 @@ const MyCalendar = () => {
                 </ul>
               )}
               <div css={buttonStyle}>
-                <Button customWidth="50px" customFontSize="40px" onClick={openAddModal}>
+                <Button customWidth="44px" customFontSize="30px" onClick={openAddModal}>
                   +
                 </Button>
               </div>
@@ -427,6 +433,7 @@ const MyCalendar = () => {
         onClose={() => {
           setIsDeleteModalOpen(false);
         }}
+        onDelete={handleDeleteEvent}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}

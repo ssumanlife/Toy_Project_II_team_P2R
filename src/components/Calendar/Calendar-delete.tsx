@@ -6,10 +6,16 @@ import Button from '../Button';
 interface CalendarDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDelete: () => void;
 }
 
-const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose }) => {
+const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onDelete }) => {
   if (!isOpen) return null;
+
+  const handleDelete = () => {
+    onDelete();
+    onClose();
+  };
 
   return (
     <div css={modalOverlay} onClick={onClose}>
@@ -17,7 +23,7 @@ const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClo
         <div css={modalContentStyle}>
           <div css={messageStyle}>삭제하시겠습니까?</div>
           <div css={buttonContainerStyle}>
-            <Button onClick={onClose} variant="primary">
+            <Button onClick={handleDelete} variant="primary">
               예
             </Button>
             <Button onClick={onClose} variant="secondary">
