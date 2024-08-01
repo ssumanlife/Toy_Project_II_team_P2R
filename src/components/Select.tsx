@@ -22,7 +22,6 @@ const selectBox = css`
   }
 
   .label {
-    ${valueStyles}
     display: flex;
     align-items: center;
     width: inherit;
@@ -44,7 +43,7 @@ const selectBox = css`
     background: var(--background-main);
     color: var(--text-gray);
     list-style-type: none;
-    border: 1px solid #d9d9d9; 
+    border: 1px solid #d9d9d9;
     border-radius: 4px;
     overflow-y: auto;
     max-height: 0;
@@ -65,7 +64,7 @@ const selectBox = css`
     }
 
     &::-webkit-scrollbar-thumb:hover {
-      background: #2A63D1;
+      background: #2a63d1;
     }
   }
 
@@ -93,9 +92,10 @@ interface SelectProps {
   defaultLabel: string;
   onSelect: (option: string) => void;
   className?: string;
+  css?: any;
 }
 
-const Select: React.FC<SelectProps> = ({ options, defaultLabel, onSelect, className }) => {
+const Select: React.FC<SelectProps> = ({ options, defaultLabel, onSelect, className, css }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(defaultLabel);
 
@@ -110,7 +110,7 @@ const Select: React.FC<SelectProps> = ({ options, defaultLabel, onSelect, classN
   };
 
   return (
-    <div css={selectBox} className={`${className} ${isOpen ? 'active' : ''}`}>
+    <div css={[selectBox, css]} className={`${className} ${isOpen ? 'active' : ''}`}>
       <div className="label" onClick={toggleDropdown}>
         <span>{selected}</span>
         <span css={{ position: 'absolute', right: '5px' }}>▾</span>
