@@ -244,16 +244,6 @@ const MyCalendar = () => {
     color: var(--text-light-gray);
   `;
 
-  const eventContentStyle = css`
-    color: white;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  `;
-
   const calendarContainerStyle = css`
     ${calendarStyle}
     ${isAnyModalOpen &&
@@ -272,10 +262,6 @@ const MyCalendar = () => {
     setIsAddModalOpen(true);
   };
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
-  };
-
   const handleAddEvent = (newEvent) => {
     setEvents((prevEvents) => [...prevEvents, newEvent]);
   };
@@ -283,6 +269,11 @@ const MyCalendar = () => {
   const openDetailModal = (event: Event) => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
+  };
+
+  const handleSaveEvent = (updatedEvent) => {
+    setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event)));
+    setIsDetailModalOpen(false);
   };
 
   const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
@@ -344,9 +335,20 @@ const MyCalendar = () => {
               right: 'next',
             }}
             eventContent={(eventInfo) => (
-              <div css={eventContentStyle}>
-                <b>{eventInfo.timeText}</b>
-                <i>{eventInfo.event.title}</i>
+              <div
+                css={css`
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                `}
+              >
+                {eventInfo.event.title}
               </div>
             )}
           />
@@ -459,6 +461,7 @@ const MyCalendar = () => {
           setIsDetailModalOpen(false);
         }}
         event={selectedEvent}
+        onSave={handleSaveEvent}
       />
     </div>
   );

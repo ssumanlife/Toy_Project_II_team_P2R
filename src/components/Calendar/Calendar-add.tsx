@@ -216,5 +216,5 @@ const titleStyle = css`
 const errorMessageStyle = css`
   color: red;
   margin-top: 30px;
-  font-size: 1.5em;
+  font-size: 1em;
 `;
