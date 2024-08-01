@@ -276,6 +276,10 @@ const MyCalendar = () => {
     setIsAddModalOpen(false);
   };
 
+  const handleAddEvent = (newEvent) => {
+    setEvents((prevEvents) => [...prevEvents, newEvent]);
+  };
+
   const openDetailModal = (event: Event) => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
@@ -302,8 +306,11 @@ const MyCalendar = () => {
     );
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(`${dateString}T00:00:00`);
+  const formatTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    if (Number.isNaN(date.getTime())) {
+      return '시간 정보 없음';
+    }
     return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
@@ -383,9 +390,20 @@ const MyCalendar = () => {
               right: 'next',
             }}
             eventContent={(eventInfo) => (
-              <div css={eventContentStyle}>
-                <b>{eventInfo.timeText}</b>
-                <i>{eventInfo.event.title}</i>
+              <div
+                css={css`
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                `}
+              >
+                {eventInfo.event.title}
               </div>
             )}
           />
@@ -427,7 +445,7 @@ const MyCalendar = () => {
           )}
         </div>
       </div>
-      <CalendarAddModal isOpen={isAddModalOpen} onClose={closeAddModal} />
+      <CalendarAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAddEvent={handleAddEvent} />
       <CalendarDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => {

@@ -15,11 +15,28 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
-const CalendarAddModal = ({ isOpen, onClose }) => {
+const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
   const [title, setTitle] = useState('');
   const [startDateTime, setStartDateTime] = useState('');
   const [endDateTime, setEndDateTime] = useState('');
-  const [selectedColor, setSelectedColor] = useState('yellow');
+  const [selectedColor, setSelectedColor] = useState('');
+
+  const handleSubmit = () => {
+    if (title && startDateTime && endDateTime) {
+      const newEvent = {
+        title,
+        start: startDateTime,
+        end: endDateTime,
+        category: selectedColor,
+      };
+      onAddEvent(newEvent);
+      onClose();
+      setTitle('');
+      setStartDateTime('');
+      setEndDateTime('');
+      setSelectedColor('');
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -71,7 +88,7 @@ const CalendarAddModal = ({ isOpen, onClose }) => {
           </div>
         </div>
         <div css={buttonContainerStyle}>
-          <Button onClick={onClose}>작성</Button>
+          <Button onClick={handleSubmit}>작성</Button>
         </div>
       </div>
     </Modal>
