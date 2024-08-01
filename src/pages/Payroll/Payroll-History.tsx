@@ -1,9 +1,16 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { css, jsx } from '@emotion/react';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
+import Select from '../../Components/Select.tsx';
+
+const SelectWidthCustom = css`
+  width: 120px;
+  font-size: 16px;
+`;
 
 interface PayData {
   basicPay: number;
@@ -24,6 +31,7 @@ export interface SalaryCorrection {
   onModal?: any;
   approval?: string;
   state: string;
+  deleteSalaryCorrection?: (id: number) => void | undefined;
 }
 export interface EmployeeSalaryType {
   id: number;
@@ -39,15 +47,15 @@ const PayrollHistory = () => {
       id: 1,
       name: '김수민',
       monthly: '6월',
-      title: '연장근무 미반영',
+      title: '업무 연장 미반영',
       content: '6월 22일 주말피크 2시간 연장근무 급여 누락 된 것 습니다.',
-      state: 'normal',
+      state: 'standBy',
     },
     {
       id: 2,
       name: '양해석',
       monthly: '6월',
-      title: '추가근무 미반영',
+      title: '업무 연장 미반영',
       content: '5월 15일 수민님 대타 출근한 4시간 급여 누락되었습니다.',
       state: 'approval',
     },
@@ -63,7 +71,7 @@ const PayrollHistory = () => {
       id: 4,
       name: '김승민',
       monthly: '1월',
-      title: '연장근무 미 반영',
+      title: '업무 연장 미반영',
       content: '1월 1일 연장근무 4시간 급여 누락 된 것 습니다.',
       state: 'reject',
     },
@@ -160,8 +168,40 @@ const PayrollHistory = () => {
       isViewd: false,
     },
   ]);
+  const [month, setMonth] = useState('2024 06월');
   const [modal, setModal] = useState(false);
   const [id, setId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const { user } = useAuthContext();
+
+  useEffect(() => {
+    user.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+  }, []);
+
+  useEffect(() => {
+    if (user.isAdmin === false) {
+      let newEmployeeSalary = [];
+      let newSalaryCorrectionLists = [];
+
+      for (let i = 0; i < employeeSalary.length; i++) {
+        if (employeeSalary[i].name === user.name) {
+          newEmployeeSalary.push(employeeSalary[i]);
+        }
+      }
+      for (let s = 0; s < salaryCorrectionLists.length; s++) {
+        if (salaryCorrectionLists[s].name === user.name) {
+          newSalaryCorrectionLists.push(salaryCorrectionLists[s]);
+        }
+      }
+      setEmployeeSalary(newEmployeeSalary);
+      setSalaryCorrectionLists(newSalaryCorrectionLists);
+    }
+  }, [user]);
+
+  const handleSelect = (option: string) => {
+    setMonth(option);
+  };
 
   const handleApproval = () => {
     let idState = id.slice(0, 1);
@@ -203,7 +243,8 @@ const PayrollHistory = () => {
     setEmployeeSalary(newIsViwedEmploySalary);
   };
 
-  const handleAdditionalPay = (value, id) => {
+  // eslint-disable-next-line no-shadow
+  const handleAdditionalPay = (value: string, id: number) => {
     if (/,/g.test(value)) {
       let additionalPayChange = value.replaceAll(',', '');
       if (/^\d+$/.test(additionalPayChange)) {
@@ -217,38 +258,59 @@ const PayrollHistory = () => {
         setEmployeeSalary(newEmploySalary);
       } else {
         alert('숫자만 입력 가능합니다.');
-        // setEmployeeSalary(employeeSalary);
       }
     } else if (/^\d+$/.test(value)) {
-      let newEmploySalary = [...employeeSalary];
-      for (let es = 0; es < newEmploySalary.length; es++) {
-        if (newEmploySalary[es].id === id) {
-          newEmploySalary[es].payData.additionalPay = Number(value);
+      let newFilterEmploySalary = [...employeeSalary];
+      for (let es = 0; es < newFilterEmploySalary.length; es++) {
+        if (newFilterEmploySalary[es].id === id) {
+          newFilterEmploySalary[es].payData.additionalPay = Number(value);
           break;
         }
       }
-      setEmployeeSalary(newEmploySalary);
+      setEmployeeSalary(newFilterEmploySalary);
     } else {
       alert('숫자만 입력 가능합니다.');
-      // setEmployeeSalary(employeeSalary);
     }
+  };
+
+  const addSalaryCorrectionList = (option: string[], content: string) => {
+    let newSalaryCorrectionLists = [...salaryCorrectionLists];
+    let newId = newSalaryCorrectionLists.length + 1;
+    newSalaryCorrectionLists.unshift({
+      id: newId,
+      name: user.name,
+      monthly: '7월',
+      title: option,
+      content,
+      state: 'standBy',
+    });
+    setSalaryCorrectionLists(newSalaryCorrectionLists);
+  };
+
+  // eslint-disable-next-line no-shadow
+  const deleteSalaryCorrection = (id: number) => {
+    let newSalaryCorrectionLists = [...salaryCorrectionLists];
+    newSalaryCorrectionLists = newSalaryCorrectionLists.filter((item) => item.id !== id);
+    setSalaryCorrectionLists(newSalaryCorrectionLists);
   };
 
   return (
     <div css={wrapper}>
       <div css={salaryCorrectionArea}>
-        <div css={salaryCorrectionheader}>
-          <h3>직원 급여 내역</h3>
+        <div css={[salaryCorrectionheader, { margin: '25px 0 10px' }]}>
+          <h3>{isAdmin ? '직원 급여 내역' : '급여 내역'}</h3>
           <div>
-            <select id="day" css={select}>
-              <option value="2024 6월">2024 6월</option>
-              <option value="2024 5월">2024 5월</option>
-              <option value="2024 4월">2024 4월</option>
-              <option value="2024 3월">2024 3월</option>
-            </select>
+            {isAdmin ? (
+              <Select
+                options={['2024 06월', '2024 05월']}
+                defaultLabel={month}
+                onSelect={handleSelect}
+                css={SelectWidthCustom}
+              />
+            ) : null}
           </div>
         </div>
-        <ul css={{ padding: 0, width: '100%', height: '450px', overflowY: 'auto', marginBottom: '15px' }}>
+        <ul css={ul}>
           {employeeSalary.map((item) => (
             <PayList
               key={item.id}
@@ -258,48 +320,60 @@ const PayrollHistory = () => {
               handleAdditionalPay={handleAdditionalPay}
               isViewd={item.isViewd}
               handleIsViewd={handleIsViewd}
+              addSalaryCorrectionList={addSalaryCorrectionList}
             />
           ))}
         </ul>
-        <div css={salaryCorrectionheader}>
-          <h3>급여 정정 요청 내역</h3>
-          <div>
-            <button onClick={() => stateFilter('normal')} css={[headerBtn, gray]}>
-              대기중
-            </button>
-            <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
-              승인
-            </button>
-            <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
-              반려
-            </button>
-          </div>
+        <div css={[salaryCorrectionheader, { margin: '25px 0' }]}>
+          <h3>{isAdmin ? '급여 정정 요청 내역' : '급여 정정 신청 내역'}</h3>
+          {isAdmin ? (
+            <div>
+              <button onClick={() => stateFilter('standBy')} css={[headerBtn, gray]}>
+                대기중
+              </button>
+              <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
+                승인
+              </button>
+              <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
+                반려
+              </button>
+            </div>
+          ) : null}
         </div>
-        <table css={listTable}>
-          <thead>
-            <tr css={trStyle}>
-              <td>요청자</td>
-              <td>월</td>
-              <td>정정 사유</td>
-              <td>정정 내용</td>
-              <td css={{ textAlign: 'center' }}>상태</td>
-            </tr>
-          </thead>
-          <tbody>
-            {salaryCorrectionLists.map((item) => (
-              <SalaryList
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                monthly={item.monthly}
-                title={item.title}
-                content={item.content}
-                state={item.state}
-                onModal={onModal}
-              />
-            ))}
-          </tbody>
-        </table>
+        {salaryCorrectionLists.length !== 0 ? (
+          <table css={listTable}>
+            <thead>
+              <tr css={trStyle}>
+                <td css={{ width: '42px' }}>요청자</td>
+                <td css={{ width: '68px' }}>월</td>
+                <td>정정 사유</td>
+                <td>정정 내용</td>
+                <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
+              </tr>
+            </thead>
+            <tbody>
+              {salaryCorrectionLists.map((item) => (
+                <SalaryList
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  monthly={item.monthly}
+                  title={item.title}
+                  content={item.content}
+                  state={item.state}
+                  onModal={onModal}
+                  deleteSalaryCorrection={deleteSalaryCorrection}
+                />
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div css={noListWrapper}>
+            <span className="material-symbols-outlined">error</span>
+            <p>신청하신 내역이 없습니다.</p>
+          </div>
+        )}
+
         {modal ? <ApprovalModal id={id} handleApproval={handleApproval} onModal={onModal} /> : null}
       </div>
     </div>
@@ -308,35 +382,42 @@ const PayrollHistory = () => {
 
 export default PayrollHistory;
 const wrapper = css`
+  height: calc(100vh - 76px);
   width: 100vw;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
 `;
 const salaryCorrectionArea = css`
   display: flex;
   flex-direction: column;
   width: 80%;
+  top: 0;
 `;
 
 const salaryCorrectionheader = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px 0 10px;
+  padding-bottom: 25px;
   border-bottom: 1px solid #f0f0f0;
 `;
-const select = css`
-  border: none;
-  font-size: 16px;
-  outline: none;
+
+const ul = css`
+  padding: 15px;
+  width: 100%;
+  min-height: 150px;
+  max-height: 480px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  box-sizing: border-box;
 `;
 
 const headerBtn = css`
   width: 90px;
   height: 25px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--border-radius-small);
   margin-right: 10px;
   color: #333;
   cursor: pointer;
@@ -361,8 +442,8 @@ const red = css`
 `;
 const listTable = css`
   width: 100%;
-  box-shadow: 0 0.4rem 1.5rem -0.4rem rgba(10, 10, 20, 0.2);
-  border-radius: 5px 5px 0 0;
+  box-shadow: var(--shadow-default);
+  border-radius: 20px 20px 0 0;
 `;
 const trStyle = css`
   height: 50px;
@@ -370,5 +451,21 @@ const trStyle = css`
   td {
     vertical-align: middle;
     padding-left: 15px;
+  }
+`;
+
+const noListWrapper = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  span {
+    font-size: 70px;
+    font-weight: 300;
+    margin: 20px 0 10px;
+    color: var(--text-white-gray);
+  }
+  p {
+    color: var(--text-light-gray);
   }
 `;

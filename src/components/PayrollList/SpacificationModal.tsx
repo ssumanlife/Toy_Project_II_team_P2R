@@ -1,11 +1,35 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React, { useState, useRef } from 'react';
+// import styled from '@emotion/styled';
+import React, { useState, useRef, useEffect } from 'react';
 import Button from '../Button.tsx';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
+import Select from '../Select.tsx';
 
-const SpacificationModal = ({ id, payData, onSpacificationModal, name, totalPay, handleAdditionalPay }) => {
+const SelectWidthCustom = css`
+  width: 378px;
+`;
+
+const SpacificationModal = ({
+  id,
+  payData,
+  onSpacificationModal,
+  name,
+  totalPay,
+  handleAdditionalPay,
+  addSalaryCorrectionList,
+  setModal,
+}) => {
   const [readOnly, setReadOnly] = useState(true);
+  const [isRequest, setRequest] = useState(false);
+  const [reason, setReason] = useState('선택해주세요.');
   const inputRef = useRef(null);
+  const textareaRef = useRef(null);
+  const { user } = useAuthContext();
+
+  const handleSelect = (option: string) => {
+    setReason(option);
+  };
 
   const handleReadOnly = () => {
     readOnly ? setReadOnly(false) : setReadOnly(true);
@@ -28,6 +52,38 @@ const SpacificationModal = ({ id, payData, onSpacificationModal, name, totalPay,
       Object.values(payData)
         [i].toFixed(0)
         .replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+    );
+  }
+
+  let salaryStatementBtn = {};
+
+  if (readOnly) {
+    if (user.isAdmin === false) {
+      salaryStatementBtn = <Button onClick={() => setRequest(true)} children={'정정 요청'} variant="secondary" />;
+      if (isRequest) {
+        salaryStatementBtn = (
+          <Button
+            onClick={() => {
+              setModal(false), addSalaryCorrectionList(reason, textareaRef.current.value);
+            }}
+            children={'제출'}
+            variant="primary"
+          />
+        );
+      }
+    } else {
+      salaryStatementBtn = <Button onClick={() => handleReadOnly()} children={'급여 수정'} variant="secondary" />;
+    }
+  } else {
+    salaryStatementBtn = (
+      <Button
+        onClick={() => {
+          handleReadOnly();
+          handleAdditionalPay(inputRef.current.value, id);
+        }}
+        children={'수정 완료'}
+        variant="primary"
+      />
     );
   }
 
@@ -54,96 +110,102 @@ const SpacificationModal = ({ id, payData, onSpacificationModal, name, totalPay,
       }
     }
   `;
-  // console.log(inputRef.current.value);
+
   return (
     <div css={spacificationModalWrapper}>
       <div css={spacificationModalpage}>
         <div css={modalTop}>
-          <h3 css={{ color: '#578aea' }}>2024년 8월 {name} 급여명세서</h3>
+          <h3 css={{ color: '#578aea' }}>
+            2024년 {user.isAdmin ? '8월' : '7월'} {name} 급여명세서
+          </h3>
           <button css={closeBtn} onClick={() => onSpacificationModal()}>
             <span css={{ color: '#888', fontSize: '36px' }} className="material-symbols-outlined">
               close
             </span>
           </button>
         </div>
-
         <div css={listWrapper}>
-          <ul css={ulArea}>
-            <li>
-              <p>급여 지급예정일</p>
-              <p>2024.08.15</p>
-            </li>
-            <li>
-              <p>성명</p>
-              <p>{name}</p>
-            </li>
-            <li>
-              <p>급여 계좌</p>
-              <p>하나 478964312312856</p>
-            </li>
-          </ul>
-          <ul css={ulArea}>
-            <li>
-              <p>기본급</p>
-              <input value={payArr[0] + '원'} readOnly />
-            </li>
-            <li>
-              <p>주휴수당</p>
-              <input value={payArr[1] + '원'} readOnly />
-            </li>
-            <li>
-              <p>추가수당</p>
-              <div className="edit">
-                <input ref={inputRef} defaultValue={payArr[2]} readOnly={readOnly} />원
-              </div>
-            </li>
-            <li css={{ fontSize: '18px', fontWeight: '500' }}>
-              <p>총지급액</p>
-              <p>{sumPay}원</p>
-            </li>
-          </ul>
-          <ul css={ulArea}>
-            <li>
-              <p>국민연금</p>
-              <input value={payArr[3] + '원'} readOnly />
-            </li>
-            <li>
-              <p>건강보험</p>
-              <input value={payArr[4] + '원'} readOnly />
-            </li>
-            <li>
-              <p>장기요양</p>
-              <input value={payArr[5] + '원'} readOnly />
-            </li>
-            <li>
-              <p>고용보험</p>
-              <input value={payArr[6] + '원'} readOnly />
-            </li>
-            <li css={{ fontSize: '18px', fontWeight: '500' }}>
-              <p>총공제액</p>
-              <p>{deductionPay}원</p>
-            </li>
-          </ul>
-          <ul css={ulArea}>
-            <li css={{ fontSize: '20px', fontWeight: '700' }}>
-              <p>실지급액</p>
-              <p>{totalPay}원</p>
-            </li>
-          </ul>
-          <div css={{ margin: '20px 0' }}>
-            {readOnly ? (
-              <Button onClick={() => handleReadOnly()} children={'급여 수정'} variant="secondary" />
-            ) : (
-              <Button
-                onClick={() => {
-                  handleReadOnly();
-                  handleAdditionalPay(inputRef.current.value, id);
-                }}
-                children={'수정 완료'}
-                variant="primary"
+          {isRequest ? (
+            <div css={requsetWrapper}>
+              <p css={{ marginTop: '20px' }}>급여 내역</p>
+              <input css={{ height: '50px' }} value="7월 급여 명세서" readOnly />
+              <p css={{ marginTop: '20px' }}>정정 사유</p>
+              <Select
+                options={['휴일 근무 미반영', '업무 연장 미반영', '무급 휴가 사용 미반영']}
+                defaultLabel={reason}
+                onSelect={handleSelect}
+                css={SelectWidthCustom}
               />
-            )}
-          </div>
+              <p css={{ marginTop: '40px' }}>정정 내용</p>
+              <textarea ref={textareaRef} css={{ height: '200px' }} />
+            </div>
+          ) : (
+            <>
+              <ul css={ulArea}>
+                <li>
+                  <p>급여 지급예정일</p>
+                  <p>2024.08.15</p>
+                </li>
+                <li>
+                  <p>성명</p>
+                  <p>{name}</p>
+                </li>
+                <li>
+                  <p>급여 계좌</p>
+                  <p>하나 478964312312856</p>
+                </li>
+              </ul>
+              <ul css={ulArea}>
+                <li>
+                  <p>기본급</p>
+                  <input value={payArr[0] + '원'} readOnly />
+                </li>
+                <li>
+                  <p>주휴수당</p>
+                  <input value={payArr[1] + '원'} readOnly />
+                </li>
+                <li>
+                  <p>추가수당</p>
+                  <div className="edit">
+                    <input ref={inputRef} defaultValue={payArr[2]} readOnly={readOnly} />원
+                  </div>
+                </li>
+                <li css={{ fontSize: '18px', fontWeight: '500' }}>
+                  <p>총지급액</p>
+                  <p>{sumPay}원</p>
+                </li>
+              </ul>
+              <ul css={ulArea}>
+                <li>
+                  <p>국민연금</p>
+                  <input value={payArr[3] + '원'} readOnly />
+                </li>
+                <li>
+                  <p>건강보험</p>
+                  <input value={payArr[4] + '원'} readOnly />
+                </li>
+                <li>
+                  <p>장기요양</p>
+                  <input value={payArr[5] + '원'} readOnly />
+                </li>
+                <li>
+                  <p>고용보험</p>
+                  <input value={payArr[6] + '원'} readOnly />
+                </li>
+                <li css={{ fontSize: '18px', fontWeight: '500' }}>
+                  <p>총공제액</p>
+                  <p>{deductionPay}원</p>
+                </li>
+              </ul>
+              <ul css={ulArea}>
+                <li css={{ fontSize: '20px', fontWeight: '700' }}>
+                  <p>실지급액</p>
+                  <p css={{ color: 'var(--primary-blue)' }}>{totalPay}원</p>
+                </li>
+              </ul>
+            </>
+          )}
+          <div css={{ margin: '20px 0' }}>{salaryStatementBtn}</div>
         </div>
       </div>
     </div>
@@ -167,10 +229,10 @@ const spacificationModalWrapper = css`
 `;
 const spacificationModalpage = css`
   width: 560px;
-  height: 700px;
+  height: 720px;
   display: flex;
   flex-direction: column;
-  background: #dceeff;
+  background: #ecf6ff;
   border-radius: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -185,7 +247,7 @@ const modalTop = css`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 `;
 const closeBtn = css`
   border: none;
@@ -207,4 +269,33 @@ const listWrapper = css`
   align-items: center;
   justify-content: center;
   flex-direction: column;
+`;
+
+const requsetWrapper = css`
+  width: 380px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  /* border-bottom: 3px solid var(--text-white-gray); */
+  p {
+    text-align: left;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  input,
+  textarea {
+    border: 2px solid var(--text-white-gray);
+    border-radius: var(--border-radius-small);
+    margin-bottom: 25px;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: var(--text-gray);
+    outline: none;
+    resize: none;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+  }
 `;
