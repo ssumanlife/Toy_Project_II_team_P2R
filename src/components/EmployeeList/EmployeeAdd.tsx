@@ -6,7 +6,7 @@ import Button from '../Button.tsx';
 import { Employee } from './EmployeeSpecificModal.tsx';
 import { modalContentStyles, containerStyles, titleStyles, valueStyles } from './EmployeeSpecificModal.tsx';
 import BankSelectComponent from './bankSelect.tsx';
-import DaysOfWeek from '../DaysOfWeek.tsx';
+import DaysOfWeek from './DaysOfWeek.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
 
 const inputStyles = css`
