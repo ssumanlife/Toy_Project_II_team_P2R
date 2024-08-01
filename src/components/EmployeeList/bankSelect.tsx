@@ -1,6 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import Select from '../Select'; 
+
+const customSelectStyles = css`
+  width: 130px; /* 원하는 너비로 설정 */
+  color: var(--text-light-gray);
+`;
 
 
 const BankSelectComponent: React.FC = () => {
@@ -12,6 +18,7 @@ const BankSelectComponent: React.FC = () => {
 
   return (
     <Select
+      css={customSelectStyles}
       options={['국민', '농협', '하나', '카카오뱅크']}
       defaultLabel={selectedBank}
       onSelect={handleSelect}

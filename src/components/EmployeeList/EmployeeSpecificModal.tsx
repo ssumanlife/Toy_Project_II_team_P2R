@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import Modal from '../Modal.tsx';
 import Button from '../Button.tsx';
 import EmployeeScheduleRequests from '../../Pages/EmployeeList/EmployeeScheduleRequests.tsx';
-import DaysOfWeek from '../DaysOfWeek.tsx';
+import DaysOfWeek from './DaysOfWeek.tsx';
 
 interface Employee {
   id: string;

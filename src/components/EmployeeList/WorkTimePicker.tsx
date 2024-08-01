@@ -6,6 +6,7 @@ import Select from '../Select';
 // Select 커스텀 코드
 const CustomSelect = styled(Select)`
   width: 130px;
+  color: var(--text-light-gray);
 `;
 
 const generateTimeOptions = () => {
