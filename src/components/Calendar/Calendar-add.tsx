@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import Modal from '../Modal';
 import Button from '../Button';
@@ -15,11 +15,55 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
-const CalendarAddModal = ({ isOpen, onClose }) => {
+const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
   const [title, setTitle] = useState('');
   const [startDateTime, setStartDateTime] = useState('');
   const [endDateTime, setEndDateTime] = useState('');
-  const [selectedColor, setSelectedColor] = useState('yellow');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const resetForm = () => {
+    setTitle('');
+    setStartDateTime('');
+    setEndDateTime('');
+    setSelectedColor('');
+    setErrorMessage('');
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (!title || !startDateTime || !endDateTime) {
+      setErrorMessage('모든 필드를 입력해주세요');
+      return;
+    }
+
+    const startDate = new Date(startDateTime);
+    const endDate = new Date(endDateTime);
+
+    if (startDate > endDate) {
+      setErrorMessage('일정시작이 일정종료 보다 늦을 수 없습니다.');
+      return;
+    }
+
+    const newEvent = {
+      title,
+      start: startDateTime,
+      end: endDateTime,
+      category: selectedColor,
+    };
+    onAddEvent(newEvent);
+    handleClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -70,8 +114,9 @@ const CalendarAddModal = ({ isOpen, onClose }) => {
             ))}
           </div>
         </div>
+        {errorMessage && <div css={errorMessageStyle}>{errorMessage}</div>}
         <div css={buttonContainerStyle}>
-          <Button onClick={onClose}>작성</Button>
+          <Button onClick={handleSubmit}>작성</Button>
         </div>
       </div>
     </Modal>
@@ -167,4 +212,9 @@ const titleStyle = css`
   display: block;
   border-bottom: 1px solid var(--text-white-gray);
   padding-bottom: 20px;
+`;
+const errorMessageStyle = css`
+  color: red;
+  margin-top: 30px;
+  font-size: 1em;
 `;

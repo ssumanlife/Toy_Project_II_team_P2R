@@ -15,11 +15,12 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
-const CalendarDetailModal = ({ isOpen, onClose, event }) => {
+const CalendarDetailModal = ({ isOpen, onClose, event, onSave }) => {
   const [title, setTitle] = useState('');
   const [startDateTime, setStartDateTime] = useState('');
   const [endDateTime, setEndDateTime] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (event) {
@@ -27,6 +28,7 @@ const CalendarDetailModal = ({ isOpen, onClose, event }) => {
       setStartDateTime(formatDate(event.start));
       setEndDateTime(formatDate(event.end));
       setSelectedColor(event.category);
+      setErrorMessage('');
     }
   }, [event]);
 
@@ -36,7 +38,26 @@ const CalendarDetailModal = ({ isOpen, onClose, event }) => {
   };
 
   const handleSave = () => {
-    console.log('Saving:', { title, startDateTime, endDateTime, selectedColor });
+    if (!title || !startDateTime || !endDateTime) {
+      setErrorMessage('모든 필드를 입력해주세요');
+      return;
+    }
+    const startDate = new Date(startDateTime);
+    const endDate = new Date(endDateTime);
+
+    if (startDate > endDate) {
+      setErrorMessage('일정시작이 일정종료 보다 늦을 수 없습니다.');
+      return;
+    }
+    const updatedEvent = {
+      ...event,
+      title,
+      start: startDateTime,
+      end: endDateTime,
+      category: selectedColor,
+    };
+
+    onSave(updatedEvent);
     onClose();
   };
 
@@ -90,6 +111,7 @@ const CalendarDetailModal = ({ isOpen, onClose, event }) => {
             ))}
           </div>
         </div>
+        {errorMessage && <div css={errorMessageStyle}>{errorMessage}</div>}
         <div css={buttonContainerStyle}>
           <Button onClick={handleSave}>수정</Button>
         </div>
@@ -189,4 +211,10 @@ const titleStyle = css`
   display: block;
   border-bottom: 1px solid var(--text-white-gray);
   padding-bottom: 20px;
+`;
+
+const errorMessageStyle = css`
+  color: red;
+  margin-top: 30px;
+  font-size: 1em;
 `;
