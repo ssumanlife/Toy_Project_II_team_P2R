@@ -5,7 +5,8 @@ import GlobalStyle from './globalStyle.tsx';
 
 const ConditionalHeader = () => {
   const { user } = useAuthContext();
-  return user ? <Header /> : null;
+  const path = window.location.pathname;
+  return user && path !== '/' ? <Header /> : null;
 };
 
 function App() {
