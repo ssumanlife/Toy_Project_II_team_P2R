@@ -9,22 +9,35 @@ const PayList = ({
   name,
   payData,
   handleAdditionalPay,
-  isViewd,
+  isViewed,
   handleIsViewd,
   addSalaryCorrectionList,
-}: employeeSalaryType) => {
+  month,
+}: EmployeeSalaryType) => {
   const [modal, setModal] = useState(false);
   const onSpacificationModal = () => {
     modal ? setModal(false) : setModal(true);
   };
 
   let totalPay =
-    payData.basicPay +
-    payData.weeklyPay +
-    payData.additionalPay -
-    (payData.nationalPension + payData.healthInsurance + payData.care + payData.employmentInsurance);
+    payData.baseSalary +
+    payData.weeklyHolidayAllowance +
+    payData.additionalAllowance -
+    (payData.nationalPension + payData.healthInsurance + payData.longTermCare + payData.employmentInsurance);
 
   totalPay = totalPay.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  const onlyMonth = Number(month.slice(6, 7));
+
+  const today = new Date();
+  const currentDate = Number(new Date(today).toISOString().substring(6, 7));
+
+  let text = '';
+  if (onlyMonth === currentDate || onlyMonth === currentDate - 1) {
+    text = '예정';
+  } else {
+    text = '완료';
+  }
 
   return (
     <li css={liItem}>
@@ -38,12 +51,17 @@ const PayList = ({
           handleAdditionalPay={handleAdditionalPay}
           addSalaryCorrectionList={addSalaryCorrectionList}
           setModal={setModal}
+          onlyMonth={onlyMonth}
         />
       ) : null}
-      <p>6월 {name} 급여명세서</p>
-      <p css={{ color: '#666' }}>2024.07.15 지급 예정</p>
+      <p>
+        {onlyMonth}월 {name} 급여명세서
+      </p>
+      <p css={{ color: '#666' }}>
+        {month} 15일 지급 {text}
+      </p>
       <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
-      {isViewd ? (
+      {isViewed ? (
         <button css={readBtn} onClick={onSpacificationModal}>
           열람
         </button>

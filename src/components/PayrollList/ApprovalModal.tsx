@@ -8,7 +8,7 @@ const btnWrapper = css`
   gap: 20px;
 `;
 
-const ApprovalModal = ({ handleApproval, id, onModal }) => {
+const ApprovalModal = ({ handleApproval, id, onYnNModal }) => {
   let text = '';
   if (id.slice(0, 1) === 'v') {
     text = '승인';
@@ -21,7 +21,7 @@ const ApprovalModal = ({ handleApproval, id, onModal }) => {
         <p css={{ fontSize: '20px', marginBottom: '60px', color: '#333' }}>{text} 하시겠습니까?</p>
         <div css={btnWrapper}>
           <Button onClick={() => handleApproval('approval', id)} children={'예'} variant="primary" />
-          <Button onClick={() => onModal()} children={'아니오'} variant="secondary" />
+          <Button onClick={() => onYnNModal()} children={'아니오'} variant="secondary" />
         </div>
       </div>
     </div>

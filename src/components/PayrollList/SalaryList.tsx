@@ -7,11 +7,11 @@ import { useAuthContext } from '../../Context/AuthContext.tsx';
 const SalaryList = ({
   id,
   name,
-  monthly,
-  title,
-  content,
-  onModal,
-  state,
+  month,
+  reasonForApplication,
+  correctionDetails,
+  onYnNModal,
+  correctionState,
   deleteSalaryCorrection,
 }: SalaryCorrection) => {
   const [contentDisplay, setContentDisplay] = useState(false);
@@ -21,7 +21,7 @@ const SalaryList = ({
   };
 
   let chkBtn = {};
-  if (state === 'standBy') {
+  if (correctionState === 'standBy') {
     if (user.isAdmin === false) {
       chkBtn = (
         <>
@@ -36,12 +36,12 @@ const SalaryList = ({
     } else {
       chkBtn = (
         <>
-          <button id={'v' + id} css={stateCheckBtn} onClick={() => onModal('v' + id)}>
+          <button id={'v' + id} css={stateCheckBtn} onClick={() => onYnNModal('v' + id)}>
             <span css={{ color: '#578AEA' }} className="material-symbols-outlined">
               check
             </span>
           </button>
-          <button id={'x' + id} css={stateCheckBtn} onClick={() => onModal('x' + id)}>
+          <button id={'x' + id} css={stateCheckBtn} onClick={() => onYnNModal('x' + id)}>
             <span css={{ color: '#888' }} className="material-symbols-outlined">
               close
             </span>
@@ -49,9 +49,9 @@ const SalaryList = ({
         </>
       );
     }
-  } else if (state === 'approval') {
+  } else if (correctionState === 'approval') {
     chkBtn = <div css={approvalState}> 승인 </div>;
-  } else if (state === 'reject') {
+  } else if (correctionState === 'reject') {
     chkBtn = <div css={rejectState}> 반려 </div>;
   }
 
@@ -71,12 +71,12 @@ const SalaryList = ({
   return (
     <tr css={tr}>
       <td>{name}</td>
-      <td>24년 0{monthly}</td>
-      <td>{title}</td>
+      <td>24년 0{month}</td>
+      <td>{reasonForApplication}</td>
       <td>
         <div css={contentBox}>
           <p onClick={() => handleContentDisplay()} className="changeDisplay">
-            {content}
+            {correctionDetails}
           </p>
         </div>
       </td>
@@ -132,7 +132,7 @@ const approvalState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #dceeff;
-  padding-top: 5px;
+  padding-top: 7px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
@@ -145,7 +145,7 @@ const rejectState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #ffe6e6;
-  padding-top: 5px;
+  padding-top: 7px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
