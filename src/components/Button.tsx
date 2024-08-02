@@ -38,6 +38,7 @@ const secondaryButtonStyles = css`
 `;
 
 interface ButtonProps {
+  type?: 'button' | 'submit';
   onClick?: () => void;
   children: React.ReactNode;
   variant?: 'primary' | 'secondary';
@@ -47,6 +48,7 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({
+  type,
   onClick,
   children,
   variant = 'primary',
@@ -64,6 +66,7 @@ const Button: React.FC<ButtonProps> = ({
     default:
       buttonStyle = css`
         ${primaryButtonStyles};
+        ${`type: ${type};`}
         ${customWidth && `width: ${customWidth};`}
         ${customFontSize && `font-size: ${customFontSize};`}
         ${customBorderRadius && `border-radius: ${customBorderRadius};`}

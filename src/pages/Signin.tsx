@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import signinPageImage from '../../public/images/signin_page_image.svg';
-import workCheckLogo from '../../public/images/workcheck_logo_signin.png';
+import workCheckLogo from '../../public/images/workcheck_logo_signin.svg';
 import Button from '../Components/Button.tsx';
 import triangle from '../../public/images/triangle.svg';
 import { login } from '../API/Firebase/Firebase.tsx';
@@ -17,45 +17,52 @@ const Signin: React.FC = () => {
   const { setUser } = useAuthContext();
   const navigate = useNavigate();
 
-  const handleLogin = useCallback(async () => {
-    if (!employeeId || !password) {
-      setErrorMessage('직원 ID와 비밀번호를 모두 입력해주세요.');
-      setEmployeeId('');
-      setPassword('');
-      return;
-    }
-
-    if (employeeId.length !== 9) {
-      setErrorMessage('직원 ID가 잘못 입력되었습니다. 다시 입력해주세요.');
-      setEmployeeId('');
-      setPassword('');
-      return;
-    }
-
-    if (password.length < 8 || password.length > 30) {
-      setErrorMessage('비밀번호는 8자 이상, 30자리 이하로 작성해주세요.');
-      setPassword('');
-      return;
-    }
-
-    try {
-      const user = await login(employeeId, password);
-      if (user) {
-        setUser(user);
-        navigate('/home');
+  const handleLogin = useCallback(
+    async (event?: React.FormEvent) => {
+      if (event) {
+        event.preventDefault();
       }
-    } catch (error: any) {
-      if (error.message === 'User not found') {
-        setErrorMessage('존재하지 않는 계정입니다. 관리자에게 문의해주세요.');
-      } else if (error.message === 'Invalid password') {
-        setErrorMessage('로그인에 실패하였습니다. 이메일과 비밀번호를 다시 확인해 주시기 바랍니다.');
-      } else {
-        setErrorMessage('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+
+      if (!employeeId || !password) {
+        setErrorMessage('직원 ID와 비밀번호를 모두 입력해주세요.');
+        setEmployeeId('');
+        setPassword('');
+        return;
       }
-      setEmployeeId('');
-      setPassword('');
-    }
-  }, [employeeId, password, setUser, navigate]);
+
+      if (employeeId.length !== 9) {
+        setErrorMessage('직원 ID가 잘못 입력되었습니다. 다시 입력해주세요.');
+        setEmployeeId('');
+        setPassword('');
+        return;
+      }
+
+      if (password.length < 8 || password.length > 30) {
+        setErrorMessage('비밀번호는 8자 이상, 30자리 이하로 작성해주세요.');
+        setPassword('');
+        return;
+      }
+
+      try {
+        const user = await login(employeeId, password);
+        if (user) {
+          setUser(user);
+          navigate('/home');
+        }
+      } catch (error: any) {
+        if (error.message === 'User not found') {
+          setErrorMessage('존재하지 않는 계정입니다. 관리자에게 문의해주세요.');
+        } else if (error.message === 'Invalid password') {
+          setErrorMessage('로그인에 실패하였습니다. 이메일과 비밀번호를 다시 확인해 주시기 바랍니다.');
+        } else {
+          setErrorMessage('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        setEmployeeId('');
+        setPassword('');
+      }
+    },
+    [employeeId, password, setUser, navigate],
+  );
 
   const handleStoreCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setEmployeeId(e.target.value);
@@ -77,7 +84,6 @@ const Signin: React.FC = () => {
     bottom: 0;
     height: 100%;
     box-sizing: border-box;
-    padding: 20px;
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -90,17 +96,19 @@ const Signin: React.FC = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 50%;
+    margin-left: -100px;
+    height: 100%;
+    width: 40%;
     .signin-image {
-      width: 80%;
+      width: 90%;
       height: auto;
       margin-bottom: 30px;
     }
     .description {
-      font-size: 1.2rem;
+      font-size: 18px;
       font-style: normal;
       font-weight: 600;
-      line-height: 22px;
+      line-height: 18px;
       letter-spacing: 0.3px;
       color: white;
       text-align: center;
@@ -123,7 +131,8 @@ const Signin: React.FC = () => {
     display: flex;
     flex-direction: column;
     padding: 40px;
-    width: 370px;
+    width: 23%;
+    height: 40%;
     background: white;
     border-radius: var(--border-radius-medium);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -140,7 +149,7 @@ const Signin: React.FC = () => {
       left: -5%;
     }
     .login-header {
-      margin-top: -30px;
+      margin-top: -20px;
       height: 100px;
       width: 100%;
       display: flex;
@@ -189,9 +198,9 @@ const Signin: React.FC = () => {
       <div css={imageContainerStyle}>
         <img src={signinPageImage} alt="로그인 페이지 이미지" className="signin-image" />
         <p className="description">급여 및 스케줄 관리 플랫폼</p>
-        <img src={workCheckLogo} alt="근무 로고" className="workcheck-logo" />
+        <img src={workCheckLogo} style={{ margin: '20px 0' }} alt="근무 로고" className="workcheck-logo" />
       </div>
-      <div css={contentsContainerStyle}>
+      <form css={contentsContainerStyle} onSubmit={handleLogin}>
         <img src={triangle} alt="삼각형" className="triangle" />
         <div className="login-header">
           <h1>LOGIN</h1>
@@ -231,10 +240,10 @@ const Signin: React.FC = () => {
           </span>
         </div>
         <p className="errorMessage">{errorMessage || ''}</p>
-        <Button onClick={handleLogin} customWidth="100%" customBorderRadius="10px">
+        <Button type="submit" customWidth="100%" customBorderRadius="10px">
           로그인
         </Button>
-      </div>
+      </form>
     </div>
   );
 };
