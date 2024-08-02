@@ -19,6 +19,7 @@ const SpacificationModal = ({
   handleAdditionalPay,
   addSalaryCorrectionList,
   setModal,
+  onlyMonth,
 }) => {
   const [readOnly, setReadOnly] = useState(true);
   const [isRequest, setRequest] = useState(false);
@@ -33,15 +34,19 @@ const SpacificationModal = ({
 
   const handleReadOnly = () => {
     readOnly ? setReadOnly(false) : setReadOnly(true);
-    // readOnly ? null : handleAdditionalPay(inputRef.current.value, id);
   };
   // 총 지급액
-  let sumPay = (payData.basicPay + payData.weeklyPay + payData.additionalPay)
+  let sumPay = (payData.baseSalary + payData.weeklyHolidayAllowance + payData.additionalAllowance)
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // 총 공제액
-  let deductionPay = (payData.nationalPension + payData.healthInsurance + payData.care + payData.employmentInsurance)
+  let deductionPay = (
+    payData.nationalPension +
+    payData.healthInsurance +
+    payData.longTermCare +
+    payData.employmentInsurance
+  )
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
@@ -116,7 +121,7 @@ const SpacificationModal = ({
       <div css={spacificationModalpage}>
         <div css={modalTop}>
           <h3 css={{ color: '#578aea' }}>
-            2024년 {user.isAdmin ? '8월' : '7월'} {name} 급여명세서
+            2024년 {onlyMonth}월 {name} 급여명세서
           </h3>
           <button css={closeBtn} onClick={() => onSpacificationModal()}>
             <span css={{ color: '#888', fontSize: '36px' }} className="material-symbols-outlined">
@@ -144,7 +149,7 @@ const SpacificationModal = ({
               <ul css={ulArea}>
                 <li>
                   <p>급여 지급예정일</p>
-                  <p>2024.08.15</p>
+                  <p>2024.0{onlyMonth}.15</p>
                 </li>
                 <li>
                   <p>성명</p>

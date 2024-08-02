@@ -6,6 +6,7 @@ import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../../Components/Select.tsx';
+import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
 
 const SelectWidthCustom = css`
   width: 120px;
@@ -13,24 +14,24 @@ const SelectWidthCustom = css`
 `;
 
 interface PayData {
-  basicPay: number;
-  weeklyPay: number;
-  additionalPay: number;
+  baseSalary: number;
+  weeklyHolidayAllowance: number;
+  additionalAllowance: number;
   nationalPension: number;
   healthInsurance: number;
-  care: number;
+  longTermCare: number;
   employmentInsurance: number;
 }
 
 export interface SalaryCorrection {
   id: number;
   name: string;
-  monthly: string;
-  title: string;
-  content: string;
+  month: string;
+  reasonForApplication: string;
+  correctionDetails: string;
   onModal?: any;
   approval?: string;
-  state: string;
+  correctionState: string;
   deleteSalaryCorrection?: (id: number) => void | undefined;
 }
 export interface EmployeeSalaryType {
@@ -38,205 +39,119 @@ export interface EmployeeSalaryType {
   name: string;
   date: string;
   payData: PayData;
-  isViewd: boolean;
+  isViewed: boolean;
 }
 
 const PayrollHistory = () => {
-  const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([
-    {
-      id: 1,
-      name: '김수민',
-      monthly: '6월',
-      title: '업무 연장 미반영',
-      content: '6월 22일 주말피크 2시간 연장근무 급여 누락 된 것 습니다.',
-      state: 'standBy',
-    },
-    {
-      id: 2,
-      name: '양해석',
-      monthly: '6월',
-      title: '업무 연장 미반영',
-      content: '5월 15일 수민님 대타 출근한 4시간 급여 누락되었습니다.',
-      state: 'approval',
-    },
-    {
-      id: 3,
-      name: '임효정',
-      monthly: '2월',
-      title: '무급휴가 사용 미반영',
-      content: '2월27일 무급 휴가 사용한거 반영이 안되었습니다!',
-      state: 'approval',
-    },
-    {
-      id: 4,
-      name: '김승민',
-      monthly: '1월',
-      title: '업무 연장 미반영',
-      content: '1월 1일 연장근무 4시간 급여 누락 된 것 습니다.',
-      state: 'reject',
-    },
-  ]);
-  const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([
-    {
-      id: 1,
-      name: '김수민',
-      date: '2024.06',
-      payData: {
-        basicPay: 2300000,
-        weeklyPay: 300000,
-        additionalPay: 25000,
-        nationalPension: 100000,
-        healthInsurance: 100000,
-        care: 50000,
-        employmentInsurance: 60000,
-      },
-      isViewd: false,
-    },
-    {
-      id: 2,
-      name: '양해석',
-      date: '2024.06',
-      payData: {
-        basicPay: 2210000,
-        weeklyPay: 370000,
-        additionalPay: 39000,
-        nationalPension: 100000,
-        healthInsurance: 100000,
-        care: 50000,
-        employmentInsurance: 60000,
-      },
-      isViewd: false,
-    },
-    {
-      id: 3,
-      name: '임효정',
-      date: '2024.06',
-      payData: {
-        basicPay: 2270000,
-        weeklyPay: 320000,
-        additionalPay: 30000,
-        nationalPension: 100000,
-        healthInsurance: 100000,
-        care: 50000,
-        employmentInsurance: 60000,
-      },
-      isViewd: false,
-    },
-    {
-      id: 4,
-      name: '김승민',
-      date: '2024.06',
-      payData: {
-        basicPay: 2300000,
-        weeklyPay: 310000,
-        additionalPay: 25000,
-        nationalPension: 100000,
-        healthInsurance: 100000,
-        care: 50000,
-        employmentInsurance: 60000,
-      },
-      isViewd: false,
-    },
-    {
-      id: 5,
-      name: '강동원',
-      date: '2024.06',
-      payData: {
-        basicPay: 2200000,
-        weeklyPay: 300000,
-        additionalPay: 25000,
-        nationalPension: 100000,
-        healthInsurance: 100000,
-        care: 50000,
-        employmentInsurance: 60000,
-      },
-      isViewd: false,
-    },
-    {
-      id: 6,
-      name: '김우빈',
-      date: '2024.06',
-      payData: {
-        basicPay: 30000,
-        weeklyPay: 300000,
-        additionalPay: 25000,
-        nationalPension: 12000,
-        healthInsurance: 10000,
-        care: 5000,
-        employmentInsurance: 6000,
-      },
-      isViewd: false,
-    },
-  ]);
-  const [month, setMonth] = useState('2024 06월');
+  const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
+  const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([]);
+  const [month, setMonth] = useState('2024 07월');
   const [modal, setModal] = useState(false);
   const [id, setId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-
   const { user } = useAuthContext();
 
   useEffect(() => {
-    user.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
-  }, []);
+    const userIsAdminVelidation = () => {
+      user.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+    };
+    userIsAdminVelidation();
+  }, [isAdmin]);
 
   useEffect(() => {
-    if (user.isAdmin === false) {
-      let newEmployeeSalary = [];
-      let newSalaryCorrectionLists = [];
+    const setEmployeeSalaryListData = async () => {
+      const newMonth = Number(month.slice(6, 7));
+      const employeeSalaryData = await getCollectionData('payrollDetails');
+      const setEmployeeSalaryData = [];
+      for (let i = 0; i < employeeSalaryData.length; i++) {
+        if (user.isAdmin || employeeSalaryData[i].name === user.name) {
+          if (user.isAdmin && employeeSalaryData[i].month !== newMonth) {
+            continue;
+          }
+          const data = {
+            id: i + 1,
+            name: employeeSalaryData[i].name,
+            month: employeeSalaryData[i].month,
+            payData: {
+              baseSalary: employeeSalaryData[i].baseSalary,
+              weeklyHolidayAllowance: employeeSalaryData[i].weeklyHolidayAllowance,
+              additionalAllowance: employeeSalaryData[i].additionalAllowance,
+              nationalPension: employeeSalaryData[i].nationalPension,
+              healthInsurance: employeeSalaryData[i].healthInsurance,
+              longTermCare: employeeSalaryData[i].longTermCare,
+              employmentInsurance: employeeSalaryData[i].employmentInsurance,
+            },
+            isViewed: employeeSalaryData[i].isViewed,
+          };
+          setEmployeeSalaryData.push(data);
+        }
+      }
+      setEmployeeSalary(setEmployeeSalaryData);
+    };
+    setEmployeeSalaryListData();
+  }, [month]);
 
-      for (let i = 0; i < employeeSalary.length; i++) {
-        if (employeeSalary[i].name === user.name) {
-          newEmployeeSalary.push(employeeSalary[i]);
+  useEffect(() => {
+    const setSalaryCorrectionListData = async () => {
+      const salaryCorrectionData = await getCollectionData('payrollCorApp');
+      const setSalaryCorrectionData = [];
+      for (let i = 0; i < salaryCorrectionData.length; i++) {
+        if (user.isAdmin || salaryCorrectionData[i].name === user.name) {
+          const data = {
+            id: i + 1,
+            name: salaryCorrectionData[i].name,
+            month: salaryCorrectionData[i].month,
+            reasonForApplication: salaryCorrectionData[i].reasonForApplication,
+            correctionDetails: salaryCorrectionData[i].correctionDetails,
+            correctionState: salaryCorrectionData[i].correctionState,
+          };
+          setSalaryCorrectionData.push(data);
         }
       }
-      for (let s = 0; s < salaryCorrectionLists.length; s++) {
-        if (salaryCorrectionLists[s].name === user.name) {
-          newSalaryCorrectionLists.push(salaryCorrectionLists[s]);
-        }
-      }
-      setEmployeeSalary(newEmployeeSalary);
-      setSalaryCorrectionLists(newSalaryCorrectionLists);
-    }
-  }, [user]);
+      setSalaryCorrectionData.sort((a, b) => b.month - a.month);
+      setSalaryCorrectionLists(setSalaryCorrectionData);
+    };
+    setSalaryCorrectionListData();
+  }, []);
 
   const handleSelect = (option: string) => {
     setMonth(option);
   };
 
   const handleApproval = () => {
-    let idState = id.slice(0, 1);
+    const idState = id.slice(0, 1);
     if (idState === 'v') {
-      let idValue = id.slice(1);
-      let changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
-      changeList[0].state = 'approval';
+      const idValue = id.slice(1);
+      const changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
+      changeList[0].correctionState = 'approval';
     } else if (idState === 'x') {
-      let idValue = id.slice(1);
-      let changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
-      changeList[0].state = 'reject';
+      const idValue = id.slice(1);
+      const changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
+      changeList[0].correctionState = 'reject';
     }
     setModal(false);
   };
 
-  const onModal = (id) => {
+  const onYnNModal = (id) => {
     modal ? setModal(false) : setModal(true);
     setId(id);
   };
 
-  const stateFilter = (stateValue) => {
-    let newStateList = [];
+  const stateFilter = (stateValue: string) => {
+    let newStateList: string[] = [];
     for (let i = 0; i < salaryCorrectionLists.length; i++) {
-      if (salaryCorrectionLists[i].state === stateValue) {
+      if (salaryCorrectionLists[i].correctionState === stateValue) {
         newStateList.push(salaryCorrectionLists[i]);
       }
     }
     setSalaryCorrectionLists(newStateList);
   };
 
-  const handleIsViewd = (id) => {
-    let newIsViwedEmploySalary = [...employeeSalary];
+  const handleIsViewd = (id: number) => {
+    const newIsViwedEmploySalary = [...employeeSalary];
     for (let iv = 0; iv < newIsViwedEmploySalary.length; iv++) {
       if (newIsViwedEmploySalary[iv].id === id) {
-        newIsViwedEmploySalary[iv].isViewd = true;
+        newIsViwedEmploySalary[iv].isViewed = true;
         break;
       }
     }
@@ -251,7 +166,7 @@ const PayrollHistory = () => {
         let newEmploySalary = [...employeeSalary];
         for (let es = 0; es < newEmploySalary.length; es++) {
           if (newEmploySalary[es].id === id) {
-            newEmploySalary[es].payData.additionalPay = Number(additionalPayChange);
+            newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
             break;
           }
         }
@@ -263,7 +178,7 @@ const PayrollHistory = () => {
       let newFilterEmploySalary = [...employeeSalary];
       for (let es = 0; es < newFilterEmploySalary.length; es++) {
         if (newFilterEmploySalary[es].id === id) {
-          newFilterEmploySalary[es].payData.additionalPay = Number(value);
+          newFilterEmploySalary[es].payData.additionalAllowance = Number(value);
           break;
         }
       }
@@ -273,16 +188,16 @@ const PayrollHistory = () => {
     }
   };
 
-  const addSalaryCorrectionList = (option: string[], content: string) => {
-    let newSalaryCorrectionLists = [...salaryCorrectionLists];
-    let newId = newSalaryCorrectionLists.length + 1;
+  const addSalaryCorrectionList = (option: string, content: string) => {
+    const newSalaryCorrectionLists = [...salaryCorrectionLists];
+    const newId: number = newSalaryCorrectionLists.length + 1;
     newSalaryCorrectionLists.unshift({
       id: newId,
       name: user.name,
-      monthly: '7월',
-      title: option,
-      content,
-      state: 'standBy',
+      month: '7월',
+      reasonForApplication: option,
+      correctionDetails: content,
+      correctionState: 'standBy',
     });
     setSalaryCorrectionLists(newSalaryCorrectionLists);
   };
@@ -302,7 +217,7 @@ const PayrollHistory = () => {
           <div>
             {isAdmin ? (
               <Select
-                options={['2024 06월', '2024 05월']}
+                options={['2024 07월', '2024 06월', '2024 05월', '2024 04월']}
                 defaultLabel={month}
                 onSelect={handleSelect}
                 css={SelectWidthCustom}
@@ -318,9 +233,10 @@ const PayrollHistory = () => {
               name={item.name}
               payData={item.payData}
               handleAdditionalPay={handleAdditionalPay}
-              isViewd={item.isViewd}
+              isViewed={item.isViewed}
               handleIsViewd={handleIsViewd}
               addSalaryCorrectionList={addSalaryCorrectionList}
+              month={month}
             />
           ))}
         </ul>
@@ -346,7 +262,7 @@ const PayrollHistory = () => {
               <tr css={trStyle}>
                 <td css={{ width: '42px' }}>요청자</td>
                 <td css={{ width: '68px' }}>월</td>
-                <td>정정 사유</td>
+                <td css={{ width: '106px' }}>정정 사유</td>
                 <td>정정 내용</td>
                 <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
               </tr>
@@ -357,11 +273,11 @@ const PayrollHistory = () => {
                   key={item.id}
                   id={item.id}
                   name={item.name}
-                  monthly={item.monthly}
-                  title={item.title}
-                  content={item.content}
-                  state={item.state}
-                  onModal={onModal}
+                  month={item.month}
+                  reasonForApplication={item.reasonForApplication}
+                  correctionDetails={item.correctionDetails}
+                  correctionState={item.correctionState}
+                  onYnNModal={onYnNModal}
                   deleteSalaryCorrection={deleteSalaryCorrection}
                 />
               ))}
@@ -370,11 +286,11 @@ const PayrollHistory = () => {
         ) : (
           <div css={noListWrapper}>
             <span className="material-symbols-outlined">error</span>
-            <p>신청하신 내역이 없습니다.</p>
+            <p>신청 내역이 없습니다.</p>
           </div>
         )}
 
-        {modal ? <ApprovalModal id={id} handleApproval={handleApproval} onModal={onModal} /> : null}
+        {modal ? <ApprovalModal id={id} handleApproval={handleApproval} onYnNModal={onYnNModal} /> : null}
       </div>
     </div>
   );
