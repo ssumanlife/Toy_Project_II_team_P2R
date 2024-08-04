@@ -1,3 +1,5 @@
+/* eslint-disable react/no-children-prop */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import React from 'react';
@@ -8,11 +10,17 @@ const btnWrapper = css`
   gap: 20px;
 `;
 
-const ApprovalModal = ({ handleApproval, id, onYnNModal }) => {
+interface ApprovalModalProps {
+  handleApproval: (btnId: string) => void;
+  btnId: string;
+  onYnNModal: (btnId: string) => void;
+}
+
+const ApprovalModal: React.FC<ApprovalModalProps> = ({ handleApproval, btnId, onYnNModal }) => {
   let text = '';
-  if (id.slice(0, 1) === 'v') {
+  if (btnId.slice(0, 1) === 'v') {
     text = '승인';
-  } else if (id.slice(0, 1) === 'x') {
+  } else if (btnId.slice(0, 1) === 'x') {
     text = '반려';
   }
   return (
@@ -20,8 +28,8 @@ const ApprovalModal = ({ handleApproval, id, onYnNModal }) => {
       <div css={ApprovalModalpage}>
         <p css={{ fontSize: '20px', marginBottom: '60px', color: '#333' }}>{text} 하시겠습니까?</p>
         <div css={btnWrapper}>
-          <Button onClick={() => handleApproval('approval', id)} children={'예'} variant="primary" />
-          <Button onClick={() => onYnNModal()} children={'아니오'} variant="secondary" />
+          <Button onClick={() => handleApproval(btnId)} children={'예'} variant="primary" />
+          <Button onClick={() => onYnNModal(btnId)} children={'아니오'} variant="secondary" />
         </div>
       </div>
     </div>

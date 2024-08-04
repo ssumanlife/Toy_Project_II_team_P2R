@@ -1,16 +1,35 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable prefer-template */
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/jsx-curly-brace-presence */
+/* eslint-disable react/no-children-prop */
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-expressions */
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-// import styled from '@emotion/styled';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Button from '../Button.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../Select.tsx';
+import { PayData } from '../../Pages/Payroll/Payroll-History.tsx';
 
 const SelectWidthCustom = css`
   width: 378px;
 `;
 
-const SpacificationModal = ({
+interface PayListProps {
+  id: number;
+  payData: PayData;
+  onSpacificationModal: () => void;
+  name: string;
+  totalPay: number;
+  handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
+  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
+  month: number;
+  isNull: boolean;
+}
+
+const SpacificationModal: React.FC<PayListProps> = ({
   id,
   payData,
   onSpacificationModal,
@@ -18,14 +37,14 @@ const SpacificationModal = ({
   totalPay,
   handleAdditionalPay,
   addSalaryCorrectionList,
-  setModal,
-  onlyMonth,
+  month,
+  isNull,
 }) => {
   const [readOnly, setReadOnly] = useState(true);
   const [isRequest, setRequest] = useState(false);
   const [reason, setReason] = useState('선택해주세요.');
-  const inputRef = useRef(null);
-  const textareaRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthContext();
 
   const handleSelect = (option: string) => {
@@ -36,12 +55,12 @@ const SpacificationModal = ({
     readOnly ? setReadOnly(false) : setReadOnly(true);
   };
   // 총 지급액
-  let sumPay = (payData.baseSalary + payData.weeklyHolidayAllowance + payData.additionalAllowance)
+  const sumPay = (payData.baseSalary + payData.weeklyHolidayAllowance + payData.additionalAllowance)
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // 총 공제액
-  let deductionPay = (
+  const deductionPay = (
     payData.nationalPension +
     payData.healthInsurance +
     payData.longTermCare +
@@ -51,7 +70,7 @@ const SpacificationModal = ({
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // 그 외 나머지 pay
-  let payArr = [];
+  const payArr = [];
   for (let i = 0; i < Object.values(payData).length; i++) {
     payArr.push(
       Object.values(payData)
@@ -60,16 +79,16 @@ const SpacificationModal = ({
     );
   }
 
-  let salaryStatementBtn = {};
-
+  let salaryStatementBtn: React.ReactNode = null;
   if (readOnly) {
-    if (user.isAdmin === false) {
+    if (user?.isAdmin === false) {
       salaryStatementBtn = <Button onClick={() => setRequest(true)} children={'정정 요청'} variant="secondary" />;
       if (isRequest) {
         salaryStatementBtn = (
           <Button
             onClick={() => {
-              setModal(false), addSalaryCorrectionList(reason, textareaRef.current.value);
+              const textareaValue = textareaRef.current?.value;
+              addSalaryCorrectionList(name, reason, textareaValue);
             }}
             children={'제출'}
             variant="primary"
@@ -83,8 +102,9 @@ const SpacificationModal = ({
     salaryStatementBtn = (
       <Button
         onClick={() => {
+          const inputValue = inputRef.current?.value;
           handleReadOnly();
-          handleAdditionalPay(inputRef.current.value, id);
+          handleAdditionalPay(inputValue, id, name, month);
         }}
         children={'수정 완료'}
         variant="primary"
@@ -121,7 +141,7 @@ const SpacificationModal = ({
       <div css={spacificationModalpage}>
         <div css={modalTop}>
           <h3 css={{ color: '#578aea' }}>
-            2024년 {onlyMonth}월 {name} 급여명세서
+            2024년 {month}월 {name} 급여명세서
           </h3>
           <button css={closeBtn} onClick={() => onSpacificationModal()}>
             <span css={{ color: '#888', fontSize: '36px' }} className="material-symbols-outlined">
@@ -143,13 +163,14 @@ const SpacificationModal = ({
               />
               <p css={{ marginTop: '40px' }}>정정 내용</p>
               <textarea ref={textareaRef} css={{ height: '200px' }} />
+              <span css={{ color: '#ff4646' }}>{isNull ? '모든 내용을 입력해주세요.' : ''}</span>
             </div>
           ) : (
             <>
               <ul css={ulArea}>
                 <li>
                   <p>급여 지급예정일</p>
-                  <p>2024.0{onlyMonth}.15</p>
+                  <p>2024.0{month}.15</p>
                 </li>
                 <li>
                   <p>성명</p>
@@ -226,7 +247,7 @@ const spacificationModalWrapper = css`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,7 +302,6 @@ const requsetWrapper = css`
   display: flex;
   justify-content: center;
   flex-direction: column;
-  /* border-bottom: 3px solid var(--text-white-gray); */
   p {
     text-align: left;
     color: #333;
