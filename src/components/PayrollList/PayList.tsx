@@ -1,10 +1,28 @@
+/* eslint-disable no-const-assign */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
-import { EmployeeSalaryType } from '../../Pages/Payroll/Payroll-History.tsx';
+import { css } from '@emotion/react';
+import React from 'react';
+import { PayData } from '../../Pages/Payroll/Payroll-History.tsx';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
 import SpacificationModal from './SpacificationModal.tsx';
-import { useState } from 'react';
 
-const PayList = ({
+interface PayListProps {
+  id: number;
+  name: string;
+  payData: PayData;
+  handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
+  isViewed: boolean;
+  handleIsViewd: (id: number, name: string, month: number) => void;
+  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
+  month: number;
+  isNull: boolean;
+  spacificationModal: boolean;
+  onSpacificationModal: () => void;
+  adminViewed: boolean;
+}
+
+const PayList: React.FC<PayListProps> = ({
   id,
   name,
   payData,
@@ -13,11 +31,13 @@ const PayList = ({
   handleIsViewd,
   addSalaryCorrectionList,
   month,
-}: EmployeeSalaryType) => {
-  const [modal, setModal] = useState(false);
-  const onSpacificationModal = () => {
-    modal ? setModal(false) : setModal(true);
-  };
+  isNull,
+  spacificationModal,
+  onSpacificationModal,
+  adminViewed,
+}) => {
+  const { user } = useAuthContext();
+  const viewedPm = user?.isAdmin ? adminViewed : isViewed;
 
   let totalPay =
     payData.baseSalary +
@@ -27,13 +47,11 @@ const PayList = ({
 
   totalPay = totalPay.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  const onlyMonth = Number(month.slice(6, 7));
-
   const today = new Date();
   const currentDate = Number(new Date(today).toISOString().substring(6, 7));
 
   let text = '';
-  if (onlyMonth === currentDate || onlyMonth === currentDate - 1) {
+  if (month === currentDate || month === currentDate - 1) {
     text = '예정';
   } else {
     text = '완료';
@@ -41,7 +59,7 @@ const PayList = ({
 
   return (
     <li css={liItem}>
-      {modal ? (
+      {spacificationModal ? (
         <SpacificationModal
           id={id}
           payData={payData}
@@ -50,18 +68,18 @@ const PayList = ({
           onSpacificationModal={onSpacificationModal}
           handleAdditionalPay={handleAdditionalPay}
           addSalaryCorrectionList={addSalaryCorrectionList}
-          setModal={setModal}
-          onlyMonth={onlyMonth}
+          month={month}
+          isNull={isNull}
         />
       ) : null}
       <p>
-        {onlyMonth}월 {name} 급여명세서
+        {month}월 {name} 급여명세서
       </p>
       <p css={{ color: '#666' }}>
-        {month} 15일 지급 {text}
+        2024 {month}월 15일 지급 {text}
       </p>
       <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
-      {isViewed ? (
+      {viewedPm ? (
         <button css={readBtn} onClick={onSpacificationModal}>
           열람
         </button>
@@ -70,7 +88,7 @@ const PayList = ({
           css={unreadBtn}
           onClick={() => {
             onSpacificationModal();
-            handleIsViewd(id);
+            handleIsViewd(id, name, month);
           }}
         >
           미열람
