@@ -3,7 +3,12 @@
 import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
-const updatePayrollData = async (name: string, month: number, changeData: string | number, isAdmin: boolean) => {
+const updatePayrollData = async (
+  name: string,
+  month: number,
+  changeData: string | number,
+  isAdmin: boolean | undefined,
+) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
     for (const memberDoc of membersSnapshot.docs) {
