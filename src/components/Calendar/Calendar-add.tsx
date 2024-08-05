@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import Modal from '../Modal';
 import Button from '../Button';
+import addCalendarEvent from '../../API/Firebase/AddCalendarEvent.tsx';
 
 const categoryColors = {
   pink: 'var(--calendar-pink)',
@@ -41,7 +42,7 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title || !startDateTime || !endDateTime) {
       setErrorMessage('모든 필드를 입력해주세요');
       return;
@@ -54,15 +55,34 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
       setErrorMessage('일정시작이 일정종료 보다 늦을 수 없습니다.');
       return;
     }
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      setErrorMessage('사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
 
     const newEvent = {
-      title,
-      start: startDateTime,
-      end: endDateTime,
-      category: selectedColor,
+      eventContent: title,
+      eventStartDate: startDateTime,
+      eventEndDate: endDateTime,
+      eventTag: selectedColor,
+      name: user.name,
     };
-    onAddEvent(newEvent);
-    handleClose();
+
+    try {
+      await addCalendarEvent(
+        newEvent.eventContent,
+        newEvent.eventEndDate,
+        newEvent.eventStartDate,
+        newEvent.eventTag,
+        newEvent.name,
+      );
+      onAddEvent(newEvent);
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('일정을 추가하는데 실패했습니다.');
+    }
   };
 
   return (

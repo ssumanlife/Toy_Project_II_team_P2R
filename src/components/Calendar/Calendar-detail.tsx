@@ -56,7 +56,6 @@ const CalendarDetailModal = ({ isOpen, onClose, event, onSave }) => {
       end: endDateTime,
       category: selectedColor,
     };
-
     onSave(updatedEvent);
     onClose();
   };
