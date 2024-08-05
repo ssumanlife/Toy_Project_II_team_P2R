@@ -188,7 +188,12 @@ const PayrollHistory: React.FC = () => {
     setEmployeeSalary(newIsViwedEmploySalary);
   };
 
-  const additionalPayUpdate = async (name: string, month: number, additionalPay: string | number, isAdmin: boolean) => {
+  const additionalPayUpdate = async (
+    name: string,
+    month: number,
+    additionalPay: string | number,
+    isAdmin: boolean | undefined,
+  ) => {
     try {
       await updatePayrollData(name, month, additionalPay, isAdmin);
     } catch (error) {
