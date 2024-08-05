@@ -1,19 +1,28 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-shadow */
 /** @jsxImportSource @emotion/react */
-import { useState, useEffect } from 'react';
-import { css, jsx } from '@emotion/react';
+import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../../Components/Select.tsx';
 import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
+import updatePayrollData from '../../API/Firebase/UpdatePayrollData.tsx';
+import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.tsx';
+import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
+import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
 
 const SelectWidthCustom = css`
   width: 120px;
   font-size: 16px;
 `;
 
-interface PayData {
+export interface PayData {
   baseSalary: number;
   weeklyHolidayAllowance: number;
   additionalAllowance: number;
@@ -26,34 +35,36 @@ interface PayData {
 export interface SalaryCorrection {
   id: number;
   name: string;
-  month: string;
+  month: number;
   reasonForApplication: string;
   correctionDetails: string;
   onModal?: any;
   approval?: string;
   correctionState: string;
-  deleteSalaryCorrection?: (id: number) => void | undefined;
 }
 export interface EmployeeSalaryType {
   id: number;
   name: string;
-  date: string;
   payData: PayData;
   isViewed: boolean;
+  month: number;
+  adminViewed: boolean;
 }
 
-const PayrollHistory = () => {
+const PayrollHistory: React.FC = () => {
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [modal, setModal] = useState(false);
-  const [id, setId] = useState(null);
+  const [spacificationModal, setSpacificationModal] = useState(false);
+  const [btnId, setBtnId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const { user } = useAuthContext();
+  const [isNull, setIsNull] = useState(false);
 
+  const { user } = useAuthContext();
   useEffect(() => {
     const userIsAdminVelidation = () => {
-      user.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+      user?.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
     };
     userIsAdminVelidation();
   }, [isAdmin]);
@@ -64,8 +75,8 @@ const PayrollHistory = () => {
       const employeeSalaryData = await getCollectionData('payrollDetails');
       const setEmployeeSalaryData = [];
       for (let i = 0; i < employeeSalaryData.length; i++) {
-        if (user.isAdmin || employeeSalaryData[i].name === user.name) {
-          if (user.isAdmin && employeeSalaryData[i].month !== newMonth) {
+        if (user?.isAdmin || employeeSalaryData[i].name === user?.name) {
+          if (user?.isAdmin && employeeSalaryData[i].month !== newMonth) {
             continue;
           }
           const data = {
@@ -82,10 +93,12 @@ const PayrollHistory = () => {
               employmentInsurance: employeeSalaryData[i].employmentInsurance,
             },
             isViewed: employeeSalaryData[i].isViewed,
+            adminViewed: employeeSalaryData[i].adminViewed,
           };
           setEmployeeSalaryData.push(data);
         }
       }
+      setEmployeeSalaryData.sort((a, b) => b.month - a.month);
       setEmployeeSalary(setEmployeeSalaryData);
     };
     setEmployeeSalaryListData();
@@ -96,7 +109,7 @@ const PayrollHistory = () => {
       const salaryCorrectionData = await getCollectionData('payrollCorApp');
       const setSalaryCorrectionData = [];
       for (let i = 0; i < salaryCorrectionData.length; i++) {
-        if (user.isAdmin || salaryCorrectionData[i].name === user.name) {
+        if (user?.isAdmin || salaryCorrectionData[i].name === user?.name) {
           const data = {
             id: i + 1,
             name: salaryCorrectionData[i].name,
@@ -118,27 +131,38 @@ const PayrollHistory = () => {
     setMonth(option);
   };
 
-  const handleApproval = () => {
+  const handleApproval = (id: string): void => {
     const idState = id.slice(0, 1);
     if (idState === 'v') {
       const idValue = id.slice(1);
       const changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
       changeList[0].correctionState = 'approval';
+      updateCorrectionState(
+        changeList[0].name,
+        Number(changeList[0].month),
+        'approval',
+        changeList[0].correctionDetails,
+      );
     } else if (idState === 'x') {
       const idValue = id.slice(1);
       const changeList = salaryCorrectionLists.filter((item) => item.id === Number(idValue));
       changeList[0].correctionState = 'reject';
+      updateCorrectionState(changeList[0].name, Number(changeList[0].month), 'reject', changeList[0].correctionDetails);
     }
     setModal(false);
   };
 
-  const onYnNModal = (id) => {
+  const onYnNModal = (id: string) => {
     modal ? setModal(false) : setModal(true);
-    setId(id);
+    setBtnId(id);
+  };
+
+  const onSpacificationModal = () => {
+    spacificationModal ? setSpacificationModal(false) : setSpacificationModal(true);
   };
 
   const stateFilter = (stateValue: string) => {
-    let newStateList: string[] = [];
+    const newStateList: SalaryCorrection[] = [];
     for (let i = 0; i < salaryCorrectionLists.length; i++) {
       if (salaryCorrectionLists[i].correctionState === stateValue) {
         newStateList.push(salaryCorrectionLists[i]);
@@ -147,66 +171,98 @@ const PayrollHistory = () => {
     setSalaryCorrectionLists(newStateList);
   };
 
-  const handleIsViewd = (id: number) => {
+  const handleIsViewd = (id: number, name: string, month: number) => {
     const newIsViwedEmploySalary = [...employeeSalary];
+    // user.isAdmin이 true면
     for (let iv = 0; iv < newIsViwedEmploySalary.length; iv++) {
       if (newIsViwedEmploySalary[iv].id === id) {
-        newIsViwedEmploySalary[iv].isViewed = true;
+        if (user?.isAdmin) {
+          newIsViwedEmploySalary[iv].adminViewed = true;
+        } else {
+          newIsViwedEmploySalary[iv].isViewed = true;
+        }
         break;
       }
     }
+    additionalPayUpdate(name, month, 'notChange', user?.isAdmin);
     setEmployeeSalary(newIsViwedEmploySalary);
   };
 
-  // eslint-disable-next-line no-shadow
-  const handleAdditionalPay = (value: string, id: number) => {
-    if (/,/g.test(value)) {
-      let additionalPayChange = value.replaceAll(',', '');
-      if (/^\d+$/.test(additionalPayChange)) {
-        let newEmploySalary = [...employeeSalary];
-        for (let es = 0; es < newEmploySalary.length; es++) {
-          if (newEmploySalary[es].id === id) {
-            newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
-            break;
-          }
-        }
-        setEmployeeSalary(newEmploySalary);
-      } else {
-        alert('숫자만 입력 가능합니다.');
-      }
-    } else if (/^\d+$/.test(value)) {
-      let newFilterEmploySalary = [...employeeSalary];
-      for (let es = 0; es < newFilterEmploySalary.length; es++) {
-        if (newFilterEmploySalary[es].id === id) {
-          newFilterEmploySalary[es].payData.additionalAllowance = Number(value);
-          break;
-        }
-      }
-      setEmployeeSalary(newFilterEmploySalary);
-    } else {
-      alert('숫자만 입력 가능합니다.');
+  const additionalPayUpdate = async (
+    name: string,
+    month: number,
+    additionalPay: string | number,
+    isAdmin: boolean | undefined,
+  ) => {
+    try {
+      await updatePayrollData(name, month, additionalPay, isAdmin);
+    } catch (error) {
+      console.log(error, 'error');
     }
   };
 
-  const addSalaryCorrectionList = (option: string, content: string) => {
-    const newSalaryCorrectionLists = [...salaryCorrectionLists];
-    const newId: number = newSalaryCorrectionLists.length + 1;
-    newSalaryCorrectionLists.unshift({
-      id: newId,
-      name: user.name,
-      month: '7월',
-      reasonForApplication: option,
-      correctionDetails: content,
-      correctionState: 'standBy',
-    });
-    setSalaryCorrectionLists(newSalaryCorrectionLists);
+  const handleAdditionalPay = (inputValue: string | undefined, id: number, name: string, month: number): void => {
+    if (inputValue !== undefined)
+      if (/,/g.test(inputValue)) {
+        const additionalPayChange = inputValue.replaceAll(',', '');
+        if (/^\d+$/.test(additionalPayChange)) {
+          const newEmploySalary = [...employeeSalary];
+          for (let es = 0; es < newEmploySalary.length; es++) {
+            if (newEmploySalary[es].id === id) {
+              newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
+              break;
+            }
+          }
+          setEmployeeSalary(newEmploySalary);
+          additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
+        } else {
+          alert('숫자만 입력 가능합니다.');
+        }
+      } else if (/^\d+$/.test(inputValue)) {
+        const newFilterEmploySalary = [...employeeSalary];
+        for (let es = 0; es < newFilterEmploySalary.length; es++) {
+          if (newFilterEmploySalary[es].id === id) {
+            newFilterEmploySalary[es].payData.additionalAllowance = Number(inputValue);
+            break;
+          }
+        }
+        setEmployeeSalary(newFilterEmploySalary);
+        additionalPayUpdate(name, month, Number(inputValue), user?.isAdmin);
+      } else {
+        alert('숫자만 입력 가능합니다.');
+      }
+  };
+
+  const today = new Date();
+  const currentDate = Number(new Date(today).toISOString().substring(6, 7));
+
+  const addSalaryCorrectionList = (name: string, reason: string, textareaValue: string | undefined) => {
+    if (reason !== '선택해주세요.' && textareaValue !== undefined) {
+      const newSalaryCorrectionLists = [...salaryCorrectionLists];
+      const newId: number = newSalaryCorrectionLists.length + 1;
+      newSalaryCorrectionLists.unshift({
+        id: newId,
+        name: user?.name,
+        month: currentDate,
+        reasonForApplication: reason,
+        correctionDetails: textareaValue,
+        correctionState: 'standBy',
+      });
+      setIsNull(false);
+      setSpacificationModal(false);
+      setSalaryCorrectionLists(newSalaryCorrectionLists);
+      createPayrollCorApp(name, currentDate, reason, textareaValue);
+    } else {
+      setIsNull(true);
+    }
   };
 
   // eslint-disable-next-line no-shadow
-  const deleteSalaryCorrection = (id: number) => {
+  const deleteSalaryCorrection = (id: number, name: string, month: number, correctionDetails: string): void => {
     let newSalaryCorrectionLists = [...salaryCorrectionLists];
     newSalaryCorrectionLists = newSalaryCorrectionLists.filter((item) => item.id !== id);
     setSalaryCorrectionLists(newSalaryCorrectionLists);
+    deleteSalaryCorrectionAPI(name, month, correctionDetails);
   };
 
   return (
@@ -236,7 +292,11 @@ const PayrollHistory = () => {
               isViewed={item.isViewed}
               handleIsViewd={handleIsViewd}
               addSalaryCorrectionList={addSalaryCorrectionList}
-              month={month}
+              month={item.month}
+              isNull={isNull}
+              spacificationModal={spacificationModal}
+              onSpacificationModal={onSpacificationModal}
+              adminViewed={item.adminViewed}
             />
           ))}
         </ul>
@@ -260,9 +320,9 @@ const PayrollHistory = () => {
           <table css={listTable}>
             <thead>
               <tr css={trStyle}>
-                <td css={{ width: '42px' }}>요청자</td>
-                <td css={{ width: '68px' }}>월</td>
-                <td css={{ width: '106px' }}>정정 사유</td>
+                <td css={{ minWidth: '42px' }}>요청자</td>
+                <td css={{ minWidth: '69px' }}>월</td>
+                <td css={{ minWidth: '106px' }}>정정 사유</td>
                 <td>정정 내용</td>
                 <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
               </tr>
@@ -290,7 +350,7 @@ const PayrollHistory = () => {
           </div>
         )}
 
-        {modal ? <ApprovalModal id={id} handleApproval={handleApproval} onYnNModal={onYnNModal} /> : null}
+        {modal ? <ApprovalModal btnId={btnId} handleApproval={handleApproval} onYnNModal={onYnNModal} /> : null}
       </div>
     </div>
   );
@@ -307,7 +367,8 @@ const wrapper = css`
 const salaryCorrectionArea = css`
   display: flex;
   flex-direction: column;
-  width: 80%;
+  max-width: 1280px;
+  width: 90%;
   top: 0;
 `;
 

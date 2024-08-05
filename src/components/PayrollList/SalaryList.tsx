@@ -1,10 +1,26 @@
+/* eslint-disable no-unneeded-ternary */
+/* eslint-disable prefer-template */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
-import { css, jsx } from '@emotion/react';
-import { useState } from 'react';
-import { SalaryCorrection } from '../../Pages/Payroll/Payroll-History.tsx';
+import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 
-const SalaryList = ({
+interface SalaryListProps {
+  id: number;
+  name: string;
+  month: number;
+  reasonForApplication: string;
+  correctionDetails: string;
+  onYnNModal: (btnId: string) => void;
+  correctionState: string;
+  deleteSalaryCorrection: (id: number, name: string, month: number, correctionDetails: string) => void;
+}
+
+const SalaryList: React.FC<SalaryListProps> = ({
   id,
   name,
   month,
@@ -13,20 +29,24 @@ const SalaryList = ({
   onYnNModal,
   correctionState,
   deleteSalaryCorrection,
-}: SalaryCorrection) => {
+}) => {
   const [contentDisplay, setContentDisplay] = useState(false);
   const { user } = useAuthContext();
+
   const handleContentDisplay = () => {
     contentDisplay ? setContentDisplay(false) : setContentDisplay(true);
   };
 
-  let chkBtn = {};
+  let chkBtn: React.ReactNode = null;
   if (correctionState === 'standBy') {
-    if (user.isAdmin === false) {
+    if (user?.isAdmin === false) {
       chkBtn = (
         <>
           <div css={[standByState, { paddingLeft: 0 }]}> 대기중 </div>
-          <button css={[stateCheckBtn, employee]} onClick={() => deleteSalaryCorrection(id)}>
+          <button
+            css={[stateCheckBtn, employee]}
+            onClick={() => deleteSalaryCorrection(id, name, month, correctionDetails)}
+          >
             <span css={{ color: '#888' }} className="material-symbols-outlined">
               close
             </span>
@@ -61,7 +81,7 @@ const SalaryList = ({
     overflow: hidden;
     -webkit-line-clamp: 1;
     max-height: 100px;
-    line-height: 26px;
+    line-height: 28px;
     padding: 5px 0;
     & .changeDisplay {
       display: ${contentDisplay ? '-webkit-box' : 'contents'};
@@ -71,7 +91,7 @@ const SalaryList = ({
   return (
     <tr css={tr}>
       <td>{name}</td>
-      <td>24년 0{month}</td>
+      <td>24년 0{month}월</td>
       <td>{reasonForApplication}</td>
       <td>
         <div css={contentBox}>

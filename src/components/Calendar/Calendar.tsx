@@ -10,6 +10,10 @@ import Button from '../Button';
 import CalendarDeleteModal from './Calendar-delete';
 import CalendarDetailModal from './Calendar-detail';
 import CalendarAddModal from './Calendar-add';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
+import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
+import deleteCalendarEvent from '../../API/Firebase/DeleteCalendarEvent.tsx';
+import updateCalendarEvent from '../../API/Firebase/UpdateCalendarEvent.tsx';
 
 const MyCalendar = () => {
   const location = useLocation();
@@ -26,13 +30,8 @@ const MyCalendar = () => {
     'purple',
     'gray',
   ]);
-  const [events, setEvents] = useState([
-    { title: '미팅', start: '2024-07-26', end: '2024-07-26', category: 'skyblue' },
-    { title: '점심 약속', start: '2024-07-27', end: '2024-07-27', category: 'green' },
-    { title: '운동', start: '2024-07-27', end: '2024-07-27', category: 'pink' },
-    { title: '프로젝트 기간', start: '2024-07-15', end: '2024-07-29', category: 'skyblue' },
-    { title: '가족 모임', start: '2024-07-21', end: '2024-07-21', category: 'peach' },
-  ]);
+  const [events, setEvents] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const categories = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
 
@@ -46,12 +45,14 @@ const MyCalendar = () => {
     purple: 'var(--calendar-purple)',
     gray: 'var(--calendar-gray)',
   };
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
+  const { user } = useAuthContext();
 
   const outerContainerStyle = css`
     display: flex;
@@ -270,13 +271,28 @@ const MyCalendar = () => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
   };
+  const handleSaveEvent = async (updatedEvent) => {
+    try {
+      if (!user) {
+        console.error('사용자 정보를 찾을 수 없습니다.');
+        return;
+      }
+      await updateCalendarEvent(
+        updatedEvent.title,
+        updatedEvent.end,
+        updatedEvent.start,
+        updatedEvent.category,
+        user.name,
+      );
 
-  const handleSaveEvent = (updatedEvent) => {
-    setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event)));
-    setIsDetailModalOpen(false);
+      setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event)));
+      setIsDetailModalOpen(false);
+    } catch (error) {
+      console.error('이벤트 업데이트 중 오류 발생:', error);
+    }
   };
-
-  const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
+  const getFilteredEvents = () =>
+    events.filter((event) => selectedCategories.includes(event.category) && event.name === user?.name);
 
   const getEventsForSelectedDate = () => {
     if (!selectedDate) return [];
@@ -305,16 +321,59 @@ const MyCalendar = () => {
     return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  const handleDeleteEvent = () => {
+  const handleDeleteEvent = async () => {
     if (eventToDelete) {
-      setEvents((prevEvents) => prevEvents.filter((event) => event !== eventToDelete));
-      setEventToDelete(null);
+      try {
+        await deleteCalendarEvent(
+          eventToDelete.name,
+          eventToDelete.category,
+          eventToDelete.title,
+          eventToDelete.end,
+          eventToDelete.start,
+        );
+        setEvents((prevEvents) => prevEvents.filter((event) => event !== eventToDelete));
+        setEventToDelete(null);
+        setIsDeleteModalOpen(false);
+      } catch (error) {
+        console.error('이벤트 삭제 중 오류 발생:', error);
+      }
     }
   };
-
   useEffect(() => {
     setSelectedDate(new Date());
   }, []);
+
+  useEffect(() => {
+    const userIsAdminVelidation = () => {
+      user?.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+    };
+    userIsAdminVelidation();
+  }, [isAdmin]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const calendarEventData = await getCollectionData('calendar');
+      const setCalendarEventData = [];
+      for (let i = 0; i < calendarEventData.length; i++) {
+        if (user?.isAdmin || calendarEventData[i].name === user?.name) {
+          const data = {
+            id: i + 1,
+            title: calendarEventData[i].eventContent,
+            start: calendarEventData[i].eventStartDate,
+            end: calendarEventData[i].eventEndDate,
+            category: calendarEventData[i].eventTag,
+            backgroundColor: categoryColors[calendarEventData[i].eventTag],
+            borderColor: categoryColors[calendarEventData[i].eventTag],
+            name: calendarEventData[i].name,
+          };
+          setCalendarEventData.push(data);
+        }
+      }
+      setEvents(setCalendarEventData);
+    };
+
+    fetchEvents();
+  }, [user, events]);
 
   if (isHomePage) {
     return (
