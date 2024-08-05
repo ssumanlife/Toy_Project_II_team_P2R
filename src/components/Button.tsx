@@ -5,8 +5,8 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 const baseButtonStyles = css`
-  width: 120px;
-  height: 44px;
+  width: 110px;
+  height: 40px;
   border-radius: var(--border-radius-large);
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-h5);

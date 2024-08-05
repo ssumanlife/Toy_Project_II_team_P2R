@@ -8,19 +8,21 @@ const customSelectStyles = css`
   color: var(--text-light-gray);
 `;
 
+interface BankSelectComponentProps {
+  selectedBank: string;
+  onChange: (bank: string) => void;
+}
 
-const BankSelectComponent: React.FC = () => {
-  const [selectedBank, setSelectedBank] = useState('은행 선택');
-
+const BankSelectComponent: React.FC<BankSelectComponentProps> = ({ selectedBank, onChange }) => {
   const handleSelect = (option: string) => {
-    setSelectedBank(option);
+    onChange(option);
   };
 
   return (
     <Select
       css={customSelectStyles}
-      options={['국민', '농협', '하나', '카카오뱅크']}
-      defaultLabel={selectedBank}
+      options={['국민은행', '농협은행', '하나은행', '신한은행', '카카오뱅크']}
+      defaultLabel={selectedBank || '은행 선택'}
       onSelect={handleSelect}
     />
   );

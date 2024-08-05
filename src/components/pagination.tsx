@@ -38,7 +38,8 @@ const PaginationComponent: React.FC<PaginationProps> = ({ count, page, onChange 
       )}
       sx={{
         display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        paddingBottom: '30px'
       }}
     />
   );

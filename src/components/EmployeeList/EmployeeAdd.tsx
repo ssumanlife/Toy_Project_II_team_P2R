@@ -1,15 +1,22 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import Modal from '../Modal.tsx';
 import Button from '../Button.tsx';
 import { Employee } from './EmployeeSpecificModal.tsx';
-import { modalContentStyles, containerStyles, titleStyles, valueStyles } from './EmployeeSpecificModal.tsx';
+import { modalContentStyles, containerStyles, titleStyles } from './EmployeeSpecificModal.tsx';
 import BankSelectComponent from './bankSelect.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
+import { addEmployee } from '../../API/Firebase/AddEmployeeList.tsx';
 
-const inputStyles = css`
+const valueStyles = css`
+  color: var(--text-light-gray);
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
+`;
+
+export const inputStyles = css`
   ${valueStyles}
   padding: 5px;
   border: none;
@@ -22,6 +29,18 @@ const inputStyles = css`
 
   &::placeholder {
     ${valueStyles}
+  }
+
+  /* Chrome, Safari, Edge, Opera */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  &[type=number] {
+    -moz-appearance: textfield;
   }
 `;
 
@@ -40,6 +59,20 @@ const modaltitleStyles = css`
   border-bottom: 1px solid #e0e0e0;
 `;
 
+const AddButton = css`
+  margin-left: 10px;
+  font-size: var(--font-size-h2);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-light-gray);
+  margin-bottom: 13px;
+
+  &:hover {
+    color: var(--primary-blue);
+  }
+`;
+
 interface EmployeeAddModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -48,39 +81,59 @@ interface EmployeeAddModalProps {
 
 const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, onSave }) => {
   const [newEmployee, setNewEmployee] = useState<Employee>({
-    id: '',
+    employeeId: '',
     name: '',
-    phone: '',
-    workHours: '',
-    account: '',
-    salary: ''
+    phoneNumber: '',
+    workDay: '',
+    accountNumber: '',
+    baseSalary: ''
   });
 
-  const [workHours, setWorkHours] = useState<string | null>(null);
-
-  useEffect(() => {
-    const time = newEmployee.workHours.split(' ')[1] || '';
-    setWorkHours(time);
-  }, [newEmployee.workHours]);
+  const [selectedBank, setSelectedBank] = useState<string>('');
+  const [workSchedules, setWorkSchedules] = useState<{ days: string, start: string | null, end: string | null }[]>([
+    { days: '', start: null, end: null }
+  ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewEmployee({ ...newEmployee, [name]: value });
   };
 
-  const handleTimeChange = (value: string | null) => {
-    if (value) {
-      setWorkHours(value);
+  const handleAddSchedule = () => {
+    setWorkSchedules([...workSchedules, { days: '', start: null, end: null }]);
+  };
+
+  const handleDayClick = (index: number, updatedDays: string) => {
+    const newSchedules = [...workSchedules];
+    newSchedules[index].days = updatedDays;
+    setWorkSchedules(newSchedules);
+  };
+
+  const handleTimeChange = (index: number, type: 'start' | 'end', value: string | null) => {
+    const newSchedules = [...workSchedules];
+    newSchedules[index][type] = value;
+    setWorkSchedules(newSchedules);
+  };
+
+  const handleBankChange = (bank: string) => {
+    setSelectedBank(bank);
+  };
+
+  const handleSave = async () => {
+    const workDayString = workSchedules
+      .filter(schedule => schedule.days && schedule.start && schedule.end)
+      .map(schedule => `${schedule.days} ${schedule.start}~${schedule.end}`)
+      .join(', ');
+
+    const employeeToSave = { ...newEmployee, workDay: workDayString };
+
+    try {
+      await addEmployee(employeeToSave);
+      onSave(employeeToSave);
+    } catch (error) {
+      console.error("Failed to save employee", error);
     }
-  };
 
-  const handleDayClick = (updatedDays: string) => {
-    setNewEmployee({ ...newEmployee, workHours: `${updatedDays} ${workHours ?? ''}`.trim() });
-  };
-
-  const handleSave = () => {
-    const days = newEmployee.workHours.split(' ')[0].split(',').filter(Boolean).sort().join(',');
-    onSave({ ...newEmployee, workHours: `${days} ${workHours ?? ''}`.trim() });
     onClose();
   };
 
@@ -105,10 +158,10 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           <div>
             <div css={titleStyles}>연락처</div>
             <input
-              type="text"
-              name="phone"
+              type="number"
+              name="phoneNumber"
               placeholder="-없이 입력"
-              value={newEmployee.phone}
+              value={newEmployee.phoneNumber}
               onChange={handleChange}
               css={inputStyles}
             />
@@ -116,12 +169,12 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           <div>
             <div css={titleStyles}>계좌 번호</div>
             <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <BankSelectComponent />
+            <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
               <input
-                type="text"
-                name="account"
+                type="number"
+                name="accountNumber"
                 placeholder="-없이 입력"
-                value={newEmployee.account}
+                value={newEmployee.accountNumber}
                 onChange={handleChange}
                 css={inputStyles}
               />
@@ -130,30 +183,40 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           <div>
             <div css={titleStyles}>기본 급여</div>
             <input
-              type="text"
-              name="salary"
+              type="number"
+              name="baseSalary"
               placeholder="숫자만 입력"
-              value={newEmployee.salary}
+              value={newEmployee.baseSalary}
               onChange={handleChange}
               css={inputStyles}
             />
             <span css={[valueStyles, { marginLeft: '6px' }]}>원</span>
-          </div>
-          <div css={{ gridColumn: 'span 2' }}>
-            <div css={titleStyles}>근무 시간</div>
-            <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <DaysOfWeek workHours={newEmployee.workHours} onDayClick={handleDayClick} editable={true} />
-              <WorkTimePicker
-                value={workHours}
-                onChange={handleTimeChange}
-              />
-              <div css={valueStyles}>~</div>
-              <WorkTimePicker
-                value={workHours}
-                onChange={handleTimeChange}
-              />
             </div>
-          </div>
+            {workSchedules.map((schedule, index) => (
+              <div css={{ gridColumn: 'span 2' }} key={index}>
+                <div css={{ display: 'flex', alignItems: 'center' }}>
+                  <div css={titleStyles}>근무 시간 {index + 1}</div>
+                  <button css={AddButton} onClick={handleAddSchedule}>+</button>
+              </div>
+                <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <DaysOfWeek
+                    workDay={schedule.days}
+                    onDayClick={(days) => handleDayClick(index, days)}
+                    editable={true}
+                  />
+                  <WorkTimePicker
+                    value={schedule.start}
+                    onChange={(time) => handleTimeChange(index, 'start', time)}
+                  />
+                  <div css={valueStyles}>~</div>
+                  <WorkTimePicker
+                    value={schedule.end}
+                    onChange={(time) => handleTimeChange(index, 'end', time)}
+                  />
+                </div>
+              </div>
+            ))}
+            
           <div css={ButtonStyles}>
             <Button onClick={handleSave}>저장</Button>
           </div>
