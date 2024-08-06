@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
 /* eslint-disable no-unused-vars */
@@ -6,6 +7,8 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store.ts';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
@@ -16,6 +19,7 @@ import updatePayrollData from '../../API/Firebase/UpdatePayrollData.tsx';
 import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.tsx';
 import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
 import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
+import { showModal, hiddenModal } from '../../Reducers/ModalSlice.ts';
 
 const SelectWidthCustom = css`
   width: 120px;
@@ -52,16 +56,17 @@ export interface EmployeeSalaryType {
 }
 
 const PayrollHistory: React.FC = () => {
+  const dispatch = useDispatch();
+  const yesNoModal = useSelector((state: RootState) => state.modal.modals['yesNoModal']);
+  const spacificationModal = useSelector((state: RootState) => state.modal.modals['spacificationModal']);
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([]);
   const [month, setMonth] = useState('2024 07월');
-  const [modal, setModal] = useState(false);
-  const [spacificationModal, setSpacificationModal] = useState(false);
   const [btnId, setBtnId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isNull, setIsNull] = useState(false);
-
   const { user } = useAuthContext();
+
   useEffect(() => {
     const userIsAdminVelidation = () => {
       setIsAdmin(user?.isAdmin ?? false);
@@ -149,16 +154,16 @@ const PayrollHistory: React.FC = () => {
       changeList[0].correctionState = 'reject';
       updateCorrectionState(changeList[0].name, Number(changeList[0].month), 'reject', changeList[0].correctionDetails);
     }
-    setModal(false);
+    dispatch(hiddenModal('yesNoModal'));
   };
 
-  const onYnNModal = (id: string) => {
-    modal ? setModal(false) : setModal(true);
+  const onYesNoModal = (id: string) => {
+    yesNoModal ? dispatch(hiddenModal('yesNoModal')) : dispatch(showModal('yesNoModal'));
     setBtnId(id);
   };
 
   const onSpacificationModal = () => {
-    spacificationModal ? setSpacificationModal(false) : setSpacificationModal(true);
+    spacificationModal ? dispatch(hiddenModal('spacificationModal')) : dispatch(showModal('spacificationModal'));
   };
 
   const stateFilter = (stateValue: string) => {
@@ -173,7 +178,6 @@ const PayrollHistory: React.FC = () => {
 
   const handleIsViewd = (id: number, name: string, month: number) => {
     const newIsViwedEmploySalary = [...employeeSalary];
-    // user.isAdmin이 true면
     for (let iv = 0; iv < newIsViwedEmploySalary.length; iv++) {
       if (newIsViwedEmploySalary[iv].id === id) {
         if (user?.isAdmin) {
@@ -224,7 +228,7 @@ const PayrollHistory: React.FC = () => {
   const currentDate = Number(new Date(today).toISOString().substring(6, 7));
 
   const addSalaryCorrectionList = (name: string, reason: string, textareaValue: string | undefined) => {
-    if (reason !== '선택해주세요.' && textareaValue !== undefined) {
+    if (reason !== '선택해주세요.' && textareaValue !== undefined && user?.name !== undefined) {
       const newSalaryCorrectionLists = [...salaryCorrectionLists];
       const newId: number = newSalaryCorrectionLists.length + 1;
       newSalaryCorrectionLists.unshift({
@@ -236,7 +240,7 @@ const PayrollHistory: React.FC = () => {
         correctionState: 'standBy',
       });
       setIsNull(false);
-      setSpacificationModal(false);
+      dispatch(hiddenModal('spacificationModal'));
       setSalaryCorrectionLists(newSalaryCorrectionLists);
       createPayrollCorApp(name, currentDate, reason, textareaValue);
     } else {
@@ -323,7 +327,7 @@ const PayrollHistory: React.FC = () => {
                   reasonForApplication={item.reasonForApplication}
                   correctionDetails={item.correctionDetails}
                   correctionState={item.correctionState}
-                  onYnNModal={onYnNModal}
+                  onYesNoModal={onYesNoModal}
                   deleteSalaryCorrection={deleteSalaryCorrection}
                 />
               ))}
@@ -336,7 +340,9 @@ const PayrollHistory: React.FC = () => {
           </div>
         )}
 
-        {modal ? <ApprovalModal btnId={btnId} handleApproval={handleApproval} onYnNModal={onYnNModal} /> : null}
+        {yesNoModal ? (
+          <ApprovalModal btnId={btnId} handleApproval={handleApproval} onYesNoModal={onYesNoModal} />
+        ) : null}
       </div>
     </div>
   );

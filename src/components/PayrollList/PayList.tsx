@@ -3,7 +3,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import React from 'react';
-import { PayData } from '../../Pages/Payroll/Payroll-History.tsx';
+import { PayData } from '../../Pages/Payroll/PayrollHistory.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import SpacificationModal from './SpacificationModal.tsx';
 

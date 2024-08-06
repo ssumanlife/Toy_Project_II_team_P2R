@@ -8,7 +8,7 @@ import Home from './Pages/Home.tsx';
 // import ProtectedRoute from './Pages/ProtectedRoute';
 import { AuthContextProvider, useAuthContext } from './Context/AuthContext.tsx';
 import ScheduleManage from './Pages/Schedule-Manage/Schedule-Manage.tsx';
-import PayrollHistory from './Pages/Payroll/Payroll-History.tsx';
+import PayrollHistory from './Pages/Payroll/PayrollHistory.tsx';
 import EmployeeList from './Pages/EmployeeList/EmployeeList.tsx';
 import EmployeeSpecific from './Components/EmployeeList/EmployeeSpecificModal.tsx';
 import Signin from './Pages/Signin.tsx';
