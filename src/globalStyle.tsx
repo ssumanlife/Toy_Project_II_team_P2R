@@ -202,6 +202,12 @@ const baseStyle = css`
     overflow-x: hidden;
   }
 
+  #root {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
   button {
     cursor: pointer;
     border: none;

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 
 interface DaysOfWeekProps {
-  workHours: string;
+  workDay: string | string[];
   onDayClick?: (day: string) => void;
   editable?: boolean; // 편집 가능 여부
 }
@@ -12,11 +12,11 @@ const dayStyles = css`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border: 1px solid var(--text-white-gray);
   border-radius: var(--border-radius-large);
-  font-size: var(--font-size-h4);
+  font-size: var(--font-size-h5);
   color: var(--text-light-gray);
 `;
 
@@ -29,20 +29,28 @@ const selectedDayStyles = css`
   color: var(--primary-blue);
 `;
 
-const extractWorkDays = (workHours: string) => {
-  const [days] = workHours.split(' ');
-  const daysArray = days.split(',');
+const extractWorkDays = (workDay: string | string[]) => {
+  const workDaysArray = Array.isArray(workDay) ? workDay : [workDay];
+  const daysArray: string[] = [];
+
+  workDaysArray.forEach((day) => {
+    const matches = day.match(/[월화수목금토일]/g);
+    if (matches) {
+      daysArray.push(...matches);
+    }
+  });
+
   return daysArray.filter(Boolean);
 };
 
-const DaysOfWeek: React.FC<DaysOfWeekProps> = ({ workHours, onDayClick, editable = false }) => {
-  const initialSelectedDays = extractWorkDays(workHours);
+const DaysOfWeek: React.FC<DaysOfWeekProps> = ({ workDay, onDayClick, editable = false }) => {
+  const initialSelectedDays = extractWorkDays(workDay);
   const [selectedDays, setSelectedDays] = useState<string[]>(initialSelectedDays);
   const days = ['월', '화', '수', '목', '금', '토', '일'];
 
   useEffect(() => {
-    setSelectedDays(initialSelectedDays);
-  }, [workHours]);
+    setSelectedDays(extractWorkDays(workDay));
+  }, [workDay]);
 
   const handleDayClick = (day: string) => {
     if (editable) {
@@ -54,19 +62,20 @@ const DaysOfWeek: React.FC<DaysOfWeekProps> = ({ workHours, onDayClick, editable
       }
       updatedDays.sort();
       setSelectedDays(updatedDays);
-      onDayClick?.(updatedDays.join(','));
+      onDayClick?.(updatedDays.join(''));
     }
   };
 
+
   return (
-    <div css={{ display: 'flex', alignItems: 'center' }}>
+    <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div css={{ display: 'flex', gap: '8px' }}>
         {days.map(day => (
           <span 
             key={day} 
             css={[dayStyles, selectedDays.includes(day) && selectedDayStyles, editable && clickableStyles]} 
             onClick={() => handleDayClick(day)}
-          >
+            >
             {day}
           </span>
         ))}
