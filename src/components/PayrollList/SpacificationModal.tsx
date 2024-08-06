@@ -11,7 +11,7 @@ import React, { useState, useRef } from 'react';
 import Button from '../Button.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../Select.tsx';
-import { PayData } from '../../Pages/Payroll/Payroll-History.tsx';
+import { PayData } from '../../Pages/Payroll/PayrollHistory.tsx';
 
 const SelectWidthCustom = css`
   width: 378px;

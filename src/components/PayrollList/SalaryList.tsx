@@ -15,7 +15,7 @@ interface SalaryListProps {
   month: number;
   reasonForApplication: string;
   correctionDetails: string;
-  onYnNModal: (btnId: string) => void;
+  onYesNoModal: (btnId: string) => void;
   correctionState: string;
   deleteSalaryCorrection: (id: number, name: string, month: number, correctionDetails: string) => void;
 }
@@ -26,7 +26,7 @@ const SalaryList: React.FC<SalaryListProps> = ({
   month,
   reasonForApplication,
   correctionDetails,
-  onYnNModal,
+  onYesNoModal,
   correctionState,
   deleteSalaryCorrection,
 }) => {
@@ -56,12 +56,12 @@ const SalaryList: React.FC<SalaryListProps> = ({
     } else {
       chkBtn = (
         <>
-          <button id={'v' + id} css={stateCheckBtn} onClick={() => onYnNModal('v' + id)}>
+          <button id={'v' + id} css={stateCheckBtn} onClick={() => onYesNoModal('v' + id)}>
             <span css={{ color: '#578AEA' }} className="material-symbols-outlined">
               check
             </span>
           </button>
-          <button id={'x' + id} css={stateCheckBtn} onClick={() => onYnNModal('x' + id)}>
+          <button id={'x' + id} css={stateCheckBtn} onClick={() => onYesNoModal('x' + id)}>
             <span css={{ color: '#888' }} className="material-symbols-outlined">
               close
             </span>
