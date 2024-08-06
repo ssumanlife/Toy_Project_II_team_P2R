@@ -373,7 +373,7 @@ const MyCalendar = () => {
     };
 
     fetchEvents();
-  }, [user, events]);
+  }, [user]);
 
   if (isHomePage) {
     return (
