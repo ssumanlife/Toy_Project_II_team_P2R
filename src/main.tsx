@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
@@ -14,6 +13,7 @@ import EmployeeList from './Pages/EmployeeList/EmployeeList.tsx';
 import EmployeeSpecific from './Components/EmployeeList/EmployeeSpecificModal.tsx';
 import Signin from './Pages/Signin.tsx';
 
+//로그인하지 않아도 url로 직접 접근이 가능한 문제 -> ProtectedRoute로 해결
 const adminRouter = createBrowserRouter([
   {
     path: '/',
@@ -35,12 +35,6 @@ const adminRouter = createBrowserRouter([
       {
         path: 'employees',
         element: <EmployeeList />,
-        children: [
-          {
-            path: ':id',
-            element: <EmployeeSpecific />,
-          },
-        ],
       },
       {
         path: 'payroll',

@@ -64,10 +64,10 @@ const PayrollHistory: React.FC = () => {
   const { user } = useAuthContext();
   useEffect(() => {
     const userIsAdminVelidation = () => {
-      user?.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+      setIsAdmin(user?.isAdmin ?? false);
     };
     userIsAdminVelidation();
-  }, [isAdmin]);
+  }, [user]);
 
   useEffect(() => {
     const setEmployeeSalaryListData = async () => {
@@ -102,7 +102,7 @@ const PayrollHistory: React.FC = () => {
       setEmployeeSalary(setEmployeeSalaryData);
     };
     setEmployeeSalaryListData();
-  }, [month]);
+  }, [month, user]);
 
   useEffect(() => {
     const setSalaryCorrectionListData = async () => {
@@ -125,7 +125,7 @@ const PayrollHistory: React.FC = () => {
       setSalaryCorrectionLists(setSalaryCorrectionData);
     };
     setSalaryCorrectionListData();
-  }, []);
+  }, [user]);
 
   const handleSelect = (option: string) => {
     setMonth(option);
@@ -202,35 +202,22 @@ const PayrollHistory: React.FC = () => {
   };
 
   const handleAdditionalPay = (inputValue: string | undefined, id: number, name: string, month: number): void => {
-    if (inputValue !== undefined)
-      if (/,/g.test(inputValue)) {
-        const additionalPayChange = inputValue.replaceAll(',', '');
-        if (/^\d+$/.test(additionalPayChange)) {
-          const newEmploySalary = [...employeeSalary];
-          for (let es = 0; es < newEmploySalary.length; es++) {
-            if (newEmploySalary[es].id === id) {
-              newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
-              break;
-            }
-          }
-          setEmployeeSalary(newEmploySalary);
-          additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
-        } else {
-          alert('숫자만 입력 가능합니다.');
-        }
-      } else if (/^\d+$/.test(inputValue)) {
-        const newFilterEmploySalary = [...employeeSalary];
-        for (let es = 0; es < newFilterEmploySalary.length; es++) {
-          if (newFilterEmploySalary[es].id === id) {
-            newFilterEmploySalary[es].payData.additionalAllowance = Number(inputValue);
+    if (inputValue !== undefined) {
+      const additionalPayChange = inputValue.replaceAll(',', '');
+      if (/^\d+$/.test(additionalPayChange)) {
+        const newEmploySalary = [...employeeSalary];
+        for (let es = 0; es < newEmploySalary.length; es++) {
+          if (newEmploySalary[es].id === id) {
+            newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
             break;
           }
         }
-        setEmployeeSalary(newFilterEmploySalary);
-        additionalPayUpdate(name, month, Number(inputValue), user?.isAdmin);
+        setEmployeeSalary(newEmploySalary);
+        additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
       } else {
         alert('숫자만 입력 가능합니다.');
       }
+    }
   };
 
   const today = new Date();
@@ -257,7 +244,6 @@ const PayrollHistory: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line no-shadow
   const deleteSalaryCorrection = (id: number, name: string, month: number, correctionDetails: string): void => {
     let newSalaryCorrectionLists = [...salaryCorrectionLists];
     newSalaryCorrectionLists = newSalaryCorrectionLists.filter((item) => item.id !== id);
