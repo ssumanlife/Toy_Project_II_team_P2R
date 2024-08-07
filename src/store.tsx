@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import modalSlice from './Reducers/ModalSlice.ts';
-import employeeSalarySlice from './Reducers/EmployeeSalarySlice.ts';
+import employeeSalarySlice from './Reducers/EmployeeSalarySlice.tsx';
 
 const store = configureStore({
   reducer: {
