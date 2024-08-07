@@ -12,8 +12,8 @@ const sectionStyle = css`
 
 const loaderStyle = css`
   position: relative;
-  width: 50px; /* 크기를 더 줄임 */
-  height: 50px; /* 크기를 더 줄임 */
+  width: 50px;
+  height: 50px;
   filter: url(#gooey);
   animation: rotate 4s linear infinite;
   animation-delay: calc(-0.3s * var(--i));
@@ -34,11 +34,11 @@ const spanStyle = css`
     position: absolute;
     top: 0;
     left: 0;
-    width: 10px; /* 크기를 더 줄임 */
-    height: 10px; /* 크기를 더 줄임 */
+    width: 10px;
+    height: 10px;
     background: linear-gradient(to right, var(--primary-blue) 0%, var(--primary-blue) 50%, var(--primary-blue) 100%);
     border-radius: 50%;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* box-shadow 크기 줄임 */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
   }
 `;
 
@@ -56,7 +56,6 @@ const rotate = css`
 const LoadingAnimation = () => {
   return (
     <section css={sectionStyle}>
-      {/* SVG 필터 정의 */}
       <svg css={{ width: '0', height: '0' }}>
         <filter id="gooey">
           <feGaussianBlur in="SourceGraphic" stdDeviation="4" /> {/* stdDeviation 값을 더 줄임 */}
@@ -70,7 +69,6 @@ const LoadingAnimation = () => {
         </filter>
       </svg>
       
-      {/* 로딩 애니메이션 요소 */}
       <div css={loaderStyle}>
         {[...Array(8)].map((_, i) => (
           <span css={[spanStyle, rotate]} style={{ '--i': i + 1 }} key={i}></span>
