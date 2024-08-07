@@ -4,6 +4,8 @@ import { css } from '@emotion/react';
 import Button from '../Button.tsx';
 import Polygon1 from '../../../public/images/Polygon 1.svg';
 import Polygon2 from '../../../public/images/Polygon 2.svg';
+import { getPayDay, updatePayDay } from '../../API/Firebase/Payday.tsx';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
 
 const contentContainerStyle = css`
   position: absolute;
@@ -91,6 +93,7 @@ const contentContainerStyle = css`
 `;
 
 const errorMessageStyle = css`
+  margin-bottom: 25px;
   color: red;
   font-size: 12px;
   margin-top: 5px;
@@ -98,11 +101,25 @@ const errorMessageStyle = css`
 
 export const Payday: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [payday, setPayday] = useState('15');
+  const [payday, setPayday] = useState('');
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuthContext();
 
-  const handleButtonClick = () => {
+  useEffect(() => {
+    const fetchPayDay = async () => {
+      if (user) {
+        const payDayData = await getPayDay(user.employeeId);
+        if (payDayData) {
+          setPayday(payDayData.payDay); // payDay로 수정
+        }
+      }
+    };
+
+    fetchPayDay();
+  }, [user]);
+
+  const handleButtonClick = async () => {
     if (isEditing) {
       const paydayNumber = parseInt(payday, 10);
       if (!/^\d+$/.test(payday) || isNaN(paydayNumber) || paydayNumber <= 0 || paydayNumber > 31) {
@@ -111,6 +128,10 @@ export const Payday: React.FC = () => {
       }
       setError('');
       setIsEditing(false);
+
+      if (user) {
+        await updatePayDay(user.employeeId, payday);
+      }
     } else {
       setIsEditing(true);
     }
@@ -140,10 +161,10 @@ export const Payday: React.FC = () => {
           )}
           일
         </h2>
+        {error && <div css={errorMessageStyle}>{error}</div>}
         <Button type="button" onClick={handleButtonClick}>
           {isEditing ? '저장하기' : '수정하기'}
         </Button>
-        {error && <div css={errorMessageStyle}>{error}</div>}
       </div>
       <img src={Polygon1} alt="Polygon 1" />
       <img src={Polygon2} alt="Polygon 2" />
