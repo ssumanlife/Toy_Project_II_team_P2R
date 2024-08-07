@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import Button from '../Button';
+import Button from '../Button.tsx';
 
 interface CalendarDeleteModalProps {
   isOpen: boolean;
