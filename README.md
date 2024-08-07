@@ -1,9 +1,10 @@
-# Toy_Project_II_team2
+# ![image](https://github.com/user-attachments/assets/9d2778e5-2eac-4528-8b65-8fd5a9df6eb8)WorkCheck 자영업자를 위한 직원 관리 플랫폼
+
 <div align=center>
 
 ## 👋 P2R (Path to Resolution) 👋
 
-|[<img src="https://avatars.githubusercontent.com/u/107895537?s=88&v=4" width="150" height="150"/>](https://github.com/HSjjs98)|[<img src="https://avatars.githubusercontent.com/u/169154369?v=4" width="150" height="150"/>](https://github.com/ssumanlife)|[<img src="https://avatars.githubusercontent.com/u/170381378?s=88&v=4" width="150" height="150"/>](https://github.com/miniseung)|[<img src="https://avatars.githubusercontent.com/u/170402797?v=4" width="150" height="150"/>](https://github.com/dyeongg)|
+|[<img src="https://avatars.githubusercontent.com/u/107895537?v=4" width="150" height="150"/>](https://github.com/HSjjs98)|[<img src="https://avatars.githubusercontent.com/u/169154369?v=4" width="150" height="150"/>](https://github.com/ssumanlife)|[<img src="https://avatars.githubusercontent.com/u/170381378?s=88&v=4" width="150" height="150"/>](https://github.com/miniseung)|[<img src="https://avatars.githubusercontent.com/u/170402797?v=4" width="150" height="150"/>](https://github.com/dyeongg)|
 |:-:|:-:|:-:|:-:|
 |🐯양해석<br/>[@HSjjs98](https://github.com/HSjjs98)|🐰김수민<br/>[@ssumanlife](https://github.com/ssumanlife)|🐶김승민<br/>[@miniseung](https://github.com/miniseung)|🐱임효정<br/>[@dyeongg](https://github.com/dyeongg)|
 <br/>
@@ -29,11 +30,18 @@
 ## 📄 프로젝트 구조
 ```
 📦Toy_Project_II_team2
- ┣ 📂design
- ┃ ┣ 📜기능정의서.md
- ┃ ┣ 📜요구사항정의서.md
- ┃ ┗ 📜프로젝트정의서.md
- ┣ 📜.gitignore
+ ┣ 📂Public
+ ┃ ┣ 📂images
+ ┃ ┣ 📂icons
+ ┃ ┗ 📂favicon
+ ┣ 📂Server
+ ┃ ┣ 📜index.js
+ ┣ 📂src
+ ┃ ┣ 📂API
+ ┃ ┣ 📂Components
+ ┃ ┣ 📂Pages
+ ┃ ┣ 📂Reducers
+ ┃ ┣ 📂Utils
  ┗ 📜README.md
 ```
 ## 목차
@@ -57,15 +65,28 @@
 
 
 ## 목적
-
+사장님들의 효율적인 직원 급여 관리 및 캘린더를 통한 업무 관리
+직원들의 급여 확인 및 캘린더를 통한 스케줄 관리
 
 ## 배경
 
 ### 1. 필요성
+![페르소나](https://github.com/user-attachments/assets/cb4a99a5-1d8f-411d-975d-91bb5cbbf66f)<br/>
+김현수는 20년 전 치킨집을 시작했다. 처음에는 작은 가게에서 시작했지만, 열정과 성실함으로 가게를 점점 키워 현재는 지역에서 유명한 치킨집 사장이 되었다.<br/>
+그는 고객 서비스와 맛의 일관성을 최우선으로 생각하며, 손님들이 언제나 만족할 수 있도록 노력하고 있다.
 
+
+- **이름:** 김현수
+- **나이:** 48세
+- **성별:** 남성
+- **직업:** 치킨집 사장
+- **가족:** 아내와 두 자녀 (고등학생 딸과 중학생 아들)
+- **학력:** 고등학교 졸업
+- **거주지:** 서울시 강서구
 
 ### 2. 목표 달성 기대 효과
-
+사장님들의 효율적인 직원 급여 관리 및 캘린더를 통한 업무 관리
+직원들의 급여 확인 및 캘린더를 통한 스케줄 관리
 
 ## 📷 프로젝트 예시
 
