@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import Modal from '../Modal';
-import Button from '../Button';
+import Modal from '../Modal.tsx';
+import Button from '../Button.tsx';
 import addCalendarEvent from '../../API/Firebase/AddCalendarEvent.tsx';
 
 const categoryColors = {

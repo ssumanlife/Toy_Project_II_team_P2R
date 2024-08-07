@@ -6,14 +6,15 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react';
 import { useLocation } from 'react-router-dom';
-import Button from '../Button';
-import CalendarDeleteModal from './Calendar-delete';
-import CalendarDetailModal from './Calendar-detail';
-import CalendarAddModal from './Calendar-add';
+import Button from '../Button.tsx';
+import CalendarDeleteModal from './Calendar-delete.tsx';
+import CalendarDetailModal from './Calendar-detail.tsx';
+import CalendarAddModal from './Calendar-add.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
 import deleteCalendarEvent from '../../API/Firebase/DeleteCalendarEvent.tsx';
 import updateCalendarEvent from '../../API/Firebase/UpdateCalendarEvent.tsx';
+import getUserCalendarEvents from '../../API/Firebase/GetUserCalendarEvents.tsx';
 
 const MyCalendar = () => {
   const location = useLocation();
@@ -49,28 +50,28 @@ const MyCalendar = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
   const { user } = useAuthContext();
 
   const outerContainerStyle = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100vh - 76px);
-    width: 100vw;
+    box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
+    border-radius: 20px;
+    max-width: 1280px;
+    margin: 50px auto;
+    height: calc(90vh - 76px);
+    overflow: hidden;
+    width: 90%;
   `;
 
   const containerStyle = css`
     display: flex;
     position: relative;
-    margin: 50px;
-    flex: 3;
     border-radius: 20px;
-    box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
+    box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
     background-color: var(--background-sub);
-    height: auto;
+    height: 100%;
     .fc {
       height: 100%;
     }
@@ -252,25 +253,29 @@ const MyCalendar = () => {
       pointer-events: none;
     `}
   `;
+
   const openDeleteModal = (event) => {
     setEventToDelete(event);
     setIsDeleteModalOpen(true);
   };
+
   const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
     setSelectedDate(arg.date);
   };
+
   const openAddModal = () => {
     setIsAddModalOpen(true);
   };
 
   const handleAddEvent = (newEvent) => {
-    setEvents((prevEvents) => [...prevEvents, newEvent]);
+    setEvents((prevEvents) => [...prevEvents, newEvent]); // 이벤트 추가
   };
 
-  const openDetailModal = (event: Event) => {
+  const openDetailModal = (event) => {
     setSelectedEvent(event);
     setIsDetailModalOpen(true);
   };
+
   const handleSaveEvent = async (updatedEvent) => {
     try {
       if (!user) {
@@ -285,14 +290,15 @@ const MyCalendar = () => {
         user.name,
       );
 
-      setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event)));
+      setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event))); // 이벤트 업데이트
       setIsDetailModalOpen(false);
     } catch (error) {
       console.error('이벤트 업데이트 중 오류 발생:', error);
     }
   };
+
   const getFilteredEvents = () =>
-    events.filter((event) => selectedCategories.includes(event.category) && event.name === user?.name);
+    events.filter((event) => selectedCategories.includes(event.category) && (isAdmin || event.name === user?.name)); // 필터 조건 수정
 
   const getEventsForSelectedDate = () => {
     if (!selectedDate) return [];
@@ -339,41 +345,45 @@ const MyCalendar = () => {
       }
     }
   };
+
   useEffect(() => {
     setSelectedDate(new Date());
   }, []);
 
   useEffect(() => {
-    const userIsAdminVelidation = () => {
-      user?.isAdmin ? setIsAdmin(true) : setIsAdmin(false);
+    const userIsAdminValidation = () => {
+      setIsAdmin(user?.isAdmin ?? false);
     };
-    userIsAdminVelidation();
-  }, [isAdmin]);
+    userIsAdminValidation();
+  }, [user]);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const calendarEventData = await getCollectionData('calendar');
+useEffect(() => {
+  const fetchEvents = async () => {
+    if (user) {
+      const calendarEventData = await getUserCalendarEvents(user.employeeId);
       const setCalendarEventData = [];
       for (let i = 0; i < calendarEventData.length; i++) {
-        if (user?.isAdmin || calendarEventData[i].name === user?.name) {
-          const data = {
-            id: i + 1,
-            title: calendarEventData[i].eventContent,
-            start: calendarEventData[i].eventStartDate,
-            end: calendarEventData[i].eventEndDate,
-            category: calendarEventData[i].eventTag,
-            backgroundColor: categoryColors[calendarEventData[i].eventTag],
-            borderColor: categoryColors[calendarEventData[i].eventTag],
-            name: calendarEventData[i].name,
-          };
-          setCalendarEventData.push(data);
-        }
+        const data = {
+          id: i + 1,
+          title: calendarEventData[i].eventContent,
+          start: calendarEventData[i].eventStartDate,
+          end: calendarEventData[i].eventEndDate,
+          category: calendarEventData[i].eventTag,
+          backgroundColor: categoryColors[calendarEventData[i].eventTag],
+          borderColor: categoryColors[calendarEventData[i].eventTag],
+          name: calendarEventData[i].name,
+        };
+        setCalendarEventData.push(data);
       }
-      setEvents(setCalendarEventData);
-    };
 
-    fetchEvents();
-  }, [user, events]);
+      if (JSON.stringify(setCalendarEventData) !== JSON.stringify(events)) {
+        setEvents(setCalendarEventData);
+      }
+    }
+  };
+
+  fetchEvents();
+}, [user]);
 
   if (isHomePage) {
     return (
