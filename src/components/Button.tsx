@@ -48,7 +48,7 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({
-  type,
+  type = 'button',
   onClick,
   children,
   variant = 'primary',
@@ -60,13 +60,17 @@ const Button: React.FC<ButtonProps> = ({
 
   switch (variant) {
     case 'secondary':
-      buttonStyle = secondaryButtonStyles;
+      buttonStyle = css`
+        ${secondaryButtonStyles};
+        ${customWidth && `width: ${customWidth};`}
+        ${customFontSize && `font-size: ${customFontSize};`}
+        ${customBorderRadius && `border-radius: ${customBorderRadius};`}
+      `;
       break;
     case 'primary':
     default:
       buttonStyle = css`
         ${primaryButtonStyles};
-        ${`type: ${type};`}
         ${customWidth && `width: ${customWidth};`}
         ${customFontSize && `font-size: ${customFontSize};`}
         ${customBorderRadius && `border-radius: ${customBorderRadius};`}
@@ -74,7 +78,7 @@ const Button: React.FC<ButtonProps> = ({
   }
 
   return (
-    <button css={buttonStyle} onClick={onClick}>
+    <button type={type} css={buttonStyle} onClick={onClick}>
       {children}
     </button>
   );
