@@ -21,6 +21,7 @@ import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
 import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
 import { showModal, hiddenModal } from '../../Reducers/ModalSlice.ts';
 import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.ts';
+import LoadingAnimation from '../../Components/LodingAnimation.tsx';
 
 const SelectWidthCustom = css`
   width: 120px;
@@ -68,6 +69,7 @@ const PayrollHistory: React.FC = () => {
   const [btnId, setBtnId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isNull, setIsNull] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthContext();
 
   useEffect(() => {
@@ -76,6 +78,17 @@ const PayrollHistory: React.FC = () => {
     };
     userIsAdminVelidation();
   }, [isAdmin]);
+
+  useEffect(() => {
+    const setLoadingAnimation = () => {
+      if (employeeSalary.length > 0) {
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
+    };
+    setLoadingAnimation();
+  }, [employeeSalary]);
 
   useEffect(() => {
     const setEmployeeSalaryListData = () => {
@@ -275,73 +288,79 @@ const PayrollHistory: React.FC = () => {
             ) : null}
           </div>
         </div>
-        <ul css={ul}>
-          {employeeSalary.map((item) => (
-            <PayList
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              payData={item.payData}
-              handleAdditionalPay={handleAdditionalPay}
-              isViewed={item.isViewed}
-              handleIsViewd={handleIsViewd}
-              addSalaryCorrectionList={addSalaryCorrectionList}
-              month={item.month}
-              isNull={isNull}
-              spacificationModal={spacificationModal}
-              onSpacificationModal={onSpacificationModal}
-              adminViewed={item.adminViewed}
-            />
-          ))}
-        </ul>
-        <div css={[salaryCorrectionheader, { margin: '25px 0' }]}>
-          <h3>{isAdmin ? '급여 정정 요청 내역' : '급여 정정 신청 내역'}</h3>
-          {isAdmin ? (
-            <div>
-              <button onClick={() => stateFilter('standBy')} css={[headerBtn, gray]}>
-                대기중
-              </button>
-              <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
-                승인
-              </button>
-              <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
-                반려
-              </button>
-            </div>
-          ) : null}
-        </div>
-        {salaryCorrectionLists.length !== 0 ? (
-          <table css={listTable}>
-            <thead>
-              <tr css={trStyle}>
-                <td css={{ minWidth: '42px' }}>요청자</td>
-                <td css={{ minWidth: '69px' }}>월</td>
-                <td css={{ minWidth: '106px' }}>정정 사유</td>
-                <td>정정 내용</td>
-                <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
-              </tr>
-            </thead>
-            <tbody>
-              {salaryCorrectionLists.map((item) => (
-                <SalaryList
+        {isLoading ? (
+          <LoadingAnimation />
+        ) : (
+          <>
+            <ul css={ul}>
+              {employeeSalary.map((item) => (
+                <PayList
                   key={item.id}
                   id={item.id}
                   name={item.name}
+                  payData={item.payData}
+                  handleAdditionalPay={handleAdditionalPay}
+                  isViewed={item.isViewed}
+                  handleIsViewd={handleIsViewd}
+                  addSalaryCorrectionList={addSalaryCorrectionList}
                   month={item.month}
-                  reasonForApplication={item.reasonForApplication}
-                  correctionDetails={item.correctionDetails}
-                  correctionState={item.correctionState}
-                  onYesNoModal={onYesNoModal}
-                  deleteSalaryCorrection={deleteSalaryCorrection}
+                  isNull={isNull}
+                  spacificationModal={spacificationModal}
+                  onSpacificationModal={onSpacificationModal}
+                  adminViewed={item.adminViewed}
                 />
               ))}
-            </tbody>
-          </table>
-        ) : (
-          <div css={noListWrapper}>
-            <span className="material-symbols-outlined">error</span>
-            <p>신청 내역이 없습니다.</p>
-          </div>
+            </ul>
+            <div css={[salaryCorrectionheader, { margin: '25px 0' }]}>
+              <h3>{isAdmin ? '급여 정정 요청 내역' : '급여 정정 신청 내역'}</h3>
+              {isAdmin ? (
+                <div>
+                  <button onClick={() => stateFilter('standBy')} css={[headerBtn, gray]}>
+                    대기중
+                  </button>
+                  <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
+                    승인
+                  </button>
+                  <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
+                    반려
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            {salaryCorrectionLists.length !== 0 ? (
+              <table css={listTable}>
+                <thead>
+                  <tr css={trStyle}>
+                    <td css={{ minWidth: '42px' }}>요청자</td>
+                    <td css={{ minWidth: '69px' }}>월</td>
+                    <td css={{ minWidth: '106px' }}>정정 사유</td>
+                    <td>정정 내용</td>
+                    <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {salaryCorrectionLists.map((item) => (
+                    <SalaryList
+                      key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      month={item.month}
+                      reasonForApplication={item.reasonForApplication}
+                      correctionDetails={item.correctionDetails}
+                      correctionState={item.correctionState}
+                      onYesNoModal={onYesNoModal}
+                      deleteSalaryCorrection={deleteSalaryCorrection}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div css={noListWrapper}>
+                <span className="material-symbols-outlined">error</span>
+                <p>신청 내역이 없습니다.</p>
+              </div>
+            )}
+          </>
         )}
 
         {yesNoModal ? (
