@@ -1,16 +1,17 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
 const updateCorrectionState = async (name: string, month: number, state: string, correctionDetails: string) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    for (const memberDoc of membersSnapshot.docs) {
+
+    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollCorApp`));
-      for (const payDataDoc of collectionSnapshot.docs) {
+
+      const payDataPromises = collectionSnapshot.docs.map(async (payDataDoc) => {
         const payDataId = payDataDoc.id;
         const payData = payDataDoc.data();
+
         if (payData.name === name && payData.month === month && payData.correctionDetails === correctionDetails) {
           await setDoc(doc(db, `members/${memberDoc.id}/payrollCorApp`, payDataId), {
             name: payData.name,
@@ -19,12 +20,15 @@ const updateCorrectionState = async (name: string, month: number, state: string,
             correctionDetails: payData.correctionDetails,
             reasonForApplication: payData.reasonForApplication,
           });
-          break;
         }
-      }
-    }
+      });
+
+      await Promise.all(payDataPromises);
+    });
+
+    await Promise.all(memberPromises);
   } catch (error) {
-    console.log(error);
+    console.error('Error updating correction state:', error);
   }
 };
 

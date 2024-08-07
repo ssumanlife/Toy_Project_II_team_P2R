@@ -10,21 +10,21 @@ interface Employee {
   baseSalary: string;
 }
 
-//----------------------------------------------------------------
 const getEmployeeData = async (): Promise<Employee[]> => {
   const employeeData: Employee[] = [];
+  const userEmployees: Employee[] = [];
 
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
 
-    for (const memberDoc of membersSnapshot.docs) {
+    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const data = memberDoc.data();
 
-      // isAdmin이 false이고 ID가 "user"로 시작하는 경우만 처리
-      if (data.isAdmin === false && memberDoc.id.startsWith("user")) {
+      // isAdmin이 false인 경우에만 처리
+      if (data.isAdmin === false) {
         // 기본급 가져오기
         const payrollDetailsSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
-        let salary = "2100000";
+        let salary = '2100000';
 
         payrollDetailsSnapshot.forEach((doc) => {
           const payrollData = doc.data();
@@ -40,18 +40,26 @@ const getEmployeeData = async (): Promise<Employee[]> => {
           baseSalary: salary,
         };
 
-        employeeData.push(employee);
+        if (memberDoc.id.startsWith('user')) {
+          userEmployees.push(employee);
+        } else {
+          employeeData.push(employee);
+        }
       }
-    }
+    });
+
+    await Promise.all(memberPromises);
+
+    // user로 시작하는 데이터를 맨 앞에 추가
+    employeeData.unshift(...userEmployees);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching employee data:', error);
   }
 
   return employeeData;
 };
 
 export { getEmployeeData };
-
 
 // const getEmployeeData = async (): Promise<Employee[]> => {
 //   const employeeData: Employee[] = [];
@@ -60,14 +68,14 @@ export { getEmployeeData };
 //   try {
 //     const membersSnapshot = await getDocs(collection(db, 'members'));
 
-//     for (const memberDoc of membersSnapshot.docs) {
+//     const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
 //       const data = memberDoc.data();
 
 //       // isAdmin이 false인 경우에만 처리
 //       if (data.isAdmin === false) {
 //         // 기본급 가져오기
 //         const payrollDetailsSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
-//         let salary = "2100000";
+//         let salary = '2100000';
 
 //         payrollDetailsSnapshot.forEach((doc) => {
 //           const payrollData = doc.data();
@@ -83,18 +91,20 @@ export { getEmployeeData };
 //           baseSalary: salary,
 //         };
 
-//         if (memberDoc.id.startsWith("user")) {
+//         if (memberDoc.id.startsWith('user')) {
 //           userEmployees.push(employee);
 //         } else {
 //           employeeData.push(employee);
 //         }
 //       }
-//     }
+//     });
+
+//     await Promise.all(memberPromises);
 
 //     // user로 시작하는 데이터를 맨 앞에 추가
 //     employeeData.unshift(...userEmployees);
 //   } catch (error) {
-//     console.error(error);
+//     console.error('Error fetching employee data:', error);
 //   }
 
 //   return employeeData;
