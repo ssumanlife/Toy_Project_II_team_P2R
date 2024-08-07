@@ -4,10 +4,11 @@ import { useAuthContext } from '../Context/AuthContext.tsx';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  // eslint-disable-next-line react/require-default-props
   requireAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children, requireAdmin }: ProtectedRouteProps) {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
@@ -21,9 +22,8 @@ export default function ProtectedRoute({ children, requireAdmin }: ProtectedRout
     return null;
   }
 
-  return { children };
-}
-
-ProtectedRoute.defaultProps = {
-  requireAdmin: false,
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  return <>{children}</>;
 };
+
+export default ProtectedRoute;
