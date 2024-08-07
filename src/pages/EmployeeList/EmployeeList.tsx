@@ -8,6 +8,7 @@ import EmployeeAddModal from '../../Components/EmployeeList/EmployeeAdd.tsx';
 import PaginationComponent from '../../Components/pagination.tsx';
 import { getEmployeeData } from '../../API/Firebase/GetEmployeeData.tsx';
 import { deleteEmployee } from '../../API/Firebase/DeleteEmployeeList.tsx';
+import LoadingAnimation from '../../Components/LodingAnimation.tsx';
 
 const COUNT_PER_PAGE = 6;
 
@@ -83,9 +84,11 @@ const EmployeeList: React.FC = () => {
   const [data, setData] = useState<Employee[]>([]);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       const employeeData = await getEmployeeData();
 
       // 데이터 없을때 용 더미 데이터 추가
@@ -111,6 +114,7 @@ const EmployeeList: React.FC = () => {
       const combinedData = [...dummyData, ...employeeData];
       setEmployees(combinedData);
       setData(combinedData.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
+      setIsLoading(false);
     };
 
     //   setEmployees(employeeData);
@@ -184,8 +188,12 @@ const EmployeeList: React.FC = () => {
             직원 삭제
           </Button>
           <Button customWidth="40px" customFontSize="30px" onClick={() => setIsAddModalOpen(true)}>+</Button>
-        </div>
-      </div>
+          </div>
+          </div>
+          {isLoading ? (
+            <LoadingAnimation />
+          ) : (
+            <>
       <div css={{ display: 'flex', flexDirection: 'column', height: '640px', width: '100%' }}>
         <div css={tableContainerStyles}>
           <table css={{ width: '100%' }}>
@@ -248,6 +256,8 @@ const EmployeeList: React.FC = () => {
           page={page}
           onChange={handlePageChange}
         />
+        </>
+        )}
       </div>
     </div>
   );
