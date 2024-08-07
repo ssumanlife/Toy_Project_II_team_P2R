@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store.ts';
+import { RootState, AppDispatch } from '../../store.tsx';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
@@ -20,6 +20,8 @@ import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.tsx';
 import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
 import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
 import { showModal, hiddenModal } from '../../Reducers/ModalSlice.ts';
+import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.tsx';
+import LoadingAnimation from '../../Components/LodingAnimation.tsx';
 
 const SelectWidthCustom = css`
   width: 120px;
@@ -56,15 +58,18 @@ export interface EmployeeSalaryType {
 }
 
 const PayrollHistory: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const yesNoModal = useSelector((state: RootState) => state.modal.modals['yesNoModal']);
   const spacificationModal = useSelector((state: RootState) => state.modal.modals['spacificationModal']);
+  const employeeSalary: EmployeeSalaryType[] = useSelector(
+    (state: RootState) => state.employeeSalary.employeeSalaryData,
+  );
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
-  const [employeeSalary, setEmployeeSalary] = useState<EmployeeSalaryType[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [btnId, setBtnId] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isNull, setIsNull] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthContext();
 
   useEffect(() => {
@@ -72,42 +77,27 @@ const PayrollHistory: React.FC = () => {
       setIsAdmin(user?.isAdmin ?? false);
     };
     userIsAdminVelidation();
-  }, [user]);
+  }, [isAdmin]);
 
   useEffect(() => {
-    const setEmployeeSalaryListData = async () => {
-      const newMonth = Number(month.slice(6, 7));
-      const employeeSalaryData = await getCollectionData('payrollDetails');
-      const setEmployeeSalaryData = [];
-      for (let i = 0; i < employeeSalaryData.length; i++) {
-        if (user?.isAdmin || employeeSalaryData[i].name === user?.name) {
-          if (user?.isAdmin && employeeSalaryData[i].month !== newMonth) {
-            continue;
-          }
-          const data = {
-            id: i + 1,
-            name: employeeSalaryData[i].name,
-            month: employeeSalaryData[i].month,
-            payData: {
-              baseSalary: employeeSalaryData[i].baseSalary,
-              weeklyHolidayAllowance: employeeSalaryData[i].weeklyHolidayAllowance,
-              additionalAllowance: employeeSalaryData[i].additionalAllowance,
-              nationalPension: employeeSalaryData[i].nationalPension,
-              healthInsurance: employeeSalaryData[i].healthInsurance,
-              longTermCare: employeeSalaryData[i].longTermCare,
-              employmentInsurance: employeeSalaryData[i].employmentInsurance,
-            },
-            isViewed: employeeSalaryData[i].isViewed,
-            adminViewed: employeeSalaryData[i].adminViewed,
-          };
-          setEmployeeSalaryData.push(data);
-        }
+    const setLoadingAnimation = () => {
+      if (employeeSalary.length > 0) {
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
       }
-      setEmployeeSalaryData.sort((a, b) => b.month - a.month);
-      setEmployeeSalary(setEmployeeSalaryData);
+    };
+    setLoadingAnimation();
+  }, [employeeSalary]);
+
+  useEffect(() => {
+    const setEmployeeSalaryListData = () => {
+      if (user) {
+        dispatch(fetchEmployeeSalaryData({ month, isAdmin, userName: user.name }));
+      }
     };
     setEmployeeSalaryListData();
-  }, [month, user]);
+  }, [month, isAdmin]);
 
   useEffect(() => {
     const setSalaryCorrectionListData = async () => {
@@ -130,7 +120,7 @@ const PayrollHistory: React.FC = () => {
       setSalaryCorrectionLists(setSalaryCorrectionData);
     };
     setSalaryCorrectionListData();
-  }, [user]);
+  }, []);
 
   const handleSelect = (option: string) => {
     setMonth(option);
@@ -176,20 +166,24 @@ const PayrollHistory: React.FC = () => {
     setSalaryCorrectionLists(newStateList);
   };
 
-  const handleIsViewd = (id: number, name: string, month: number) => {
-    const newIsViwedEmploySalary = [...employeeSalary];
-    for (let iv = 0; iv < newIsViwedEmploySalary.length; iv++) {
-      if (newIsViwedEmploySalary[iv].id === id) {
+  const handleIsViewd = (id: number, name: string, month: number): void => {
+    const newIsViwedEmploySalary = employeeSalary.map((employee) => {
+      if (employee.id === id) {
         if (user?.isAdmin) {
-          newIsViwedEmploySalary[iv].adminViewed = true;
-        } else {
-          newIsViwedEmploySalary[iv].isViewed = true;
+          return {
+            ...employee,
+            adminViewed: true,
+          };
         }
-        break;
+        return {
+          ...employee,
+          isViewed: true,
+        };
       }
-    }
+      return employee;
+    });
+    dispatch(setEmployeeSalary(newIsViwedEmploySalary));
     additionalPayUpdate(name, month, 'notChange', user?.isAdmin);
-    setEmployeeSalary(newIsViwedEmploySalary);
   };
 
   const additionalPayUpdate = async (
@@ -206,22 +200,45 @@ const PayrollHistory: React.FC = () => {
   };
 
   const handleAdditionalPay = (inputValue: string | undefined, id: number, name: string, month: number): void => {
-    if (inputValue !== undefined) {
-      const additionalPayChange = inputValue.replaceAll(',', '');
-      if (/^\d+$/.test(additionalPayChange)) {
-        const newEmploySalary = [...employeeSalary];
-        for (let es = 0; es < newEmploySalary.length; es++) {
-          if (newEmploySalary[es].id === id) {
-            newEmploySalary[es].payData.additionalAllowance = Number(additionalPayChange);
-            break;
-          }
+    if (inputValue !== undefined)
+      if (/,/g.test(inputValue)) {
+        const additionalPayChange = inputValue.replaceAll(',', '');
+        if (/^\d+$/.test(additionalPayChange)) {
+          const newEmploySalary = employeeSalary.map((employee) => {
+            if (employee.id === id) {
+              return {
+                ...employee,
+                payData: {
+                  ...employee.payData,
+                  additionalAllowance: Number(additionalPayChange),
+                },
+              };
+            }
+            return employee;
+          });
+          dispatch(setEmployeeSalary(newEmploySalary));
+          additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
+        } else {
+          alert('숫자만 입력 가능합니다.');
         }
-        setEmployeeSalary(newEmploySalary);
-        additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
+      } else if (/^\d+$/.test(inputValue)) {
+        const newFilterEmploySalary = employeeSalary.map((employee) => {
+          if (employee.id === id) {
+            return {
+              ...employee,
+              payData: {
+                ...employee.payData,
+                additionalAllowance: Number(inputValue),
+              },
+            };
+          }
+          return employee;
+        });
+        dispatch(setEmployeeSalary(newFilterEmploySalary));
+        additionalPayUpdate(name, month, Number(inputValue), user?.isAdmin);
       } else {
         alert('숫자만 입력 가능합니다.');
       }
-    }
   };
 
   const today = new Date();
@@ -271,73 +288,79 @@ const PayrollHistory: React.FC = () => {
             ) : null}
           </div>
         </div>
-        <ul css={ul}>
-          {employeeSalary.map((item) => (
-            <PayList
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              payData={item.payData}
-              handleAdditionalPay={handleAdditionalPay}
-              isViewed={item.isViewed}
-              handleIsViewd={handleIsViewd}
-              addSalaryCorrectionList={addSalaryCorrectionList}
-              month={item.month}
-              isNull={isNull}
-              spacificationModal={spacificationModal}
-              onSpacificationModal={onSpacificationModal}
-              adminViewed={item.adminViewed}
-            />
-          ))}
-        </ul>
-        <div css={[salaryCorrectionheader, { margin: '25px 0' }]}>
-          <h3>{isAdmin ? '급여 정정 요청 내역' : '급여 정정 신청 내역'}</h3>
-          {isAdmin ? (
-            <div>
-              <button onClick={() => stateFilter('standBy')} css={[headerBtn, gray]}>
-                대기중
-              </button>
-              <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
-                승인
-              </button>
-              <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
-                반려
-              </button>
-            </div>
-          ) : null}
-        </div>
-        {salaryCorrectionLists.length !== 0 ? (
-          <table css={listTable}>
-            <thead>
-              <tr css={trStyle}>
-                <td css={{ minWidth: '42px' }}>요청자</td>
-                <td css={{ minWidth: '69px' }}>월</td>
-                <td css={{ minWidth: '106px' }}>정정 사유</td>
-                <td>정정 내용</td>
-                <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
-              </tr>
-            </thead>
-            <tbody>
-              {salaryCorrectionLists.map((item) => (
-                <SalaryList
+        {isLoading ? (
+          <LoadingAnimation />
+        ) : (
+          <>
+            <ul css={ul}>
+              {employeeSalary.map((item) => (
+                <PayList
                   key={item.id}
                   id={item.id}
                   name={item.name}
+                  payData={item.payData}
+                  handleAdditionalPay={handleAdditionalPay}
+                  isViewed={item.isViewed}
+                  handleIsViewd={handleIsViewd}
+                  addSalaryCorrectionList={addSalaryCorrectionList}
                   month={item.month}
-                  reasonForApplication={item.reasonForApplication}
-                  correctionDetails={item.correctionDetails}
-                  correctionState={item.correctionState}
-                  onYesNoModal={onYesNoModal}
-                  deleteSalaryCorrection={deleteSalaryCorrection}
+                  isNull={isNull}
+                  spacificationModal={spacificationModal}
+                  onSpacificationModal={onSpacificationModal}
+                  adminViewed={item.adminViewed}
                 />
               ))}
-            </tbody>
-          </table>
-        ) : (
-          <div css={noListWrapper}>
-            <span className="material-symbols-outlined">error</span>
-            <p>신청 내역이 없습니다.</p>
-          </div>
+            </ul>
+            <div css={[salaryCorrectionheader, { margin: '25px 0' }]}>
+              <h3>{isAdmin ? '급여 정정 요청 내역' : '급여 정정 신청 내역'}</h3>
+              {isAdmin ? (
+                <div>
+                  <button onClick={() => stateFilter('standBy')} css={[headerBtn, gray]}>
+                    대기중
+                  </button>
+                  <button onClick={() => stateFilter('approval')} css={[headerBtn, blue]}>
+                    승인
+                  </button>
+                  <button onClick={() => stateFilter('reject')} css={[headerBtn, red]}>
+                    반려
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            {salaryCorrectionLists.length !== 0 ? (
+              <table css={listTable}>
+                <thead>
+                  <tr css={trStyle}>
+                    <td css={{ minWidth: '42px' }}>요청자</td>
+                    <td css={{ minWidth: '69px' }}>월</td>
+                    <td css={{ minWidth: '106px' }}>정정 사유</td>
+                    <td>정정 내용</td>
+                    <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {salaryCorrectionLists.map((item) => (
+                    <SalaryList
+                      key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      month={item.month}
+                      reasonForApplication={item.reasonForApplication}
+                      correctionDetails={item.correctionDetails}
+                      correctionState={item.correctionState}
+                      onYesNoModal={onYesNoModal}
+                      deleteSalaryCorrection={deleteSalaryCorrection}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div css={noListWrapper}>
+                <span className="material-symbols-outlined">error</span>
+                <p>신청 내역이 없습니다.</p>
+              </div>
+            )}
+          </>
         )}
 
         {yesNoModal ? (
@@ -349,9 +372,12 @@ const PayrollHistory: React.FC = () => {
 };
 
 export default PayrollHistory;
+
 const wrapper = css`
   height: calc(100vh - 76px);
-  width: 100vw;
+  width: 90%;
+  max-width: 1280px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: start;
@@ -359,8 +385,7 @@ const wrapper = css`
 const salaryCorrectionArea = css`
   display: flex;
   flex-direction: column;
-  max-width: 1280px;
-  width: 90%;
+  width: 100%;
   top: 0;
 `;
 
@@ -369,7 +394,10 @@ const salaryCorrectionheader = css`
   justify-content: space-between;
   align-items: center;
   padding-bottom: 25px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e0e0e0;
+  h3 {
+    font-weight: bold;
+  }
 `;
 
 const ul = css`
@@ -415,12 +443,13 @@ const listTable = css`
   border-radius: 20px 20px 0 0;
 `;
 const trStyle = css`
-  height: 50px;
-  text-align: 'center';
   td {
+    height: 60px;
     vertical-align: middle;
     padding-left: 15px;
   }
+  height: 50px;
+  text-align: 'center';
 `;
 
 const noListWrapper = css`
@@ -431,7 +460,7 @@ const noListWrapper = css`
   span {
     font-size: 70px;
     font-weight: 300;
-    margin: 20px 0 10px;
+    margin: 25px 0 10px;
     color: var(--text-white-gray);
   }
   p {
