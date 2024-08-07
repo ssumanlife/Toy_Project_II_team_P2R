@@ -3,7 +3,7 @@
 
 ## 👋 P2R (Path to Resolution) 👋
 
-|[<img src="https://avatars.githubusercontent.com/u/107895537?s=88&v=4" width="150" height="150"/>](https://github.com/HSjjs98)|[<img src="https://avatars.githubusercontent.com/u/169154369?s=88&v=4" width="150" height="150"/>](https://github.com/ssumanlife)|[<img src="https://avatars.githubusercontent.com/u/170381378?s=88&v=4" width="150" height="150"/>](https://github.com/miniseung)|[<img src="https://avatars.githubusercontent.com/u/170402797?v=4" width="150" height="150"/>](https://github.com/dyeongg)|
+|[<img src="https://avatars.githubusercontent.com/u/107895537?s=88&v=4" width="150" height="150"/>](https://github.com/HSjjs98)|[<img src="https://avatars.githubusercontent.com/u/169154369?v=4" width="150" height="150"/>](https://github.com/ssumanlife)|[<img src="https://avatars.githubusercontent.com/u/170381378?s=88&v=4" width="150" height="150"/>](https://github.com/miniseung)|[<img src="https://avatars.githubusercontent.com/u/170402797?v=4" width="150" height="150"/>](https://github.com/dyeongg)|
 |:-:|:-:|:-:|:-:|
 |🐯양해석<br/>[@HSjjs98](https://github.com/HSjjs98)|🐰김수민<br/>[@ssumanlife](https://github.com/ssumanlife)|🐶김승민<br/>[@miniseung](https://github.com/miniseung)|🐱임효정<br/>[@dyeongg](https://github.com/dyeongg)|
 <br/>
