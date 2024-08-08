@@ -21,12 +21,7 @@ import {
   CalendarEvent,
 } from '../../Reducers/CalendarEventSlice.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
-
-interface User {
-  name: string;
-  isAdmin: boolean;
-  employeeId: string;
-}
+import LoadingAnimation from '../LodingAnimation.tsx';
 
 const MyCalendar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -46,6 +41,7 @@ const MyCalendar: React.FC = () => {
     'gray',
   ]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -65,6 +61,17 @@ const MyCalendar: React.FC = () => {
   useEffect(() => {
     dispatch(fetchEvents(user?.employeeId || ''));
   }, [dispatch]);
+
+  useEffect(() => {
+    const setLoadingAnimation = () => {
+      if (events.length > 0) {
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
+    };
+    setLoadingAnimation();
+  }, [events]);
 
   const openDeleteModal = (event: CalendarEvent) => {
     setEventToDelete(event);
@@ -403,6 +410,9 @@ const containerStyle = css`
   .fc-icon-chevron-left::before,
   .fc-icon-chevron-right::before {
     color: var(--text-gray);
+  }
+  .fc .fc-daygrid-event {
+    padding: 2px;
   }
 `;
 
