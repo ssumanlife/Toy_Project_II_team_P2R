@@ -5,7 +5,6 @@ const getUserCalendarEvents = async (userId: string) => {
   try {
     const q = query(collection(db, `members/user${userId}/calendar`));
     const querySnapshot = await getDocs(q);
-    console.log(querySnapshot);
     const events: {
       eventContent: string;
       eventEndDate: string;

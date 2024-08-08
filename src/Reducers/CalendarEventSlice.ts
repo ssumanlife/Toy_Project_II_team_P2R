@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../store.ts';
-import { getCollectionData } from '../API/Firebase/GetUserData.tsx';
+import { AppThunk } from '../store.tsx';
 import addCalendarEvent from '../API/Firebase/AddCalendarEvent.tsx';
 import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.tsx';
 import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.tsx';
+import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.tsx';
 
 export interface CalendarEvent {
   id: number;
@@ -46,21 +46,29 @@ const calendarSlice = createSlice({
 
 export const { setEvents, addEvent, updateEvent, deleteEvent } = calendarSlice.actions;
 
-export const fetchEvents = (): AppThunk => async (dispatch, getState) => {
-  const calendarEventData = await getCollectionData('calendar');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const events = calendarEventData
-    .filter((event) => user.isAdmin || event.name === user.name)
-    .map((event, index) => ({
-      id: index + 1,
-      title: event.eventContent,
-      start: event.eventStartDate,
-      end: event.eventEndDate,
-      category: event.eventTag,
-      name: event.name,
-    }));
-  dispatch(setEvents(events));
-};
+export const fetchEvents =
+  (userId: string): AppThunk =>
+  async (dispatch) => {
+    if (!userId) {
+      console.error('User ID is required to fetch events');
+      return;
+    }
+
+    try {
+      const calendarEventData = await getUserCalendarEvents(userId);
+      const events = calendarEventData.map((event, index) => ({
+        id: index + 1,
+        title: event.eventContent,
+        start: event.eventStartDate,
+        end: event.eventEndDate,
+        category: event.eventTag,
+        name: event.name,
+      }));
+      dispatch(setEvents(events));
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    }
+  };
 
 export const addEventAsync =
   (newEvent: CalendarEvent): AppThunk =>

@@ -25,12 +25,13 @@ import { useAuthContext } from '../../Context/AuthContext.tsx';
 interface User {
   name: string;
   isAdmin: boolean;
+  employeeId: string;
 }
 
 const MyCalendar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const events = useSelector((state: RootState) => state.calendar.events);
-  const { user } = useAuthContext() as { user: User | null };
+  const { user } = useAuthContext();
   const location = useLocation();
   const isHomePage = location.pathname === '/home';
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -61,10 +62,8 @@ const MyCalendar: React.FC = () => {
     purple: 'var(--calendar-purple)',
     gray: 'var(--calendar-gray)',
   };
-
   useEffect(() => {
-    dispatch(fetchEvents());
-    console.log('dispatch events');
+    dispatch(fetchEvents(user?.employeeId || ''));
   }, [dispatch]);
 
   const openDeleteModal = (event: CalendarEvent) => {
