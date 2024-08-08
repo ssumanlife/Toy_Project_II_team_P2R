@@ -324,11 +324,11 @@ const PayrollHistory: React.FC = () => {
               <table css={listTable}>
                 <thead>
                   <tr css={trStyle}>
-                    <td css={{ minWidth: '42px' }}>요청자</td>
-                    <td css={{ minWidth: '69px' }}>월</td>
-                    <td css={{ minWidth: '106px' }}>정정 사유</td>
+                    <td css={{ minWidth: '100px', paddingLeft: '40px' }}>요청자</td>
+                    <td css={{ minWidth: '140px' }}>월</td>
+                    <td css={{ minWidth: '180px' }}>정정 사유</td>
                     <td>정정 내용</td>
-                    <td css={{ textAlign: 'center', width: '150px' }}>상태</td>
+                    <td css={{ textAlign: 'center', minWidth: '195px' }}>상태</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -439,7 +439,8 @@ const trStyle = css`
   td {
     height: 60px;
     vertical-align: middle;
-    padding-left: 15px;
+    font-size: var(--font-size-h5);
+    font-weight: var(--font-weight-medium);
   }
   height: 50px;
   text-align: 'center';

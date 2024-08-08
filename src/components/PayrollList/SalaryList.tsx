@@ -91,7 +91,7 @@ const SalaryList: React.FC<SalaryListProps> = ({
 
   return (
     <tr css={tr}>
-      <td>{name}</td>
+      <td css={{ paddingLeft: '40px' }}>{name}</td>
       <td>24년 0{month}월</td>
       <td>{reasonForApplication}</td>
       <td>
@@ -134,7 +134,6 @@ const tr = css`
   td {
     border-top: 1px solid #eeeeee;
     vertical-align: middle;
-    padding-left: 15px;
     position: relative;
   }
 `;
