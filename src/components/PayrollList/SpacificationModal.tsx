@@ -22,7 +22,7 @@ interface PayListProps {
   payData: PayData;
   onSpacificationModal: () => void;
   name: string;
-  totalPay: number;
+  totalPay: number | string;
   handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
   addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
   month: number;
