@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
@@ -15,7 +13,7 @@ const addCalendarEvent = async (
   }
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    for (const memberDoc of membersSnapshot.docs) {
+    membersSnapshot.docs.forEach(async (memberDoc) => {
       const memberData = memberDoc.data();
       if (memberData.name === name) {
         await addDoc(collection(db, `members/${memberDoc.id}/calendar`), {
@@ -25,9 +23,8 @@ const addCalendarEvent = async (
           eventTag,
           name,
         });
-        break;
       }
-    }
+    });
   } catch (error) {
     console.error(error);
   }

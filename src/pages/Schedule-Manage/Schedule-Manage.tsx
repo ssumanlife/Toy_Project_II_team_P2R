@@ -1,5 +1,5 @@
 import React from 'react';
-import MyCalendar from '../../Components/Calendar/Calendar'; // Fixed file extension and capitalized the first letter of the component name
+import MyCalendar from '../../Components/Calendar/Calendar.tsx';
 
 const ScheduleManage: React.FC = () => <MyCalendar />;
 

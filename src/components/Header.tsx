@@ -10,8 +10,7 @@ import { useAuthContext } from '../Context/AuthContext.tsx';
 
 const headerStyles = css`
   background-color: #f8f9fa;
-  padding: 1rem 2rem;
-  padding-right: 50px;
+  padding: 1rem 4rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;

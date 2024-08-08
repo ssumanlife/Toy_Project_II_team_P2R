@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
@@ -11,12 +9,15 @@ const updatePayrollData = async (
 ) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    for (const memberDoc of membersSnapshot.docs) {
+
+    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
-      for (const payDataDoc of collectionSnapshot.docs) {
+
+      const payDataPromises = collectionSnapshot.docs.map(async (payDataDoc) => {
         const payDataId = payDataDoc.id;
         const payData = payDataDoc.data();
         const additionalAllowanceValue = changeData === 'notChange' ? payData.additionalAllowance : changeData;
+
         const data4Update = {
           additionalAllowance: additionalAllowanceValue,
           name: payData.name,
@@ -31,6 +32,7 @@ const updatePayrollData = async (
           nationalPension: payData.nationalPension,
           weeklyHolidayAllowance: payData.weeklyHolidayAllowance,
         };
+
         if (!isAdmin) {
           data4Update.isViewed = true;
         } else {
@@ -39,12 +41,15 @@ const updatePayrollData = async (
 
         if (payData.name === name && payData.month === month) {
           await setDoc(doc(db, `members/${memberDoc.id}/payrollDetails`, payDataId), data4Update);
-          break;
         }
-      }
-    }
+      });
+
+      await Promise.all(payDataPromises);
+    });
+
+    await Promise.all(memberPromises);
   } catch (error) {
-    console.log(error);
+    console.error('Error updating payroll data:', error);
   }
 };
 

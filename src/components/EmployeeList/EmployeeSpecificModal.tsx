@@ -6,7 +6,7 @@ import Button from '../Button.tsx';
 import EmployeeScheduleRequests from '../../Pages/EmployeeList/EmployeeScheduleRequests.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import { inputStyles } from './EmployeeAdd.tsx';
-import { updateEmployee } from '../../API/Firebase/UpdateEmployeeList.tsx'
+import updateEmployee from '../../API/Firebase/UpdateEmployeeList.tsx';
 import BankSelectComponent from './bankSelect.tsx';
 
 interface Employee {
@@ -98,14 +98,12 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
       setEditMode(false);
       onClose();
     } catch (error) {
-      console.error("Failed to update employee", error);
+      console.error('Failed to update employee', error);
     }
   };
 
   const workDays = Array.isArray(employee.workDay) ? employee.workDay : [employee.workDay];
-  const splitWorkDays = workDays.reduce<string[]>((acc, workDay) => {
-    return acc.concat(workDay.split(','));
-  }, []);
+  const splitWorkDays = workDays.reduce<string[]>((acc, workDay) => acc.concat(workDay.split(',')), []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -114,13 +112,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
           <div>
             <div css={titleStyles}>이름</div>
             {editMode ? (
-              <input
-                type="text"
-                name="name"
-                value={updatedEmployee.name}
-                onChange={handleChange}
-                css={inputStyles}
-              />
+              <input type="text" name="name" value={updatedEmployee.name} onChange={handleChange} css={inputStyles} />
             ) : (
               <div css={valueStyles}>{updatedEmployee.name}</div>
             )}
@@ -142,7 +134,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
           <div>
             <div css={titleStyles}>계좌 번호</div>
             {editMode ? (
-              <div css= {{ display: 'flex', alignItems: 'center' }}>
+              <div css={{ display: 'flex', alignItems: 'center' }}>
                 <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
                 <input
                   type="text"

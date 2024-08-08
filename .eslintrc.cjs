@@ -24,6 +24,7 @@ module.exports = {
     'react/button-has-type': 'off',
     'react/no-unknown-property': 'off',
     'no-use-before-define': 'off',
+    'import/no-absolute-path': 'off',
     'prettier/prettier': [
       'error',
       {

@@ -21,15 +21,15 @@ const getCollectionData = async (collectionName: string) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const memberDoc of membersSnapshot.docs) {
+    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const userDocId = memberDoc.id;
-      // eslint-disable-next-line no-await-in-loop
       const collectionSnapshot = await getDocs(collection(db, `members/${userDocId}/${collectionName}`));
       collectionSnapshot.docs.forEach((obj) => {
         allDocData.push(obj.data());
       });
-    }
+    });
+
+    await Promise.all(memberPromises);
   } catch (error) {
     console.log(error);
   }

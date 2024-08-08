@@ -12,7 +12,7 @@ import Button from '../Button.tsx';
 import CalendarDeleteModal from './Calendar-delete.tsx';
 import CalendarDetailModal from './Calendar-detail.tsx';
 import CalendarAddModal from './Calendar-add.tsx';
-import { RootState, AppDispatch } from '../../store.ts';
+import { RootState, AppDispatch } from '../../store.tsx';
 import {
   fetchEvents,
   addEventAsync,
@@ -25,12 +25,13 @@ import { useAuthContext } from '../../Context/AuthContext.tsx';
 interface User {
   name: string;
   isAdmin: boolean;
+  employeeId: string;
 }
 
 const MyCalendar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const events = useSelector((state: RootState) => state.calendar.events);
-  const { user } = useAuthContext() as { user: User | null };
+  const { user } = useAuthContext();
   const location = useLocation();
   const isHomePage = location.pathname === '/home';
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -61,10 +62,8 @@ const MyCalendar: React.FC = () => {
     purple: 'var(--calendar-purple)',
     gray: 'var(--calendar-gray)',
   };
-
   useEffect(() => {
-    dispatch(fetchEvents());
-    console.log('dispatch events');
+    dispatch(fetchEvents(user?.employeeId || ''));
   }, [dispatch]);
 
   const openDeleteModal = (event: CalendarEvent) => {
@@ -337,22 +336,22 @@ const MyCalendar: React.FC = () => {
 export default MyCalendar;
 
 const outerContainerStyle = css`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 50px 0;
+  box-sizing: border-box;
   height: calc(100vh - 76px);
-  width: 100vw;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
 `;
 
 const containerStyle = css`
   display: flex;
   position: relative;
-  margin: 50px;
   flex: 3;
   border-radius: 20px;
-  box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
+  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
   background-color: var(--background-sub);
-  height: auto;
+  height: 100%;
   .fc {
     height: 100%;
   }

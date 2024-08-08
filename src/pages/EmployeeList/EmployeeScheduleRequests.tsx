@@ -38,21 +38,19 @@ const requestStyles = css`
   padding: 20px 60px 0 0;
 `;
 
-const EmployeeScheduleRequests: React.FC<EmployeeScheduleRequestsProps> = ({ requests = scheduleRequests }) => {
-  return (
-    <div css={containerStyles}>
-      {requests.map((request, index) => (
-        <div key={index} css={requestStyles}>
-          <div>{request.date}</div>
-          <div css={{ display: 'flex', gap: '40px' }}>
-            <div>{request.previousTime}</div>→<div>{request.newTime}</div>
-          </div>
-          <div css={{ color: '#FF7676', fontWeight: 'var(--font-weight-bold)' }}>{request.change}</div>
-          <div css={{ color: 'var(--text-blue)' }}>{request.amount}</div>
+const EmployeeScheduleRequests: React.FC<EmployeeScheduleRequestsProps> = ({ requests = scheduleRequests }) => (
+  <div css={containerStyles}>
+    {requests.map((request, index) => (
+      <div key={index} css={requestStyles}>
+        <div>{request.date}</div>
+        <div css={{ display: 'flex', gap: '40px' }}>
+          <div>{request.previousTime}</div>→<div>{request.newTime}</div>
         </div>
-      ))}
-    </div>
-  );
-};
+        <div css={{ color: '#FF7676', fontWeight: 'var(--font-weight-bold)' }}>{request.change}</div>
+        <div css={{ color: 'var(--text-blue)' }}>{request.amount}</div>
+      </div>
+    ))}
+  </div>
+);
 
 export default EmployeeScheduleRequests;

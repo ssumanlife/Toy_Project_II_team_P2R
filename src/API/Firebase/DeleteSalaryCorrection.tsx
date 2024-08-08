@@ -1,23 +1,29 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
 const deleteSalaryCorrectionAPI = async (name: string, month: number, correctionDetails: string) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    for (const memberDoc of membersSnapshot.docs) {
+
+    const memberDeletionPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollCorApp`));
-      for (const payDataDoc of collectionSnapshot.docs) {
+
+      const payDataDocs = collectionSnapshot.docs.filter((payDataDoc) => {
         const payData = payDataDoc.data();
-        if (payData.name === name && payData.month === month && payData.correctionDetails === correctionDetails) {
-          await deleteDoc(doc(db, `members/${memberDoc.id}/payrollCorApp`, payDataDoc.id));
-          break;
-        }
-      }
-    }
+        return payData.name === name && payData.month === month && payData.correctionDetails === correctionDetails;
+      });
+
+      const deletePromises = payDataDocs.map((payDataDoc) =>
+        deleteDoc(doc(db, `members/${memberDoc.id}/payrollCorApp`, payDataDoc.id)),
+      );
+
+      await Promise.all(deletePromises);
+    });
+
+    await Promise.all(memberDeletionPromises);
   } catch (error) {
-    console.log(error);
+    console.error('Error deleting salary correction:', error);
   }
 };
+
 export default deleteSalaryCorrectionAPI;

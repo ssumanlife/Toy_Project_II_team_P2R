@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../store.ts';
+import { RootState, AppDispatch } from '../../store.tsx';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
@@ -20,7 +20,7 @@ import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.tsx';
 import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
 import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
 import { showModal, hiddenModal } from '../../Reducers/ModalSlice.ts';
-import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.ts';
+import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.tsx';
 import LoadingAnimation from '../../Components/LodingAnimation.tsx';
 
 const SelectWidthCustom = css`
@@ -372,9 +372,12 @@ const PayrollHistory: React.FC = () => {
 };
 
 export default PayrollHistory;
+
 const wrapper = css`
   height: calc(100vh - 76px);
-  width: 100vw;
+  width: 90%;
+  max-width: 1280px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: start;
@@ -382,8 +385,7 @@ const wrapper = css`
 const salaryCorrectionArea = css`
   display: flex;
   flex-direction: column;
-  max-width: 1280px;
-  width: 90%;
+  width: 100%;
   top: 0;
 `;
 
@@ -392,7 +394,10 @@ const salaryCorrectionheader = css`
   justify-content: space-between;
   align-items: center;
   padding-bottom: 25px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e0e0e0;
+  h3 {
+    font-weight: bold;
+  }
 `;
 
 const ul = css`
@@ -438,12 +443,13 @@ const listTable = css`
   border-radius: 20px 20px 0 0;
 `;
 const trStyle = css`
-  height: 50px;
-  text-align: 'center';
   td {
+    height: 60px;
     vertical-align: middle;
     padding-left: 15px;
   }
+  height: 50px;
+  text-align: 'center';
 `;
 
 const noListWrapper = css`
@@ -454,7 +460,7 @@ const noListWrapper = css`
   span {
     font-size: 70px;
     font-weight: 300;
-    margin: 20px 0 10px;
+    margin: 25px 0 10px;
     color: var(--text-white-gray);
   }
   p {

@@ -4,7 +4,7 @@
 import { createSlice, createAsyncThunk, AsyncThunk } from '@reduxjs/toolkit';
 import { getCollectionData } from '../API/Firebase/GetUserData.tsx';
 import { EmployeeSalaryType } from '../Pages/Payroll/PayrollHistory.tsx';
-import { RootState } from '../store.ts';
+import { RootState } from '../store.tsx';
 
 interface EmployeeSalaryState {
   employeeSalaryData: EmployeeSalaryType[];
