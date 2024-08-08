@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import Modal from '../Modal.tsx';
 import Button from '../Button.tsx';
-import addCalendarEvent from '../../API/Firebase/AddCalendarEvent.tsx';
 
-const categoryColors = {
+interface CategoryColors {
+  [key: string]: string;
+}
+
+const categoryColors: CategoryColors = {
   pink: 'var(--calendar-pink)',
   yellow: 'var(--calendar-yellow)',
   peach: 'var(--calendar-peach)',
@@ -16,12 +19,25 @@ const categoryColors = {
   gray: 'var(--calendar-gray)',
 };
 
-const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
-  const [title, setTitle] = useState('');
-  const [startDateTime, setStartDateTime] = useState('');
-  const [endDateTime, setEndDateTime] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+interface CalendarAddModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddEvent: (event: CalendarEvent) => void;
+}
+interface CalendarEvent {
+  title: string;
+  start: string;
+  end: string;
+  category: string;
+  name: string;
+}
+
+const CalendarAddModal: React.FC<CalendarAddModalProps> = ({ isOpen, onClose, onAddEvent }) => {
+  const [title, setTitle] = useState<string>('');
+  const [startDateTime, setStartDateTime] = useState<string>('');
+  const [endDateTime, setEndDateTime] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const resetForm = () => {
     setTitle('');
@@ -42,7 +58,7 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
     onClose();
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (!title || !startDateTime || !endDateTime) {
       setErrorMessage('모든 필드를 입력해주세요');
       return;
@@ -55,34 +71,21 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
       setErrorMessage('일정시작이 일정종료 보다 늦을 수 없습니다.');
       return;
     }
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user) {
       setErrorMessage('사용자 정보를 찾을 수 없습니다.');
       return;
     }
 
-    const newEvent = {
-      eventContent: title,
-      eventStartDate: startDateTime,
-      eventEndDate: endDateTime,
-      eventTag: selectedColor,
+    const newEvent: CalendarEvent = {
+      title,
+      start: startDateTime,
+      end: endDateTime,
+      category: selectedColor,
       name: user.name,
     };
-
-    try {
-      await addCalendarEvent(
-        newEvent.eventContent,
-        newEvent.eventEndDate,
-        newEvent.eventStartDate,
-        newEvent.eventTag,
-        newEvent.name,
-      );
-      onAddEvent(newEvent);
-      handleClose();
-    } catch (error) {
-      console.error(error);
-      setErrorMessage('일정을 추가하는데 실패했습니다.');
-    }
+    onAddEvent(newEvent);
+    handleClose();
   };
 
   return (
@@ -95,7 +98,7 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             placeholder="일정 제목"
             css={inputStyle}
           />
@@ -106,14 +109,14 @@ const CalendarAddModal = ({ isOpen, onClose, onAddEvent }) => {
             <input
               type="datetime-local"
               value={startDateTime}
-              onChange={(e) => setStartDateTime(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDateTime(e.target.value)}
               css={dateTimeInputStyle}
             />
             <span css={separatorStyle}>-</span>
             <input
               type="datetime-local"
               value={endDateTime}
-              onChange={(e) => setEndDateTime(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDateTime(e.target.value)}
               css={dateTimeInputStyle}
             />
           </div>

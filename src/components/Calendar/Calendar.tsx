@@ -1,6 +1,8 @@
+/* eslint-disable react/no-unstable-nested-components */
 /** @jsxImportSource @emotion/react */
 /* eslint-disable react/no-unknown-property */
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -10,16 +12,27 @@ import Button from '../Button.tsx';
 import CalendarDeleteModal from './Calendar-delete.tsx';
 import CalendarDetailModal from './Calendar-detail.tsx';
 import CalendarAddModal from './Calendar-add.tsx';
+import { RootState, AppDispatch } from '../../store.tsx';
+import {
+  fetchEvents,
+  addEventAsync,
+  updateEventAsync,
+  deleteEventAsync,
+  CalendarEvent,
+} from '../../Reducers/CalendarEventSlice.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
-import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
-import deleteCalendarEvent from '../../API/Firebase/DeleteCalendarEvent.tsx';
-import updateCalendarEvent from '../../API/Firebase/UpdateCalendarEvent.tsx';
-import getUserCalendarEvents from '../../API/Firebase/GetUserCalendarEvents.tsx';
 
-const MyCalendar = () => {
+interface User {
+  name: string;
+  isAdmin: boolean;
+}
+
+const MyCalendar: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const events = useSelector((state: RootState) => state.calendar.events);
+  const { user } = useAuthContext() as { user: User | null };
   const location = useLocation();
   const isHomePage = location.pathname === '/home';
-
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCategories, setSelectedCategories] = useState([
     'pink',
@@ -31,12 +44,14 @@ const MyCalendar = () => {
     'purple',
     'gray',
   ]);
-  const [events, setEvents] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  const categories = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
-
-  const categoryColors = {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
+  const categories: string[] = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
+  const categoryColors: { [key: string]: string } = {
     pink: 'var(--calendar-pink)',
     yellow: 'var(--calendar-yellow)',
     peach: 'var(--calendar-peach)',
@@ -47,124 +62,74 @@ const MyCalendar = () => {
     gray: 'var(--calendar-gray)',
   };
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
-  const { user } = useAuthContext();
+  useEffect(() => {
+    dispatch(fetchEvents());
+    console.log('dispatch events');
+  }, [dispatch]);
 
-  const outerContainerStyle = css`
-    box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
-    border-radius: 20px;
-    max-width: 1280px;
-    margin: 50px auto;
-    height: calc(90vh - 76px);
-    overflow: hidden;
-    width: 90%;
-  `;
+  const openDeleteModal = (event: CalendarEvent) => {
+    setEventToDelete(event);
+    setIsDeleteModalOpen(true);
+  };
 
-  const containerStyle = css`
-    display: flex;
-    position: relative;
-    border-radius: 20px;
-    box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
-    background-color: var(--background-sub);
-    height: 100%;
-    .fc {
-      height: 100%;
-    }
-    .fc-col-header-cell a {
-      color: var(--text-gray);
-    }
-    .fc-day-sat a,
-    .fc-col-header-cell.fc-day-sat {
-      color: #3a80e9;
-    }
-    .fc-day-sun a,
-    .fc-col-header-cell.fc-day-sun {
-      color: #f64d4d;
-    }
-    .fc-daygrid-day {
-      border: none;
-    }
-    .fc-col-header {
-      border-bottom: 1px solid #ddd;
-    }
-    .fc td,
-    .fc th {
-      border: none;
-    }
-    .fc-daygrid-day-frame {
-      padding: 2px;
-    }
-    .fc-theme-standard .fc-scrollgrid {
-      border: none;
-    }
-    .fc-theme-standard thead {
-      border-left: none;
-      border-right: none;
-    }
-    .fc-theme-standard td {
-      border-left: none;
-      border-right: none;
-    }
-    .fc-scrollgrid-section-body > td {
-      border-bottom: none;
-    }
+  const handleDateClick = (arg: { date: Date }) => {
+    setSelectedDate(arg.date);
+  };
 
-    .fc-prev-button,
-    .fc-next-button {
-      background-color: var(--background-main);
-      border: none;
-    }
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
 
-    .fc-icon-chevron-left::before,
-    .fc-icon-chevron-right::before {
-      color: var(--text-gray);
-    }
-  `;
+  const handleAddEvent = (newEvent: CalendarEvent) => {
+    dispatch(addEventAsync(newEvent));
+  };
 
-  const sidebarStyle = css`
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    div,
-    h3 {
-      margin-bottom: 15px;
-    }
-    label {
-      margin-left: 15px;
-    }
-  `;
+  const openDetailModal = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsDetailModalOpen(true);
+  };
 
-  const calendarStyle = css`
-    flex: 3;
-    padding: 20px;
-    cursor: pointer;
-    background-color: var(--background-main);
-    .fc {
-      height: 100%;
-    }
-  `;
+  const handleSaveEvent = (updatedEvent: CalendarEvent) => {
+    dispatch(updateEventAsync(updatedEvent));
+  };
 
-  const eventListStyle = css`
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    h3 {
-      margin-bottom: 15px;
-    }
-  `;
+  const getFilteredEvents = () =>
+    events.filter((event) => selectedCategories.includes(event.category) && event.name === user?.name);
 
-  const checkboxStyle = (category: string) => css`
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  `;
+  const getEventsForSelectedDate = (): CalendarEvent[] => {
+    if (!selectedDate) return [];
+    const selectedDateString = selectedDate.toLocaleDateString('en-CA');
+    return getFilteredEvents().filter((event) => {
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      return (
+        selectedDateString >= eventStart.toLocaleDateString('en-CA') &&
+        selectedDateString <= eventEnd.toLocaleDateString('en-CA')
+      );
+    });
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    );
+  };
+
+  const formatTime = (dateTimeString: string): string => {
+    const date = new Date(dateTimeString);
+    if (Number.isNaN(date.getTime())) {
+      return '시간 정보 없음';
+    }
+    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const handleDeleteEvent = () => {
+    if (eventToDelete) {
+      dispatch(deleteEventAsync(eventToDelete.id));
+      setEventToDelete(null);
+      setIsDeleteModalOpen(false);
+    }
+  };
   const checkboxLabelStyle = (category: string) => css`
     display: flex;
     align-items: center;
@@ -200,24 +165,6 @@ const MyCalendar = () => {
       transform: rotate(45deg);
     }
   `;
-
-  const checkboxInputStyle = css`
-    &:checked + label:after {
-      display: block;
-    }
-  `;
-
-  const buttonStyle = css`
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-  `;
-
-  const ulStyle = css`
-    list-style-type: none;
-    padding: 0;
-  `;
-
   const liStyle = (category: string) => css`
     position: relative;
     margin-bottom: 15px;
@@ -228,24 +175,6 @@ const MyCalendar = () => {
     position: relative;
     cursor: pointer;
   `;
-
-  const spanStyle = css`
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    cursor: pointer;
-  `;
-
-  const pTitleStyle = css`
-    margin: 0 0 5px 0;
-    font-weight: bold;
-  `;
-
-  const pTimeStyle = css`
-    margin: 0;
-    color: var(--text-light-gray);
-  `;
-
   const calendarContainerStyle = css`
     ${calendarStyle}
     ${isAnyModalOpen &&
@@ -253,138 +182,6 @@ const MyCalendar = () => {
       pointer-events: none;
     `}
   `;
-
-  const openDeleteModal = (event) => {
-    setEventToDelete(event);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
-    setSelectedDate(arg.date);
-  };
-
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
-  };
-
-  const handleAddEvent = (newEvent) => {
-    setEvents((prevEvents) => [...prevEvents, newEvent]); // 이벤트 추가
-  };
-
-  const openDetailModal = (event) => {
-    setSelectedEvent(event);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleSaveEvent = async (updatedEvent) => {
-    try {
-      if (!user) {
-        console.error('사용자 정보를 찾을 수 없습니다.');
-        return;
-      }
-      await updateCalendarEvent(
-        updatedEvent.title,
-        updatedEvent.end,
-        updatedEvent.start,
-        updatedEvent.category,
-        user.name,
-      );
-
-      setEvents((prevEvents) => prevEvents.map((event) => (event === selectedEvent ? updatedEvent : event))); // 이벤트 업데이트
-      setIsDetailModalOpen(false);
-    } catch (error) {
-      console.error('이벤트 업데이트 중 오류 발생:', error);
-    }
-  };
-
-  const getFilteredEvents = () =>
-    events.filter((event) => selectedCategories.includes(event.category) && (isAdmin || event.name === user?.name)); // 필터 조건 수정
-
-  const getEventsForSelectedDate = () => {
-    if (!selectedDate) return [];
-    const selectedDateString = selectedDate.toLocaleDateString('en-CA');
-    return getFilteredEvents().filter((event) => {
-      const eventStart = new Date(event.start);
-      const eventEnd = new Date(event.end);
-      return (
-        selectedDateString >= eventStart.toLocaleDateString('en-CA') &&
-        selectedDateString <= eventEnd.toLocaleDateString('en-CA')
-      );
-    });
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    );
-  };
-
-  const formatTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
-    if (Number.isNaN(date.getTime())) {
-      return '시간 정보 없음';
-    }
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
-  };
-
-  const handleDeleteEvent = async () => {
-    if (eventToDelete) {
-      try {
-        await deleteCalendarEvent(
-          eventToDelete.name,
-          eventToDelete.category,
-          eventToDelete.title,
-          eventToDelete.end,
-          eventToDelete.start,
-        );
-        setEvents((prevEvents) => prevEvents.filter((event) => event !== eventToDelete));
-        setEventToDelete(null);
-        setIsDeleteModalOpen(false);
-      } catch (error) {
-        console.error('이벤트 삭제 중 오류 발생:', error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    setSelectedDate(new Date());
-  }, []);
-
-  useEffect(() => {
-    const userIsAdminValidation = () => {
-      setIsAdmin(user?.isAdmin ?? false);
-    };
-    userIsAdminValidation();
-  }, [user]);
-
-useEffect(() => {
-  const fetchEvents = async () => {
-    if (user) {
-      const calendarEventData = await getUserCalendarEvents(user.employeeId);
-      const setCalendarEventData = [];
-      for (let i = 0; i < calendarEventData.length; i++) {
-        const data = {
-          id: i + 1,
-          title: calendarEventData[i].eventContent,
-          start: calendarEventData[i].eventStartDate,
-          end: calendarEventData[i].eventEndDate,
-          category: calendarEventData[i].eventTag,
-          backgroundColor: categoryColors[calendarEventData[i].eventTag],
-          borderColor: categoryColors[calendarEventData[i].eventTag],
-          name: calendarEventData[i].name,
-        };
-        setCalendarEventData.push(data);
-      }
-
-      if (JSON.stringify(setCalendarEventData) !== JSON.stringify(events)) {
-        setEvents(setCalendarEventData);
-      }
-    }
-  };
-
-  fetchEvents();
-}, [user]);
-
   if (isHomePage) {
     return (
       <div css={containerStyle}>
@@ -523,6 +320,7 @@ useEffect(() => {
           setIsDeleteModalOpen(false);
         }}
         onDelete={handleDeleteEvent}
+        eventId={eventToDelete?.id || 0}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}
@@ -537,3 +335,148 @@ useEffect(() => {
 };
 
 export default MyCalendar;
+
+const outerContainerStyle = css`
+  padding: 50px 0;
+  box-sizing: border-box;
+  height: calc(100vh - 76px);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+`;
+
+const containerStyle = css`
+  display: flex;
+  position: relative;
+  flex: 3;
+  border-radius: 20px;
+  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
+  background-color: var(--background-sub);
+  height: 100%;
+  .fc {
+    height: 100%;
+  }
+  .fc-col-header-cell a {
+    color: var(--text-gray);
+  }
+  .fc-day-sat a,
+  .fc-col-header-cell.fc-day-sat {
+    color: #3a80e9;
+  }
+  .fc-day-sun a,
+  .fc-col-header-cell.fc-day-sun {
+    color: #f64d4d;
+  }
+  .fc-daygrid-day {
+    border: none;
+  }
+  .fc-col-header {
+    border-bottom: 1px solid #ddd;
+  }
+  .fc td,
+  .fc th {
+    border: none;
+  }
+  .fc-daygrid-day-frame {
+    padding: 2px;
+  }
+  .fc-theme-standard .fc-scrollgrid {
+    border: none;
+  }
+  .fc-theme-standard thead {
+    border-left: none;
+    border-right: none;
+  }
+  .fc-theme-standard td {
+    border-left: none;
+    border-right: none;
+  }
+  .fc-scrollgrid-section-body > td {
+    border-bottom: none;
+  }
+
+  .fc-prev-button,
+  .fc-next-button {
+    background-color: var(--background-main);
+    border: none;
+  }
+
+  .fc-icon-chevron-left::before,
+  .fc-icon-chevron-right::before {
+    color: var(--text-gray);
+  }
+`;
+
+const sidebarStyle = css`
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  div,
+  h3 {
+    margin-bottom: 15px;
+  }
+  label {
+    margin-left: 15px;
+  }
+`;
+
+const calendarStyle = css`
+  flex: 3;
+  padding: 20px;
+  cursor: pointer;
+  background-color: var(--background-main);
+  .fc {
+    height: 100%;
+  }
+`;
+
+const eventListStyle = css`
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  h3 {
+    margin-bottom: 15px;
+  }
+`;
+
+const checkboxStyle = (category: string) => css`
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+`;
+
+const checkboxInputStyle = css`
+  &:checked + label:after {
+    display: block;
+  }
+`;
+
+const buttonStyle = css`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+`;
+
+const ulStyle = css`
+  list-style-type: none;
+  padding: 0;
+`;
+
+const spanStyle = css`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+`;
+
+const pTitleStyle = css`
+  margin: 0 0 5px 0;
+  font-weight: bold;
+`;
+
+const pTimeStyle = css`
+  margin: 0;
+  color: var(--text-light-gray);
+`;

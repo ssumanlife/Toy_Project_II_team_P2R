@@ -8,6 +8,9 @@ const addCalendarEvent = async (
   eventTag: string,
   name: string,
 ) => {
+  if (!eventContent || !eventEndDate || !eventStartDate || !eventTag || !name) {
+    throw new Error('Invalid event data');
+  }
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
     membersSnapshot.docs.forEach(async (memberDoc) => {
