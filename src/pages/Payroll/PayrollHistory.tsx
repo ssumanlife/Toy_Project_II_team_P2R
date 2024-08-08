@@ -67,17 +67,10 @@ const PayrollHistory: React.FC = () => {
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [btnId, setBtnId] = useState<string>('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [isNull, setIsNull] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthContext();
-
-  useEffect(() => {
-    const userIsAdminVelidation = () => {
-      setIsAdmin(user?.isAdmin ?? false);
-    };
-    userIsAdminVelidation();
-  }, [isAdmin]);
+  const isAdmin = Boolean(user?.isAdmin);
 
   useEffect(() => {
     const setLoadingAnimation = () => {
@@ -97,7 +90,7 @@ const PayrollHistory: React.FC = () => {
       }
     };
     setEmployeeSalaryListData();
-  }, [month, isAdmin]);
+  }, [month]);
 
   useEffect(() => {
     const setSalaryCorrectionListData = async () => {
