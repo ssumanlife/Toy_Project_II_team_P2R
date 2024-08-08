@@ -30,10 +30,13 @@
     - [2. 목표 및 기대 효과  ](#2-목표-달성-기대-효과)
 - [🕖 프로젝트 타임라인 ](#-프로젝트-타임라인)
   - [ 기획  ](#기획)
+    - [ 주요 기능  ](#주요-기능)
+    - [ ERD  ](#ERD)
+    - [ 와이어프레임  ](#와이어프레임)
   - [ 🧑‍💻 Tech Stack  ](#-Tech-Stack)
   - [ 프로젝트 구조  ](#구조)
   - [ 컨벤션  ](#컨벤션)
-- [📷 프로젝트 예시  ](#-프로젝트-예시)
+- [📷 디자인 초안  ](#-디자인-초안)
   - [🔎 로그인 및 회원가입  ](#-로그인)
   - [🔎 사용자 화면  ](#-사용자-화면)
 - [🛠 시작하기](#-시작하기)
@@ -78,23 +81,38 @@
 
 ## 기획
 
-### 공통 기능
+### 기능
+
+![토이2유저플로우](https://github.com/user-attachments/assets/96072526-2c07-40e2-a40e-3bb1d11cf4ff)
+1. 공통 기능
 - 로그인
   - 사장님 계정 생성 시 매장 코드 부여
   - 매장 코드를 활용하여 여러 매장에 대한 서비스 제공 가능
 - 캘린더를 통한 일정 관리: 등록, 수정 삭제
 
-### 사장님 기능
+2. 사장님 기능
   - 직원 리스트 관리 (CRUD)
   - 직원 정보 생성, 읽기, 수정, 삭제
   - 급여 기간 등록
   - 직원 급여 관리
   - 급여 내역 (금액, 정산 내역) 등록 및 수정
 
-### 직원 기능
+3. 직원 기능
   - 급여 내역 확인
   - 급여 정정 신청
   - 캘린더를 통한 일정 관리
+
+<br/>
+
+### ERD
+
+<img width="1774" alt="스크린샷 2024-08-08 오후 6 25 53" src="https://github.com/user-attachments/assets/83881c6e-be99-4e86-a886-908d5bdc9423">
+
+<br/>
+
+### 와이어프레임
+
+![토이2-3](https://github.com/user-attachments/assets/8a5d7470-62bf-4ba6-a3db-3f426a1d08a3)
 
 <br/>
 
@@ -105,15 +123,25 @@
 
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![redux](https://img.shields.io/badge/Redux-593D88?style=for-the-badge&logo=redux&logoColor=white)
+![redux](https://img.shields.io/badge/Redux-593D88?style=for-the-badge&logo=redux&logoColor=white) <br/>
+모던한 웹 애플리케이션 개발에서 효율적이고 유지보수 가능한 코드 작성을 위해 React, TypeScript, Redux를 사용
+
+<br/>
 
 #### 💻 Database 💻
-![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white) <br/>
+실시간 데이터베이스, 인증, 호스팅 등을 사용하여 빠르고 효율적인 개발을 위해 Firebase를 사용
+
+<br/>
 
 #### 🛠 Tools 🛠
-![styled-components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
+![Emotion](https://img.shields.io/badge/Emotion-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
 ![eslint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white)
 ![prettier](https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E)
+![fullcalendar](https://img.shields.io/badge/fullcalendar-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white) <br/>
+모던 웹 개발에서 스타일링, 코드 품질, 일관된 코드 포맷팅을 효율적으로 관리하기 위한 Emotion, eslint, prettier 설정<br/><br/>
+개발 기간이 제약적인 상황에서,<br/> **FullCalendar는 다양한 기능과 높은 커스터마이징** 가능성을 제공하여<br/>복잡한 일정 관리 인터페이스를 쉽게 구현할 수 있기 때문에 선택
+
 </div>
 
 ---
@@ -164,7 +192,7 @@
     - 함수, 변수 이름: Camel Case (ex: userName, handleOnclick)
     - 클래스 컴포넌트 이름: Title Case (ex: Button)
 
-## 📷 프로젝트 예시
+## 📷 디자인 초안
 
 ### 🔎 [로그인]
 ![image](https://github.com/user-attachments/assets/358a0d73-c239-4d78-b985-e1a226e9c6d7)
@@ -172,11 +200,27 @@
 
 <br>
 
-### 🔎 [사용자 화면]
-#### 일정 관리 화면
-![image](https://github.com/user-attachments/assets/581f4adc-afe4-41f0-9bca-0eab04bb358d)
-#### 급여 관리 화면
-![image](https://github.com/user-attachments/assets/090471bd-f002-4f23-b07a-47f873cb738c)
+### 🏠 [로그인 후 홈 화면: 사장님, 직원]
+![image](https://github.com/user-attachments/assets/c7c3dd78-96eb-4068-8e3c-0c1a6bfa7fe7)
+
+<br>
+
+### 🗓️ [일정 관리 페이지]
+
+![image](https://github.com/user-attachments/assets/27306904-af18-4911-8300-9b260efe9a82)
+
+<br>
+
+### 📜 [직원리스트 페이지]
+
+![image](https://github.com/user-attachments/assets/c93244c5-97e2-481a-a7f6-c6eb98e6afdc)
+
+<br>
+
+### 💰 [급여 확인 및 정정페이지: 사장님, 직원]
+
+![image](https://github.com/user-attachments/assets/093839f5-950f-4003-b8c7-4c9b0bab90fc)
+
 
 
 ---
