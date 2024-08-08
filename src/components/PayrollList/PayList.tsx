@@ -39,7 +39,7 @@ const PayList: React.FC<PayListProps> = ({
   const { user } = useAuthContext();
   const viewedPm = user?.isAdmin ? adminViewed : isViewed;
 
-  let totalPay =
+  let totalPay: number | string =
     payData.baseSalary +
     payData.weeklyHolidayAllowance +
     payData.additionalAllowance -
