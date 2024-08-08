@@ -5,11 +5,11 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 const baseButtonStyles = css`
-  width: 150px;
-  height: 50px;
+  width: 110px;
+  height: 40px;
   border-radius: var(--border-radius-large);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-h5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -38,6 +38,7 @@ const secondaryButtonStyles = css`
 `;
 
 interface ButtonProps {
+  type?: 'button' | 'submit';
   onClick?: () => void;
   children: React.ReactNode;
   variant?: 'primary' | 'secondary';
@@ -47,6 +48,7 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({
+  type = 'button',
   onClick,
   children,
   variant = 'primary',
@@ -58,7 +60,12 @@ const Button: React.FC<ButtonProps> = ({
 
   switch (variant) {
     case 'secondary':
-      buttonStyle = secondaryButtonStyles;
+      buttonStyle = css`
+        ${secondaryButtonStyles};
+        ${customWidth && `width: ${customWidth};`}
+        ${customFontSize && `font-size: ${customFontSize};`}
+        ${customBorderRadius && `border-radius: ${customBorderRadius};`}
+      `;
       break;
     case 'primary':
     default:
@@ -71,7 +78,7 @@ const Button: React.FC<ButtonProps> = ({
   }
 
   return (
-    <button css={buttonStyle} onClick={onClick}>
+    <button type={type} css={buttonStyle} onClick={onClick}>
       {children}
     </button>
   );

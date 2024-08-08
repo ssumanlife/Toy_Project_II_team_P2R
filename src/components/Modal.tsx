@@ -34,8 +34,8 @@ const closeButton = css`
   cursor: pointer;
 
   svg {
-    width: 33px;
-    height: 33px;
+    width: 28px;
+    height: 28px;
     stroke: var(--text-light-gray);
   }
 
@@ -48,24 +48,27 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  showCloseButton?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, showCloseButton = true }) => {
   if (!isOpen) return null;
 
   return (
     <div css={modalOverlay} onClick={onClose}>
       <div css={modalContent} onClick={(e) => e.stopPropagation()}>
-        <button css={closeButton} onClick={onClose}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">
-            <path
-              d="M2.68135 2.68132L30.0441 30.044M30.0441 2.68132L2.68135 30.044"
-              strokeWidth="5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        {showCloseButton && (
+          <button css={closeButton} onClick={onClose}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33" fill="none">
+              <path
+                d="M2.68135 2.68132L30.0441 30.044M30.0441 2.68132L2.68135 30.044"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
         {children}
       </div>
     </div>

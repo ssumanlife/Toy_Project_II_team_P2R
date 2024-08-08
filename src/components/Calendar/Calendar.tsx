@@ -1,16 +1,39 @@
+/* eslint-disable react/no-unstable-nested-components */
 /** @jsxImportSource @emotion/react */
 /* eslint-disable react/no-unknown-property */
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react';
-import Button from '../Button';
-import CalendarDeleteModal from './Calendar-delete';
-import CalendarDetailModal from './Calendar-detail';
-import CalendarAddModal from './Calendar-add';
+import { useLocation } from 'react-router-dom';
+import Button from '../Button.tsx';
+import CalendarDeleteModal from './Calendar-delete.tsx';
+import CalendarDetailModal from './Calendar-detail.tsx';
+import CalendarAddModal from './Calendar-add.tsx';
+import { RootState, AppDispatch } from '../../store.tsx';
+import {
+  fetchEvents,
+  addEventAsync,
+  updateEventAsync,
+  deleteEventAsync,
+  CalendarEvent,
+} from '../../Reducers/CalendarEventSlice.ts';
+import { useAuthContext } from '../../Context/AuthContext.tsx';
 
-const MyCalendar = () => {
+interface User {
+  name: string;
+  isAdmin: boolean;
+  employeeId: string;
+}
+
+const MyCalendar: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const events = useSelector((state: RootState) => state.calendar.events);
+  const { user } = useAuthContext();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/home';
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCategories, setSelectedCategories] = useState([
     'pink',
@@ -22,17 +45,14 @@ const MyCalendar = () => {
     'purple',
     'gray',
   ]);
-  const [events, setEvents] = useState([
-    { title: '미팅', start: '2024-07-26', end: '2024-07-26', category: 'skyblue' },
-    { title: '점심 약속', start: '2024-07-27', end: '2024-07-27', category: 'green' },
-    { title: '운동', start: '2024-07-27', end: '2024-07-27', category: 'pink' },
-    { title: '프로젝트 기간', start: '2024-07-15', end: '2024-07-29', category: 'skyblue' },
-    { title: '가족 모임', start: '2024-07-21', end: '2024-07-21', category: 'peach' },
-  ]);
-
-  const categories = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
-
-  const categoryColors = {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
+  const categories: string[] = ['pink', 'yellow', 'peach', 'green', 'skyblue', 'blue', 'purple', 'gray'];
+  const categoryColors: { [key: string]: string } = {
     pink: 'var(--calendar-pink)',
     yellow: 'var(--calendar-yellow)',
     peach: 'var(--calendar-peach)',
@@ -42,116 +62,73 @@ const MyCalendar = () => {
     purple: 'var(--calendar-purple)',
     gray: 'var(--calendar-gray)',
   };
+  useEffect(() => {
+    dispatch(fetchEvents(user?.employeeId || ''));
+  }, [dispatch]);
 
-  const outerContainerStyle = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-  `;
+  const openDeleteModal = (event: CalendarEvent) => {
+    setEventToDelete(event);
+    setIsDeleteModalOpen(true);
+  };
 
-  const containerStyle = css`
-    display: flex;
-    position: relative;
-    margin: 100px;
-    flex: 3;
-    border-radius: 20px;
-    box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
-    background-color: var(--background-sub);
-    height: 90vh;
-    .fc {
-      height: 100%;
-    }
-    .fc-col-header-cell a {
-      color: var(--text-gray);
-    }
-    .fc-day-sat a,
-    .fc-col-header-cell.fc-day-sat {
-      color: #3a80e9;
-    }
-    .fc-day-sun a,
-    .fc-col-header-cell.fc-day-sun {
-      color: #f64d4d;
-    }
-    .fc-daygrid-day {
-      border: none;
-    }
-    .fc-col-header {
-      border-bottom: 1px solid #ddd;
-    }
-    .fc td,
-    .fc th {
-      border: none;
-    }
-    .fc-daygrid-day-frame {
-      padding: 2px;
-    }
-    .fc-theme-standard .fc-scrollgrid {
-      border: none;
-    }
-    .fc-theme-standard thead {
-      border-left: none;
-      border-right: none;
-    }
-    .fc-theme-standard td {
-      border-left: none;
-      border-right: none;
-    }
-    .fc-scrollgrid-section-body > td {
-      border-bottom: none;
-    }
+  const handleDateClick = (arg: { date: Date }) => {
+    setSelectedDate(arg.date);
+  };
 
-    .fc-prev-button,
-    .fc-next-button {
-      background-color: var(--background-main);
-      border: none;
-    }
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
 
-    .fc-icon-chevron-left::before,
-    .fc-icon-chevron-right::before {
-      color: var(--text-gray);
-    }
-  `;
+  const handleAddEvent = (newEvent: CalendarEvent) => {
+    dispatch(addEventAsync(newEvent));
+  };
 
-  const sidebarStyle = css`
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    div,
-    h3 {
-      margin-bottom: 15px; // 각 카테고리 사이 간격 추가
-    }
-    label {
-      margin-left: 15px; // 체크박스와 라벨 사이 간격 추가
-    }
-  `;
+  const openDetailModal = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsDetailModalOpen(true);
+  };
 
-  const calendarStyle = css`
-    flex: 3;
-    padding: 20px;
-    background-color: var(--background-main);
-    .fc {
-      height: 100%;
-    }
-  `;
+  const handleSaveEvent = (updatedEvent: CalendarEvent) => {
+    dispatch(updateEventAsync(updatedEvent));
+  };
 
-  const eventListStyle = css`
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    h3 {
-      margin-bottom: 15px; // 각 카테고리 사이 간격 추가
-    }
-  `;
+  const getFilteredEvents = () =>
+    events.filter((event) => selectedCategories.includes(event.category) && event.name === user?.name);
 
-  const checkboxStyle = (category: string) => css`
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  `;
+  const getEventsForSelectedDate = (): CalendarEvent[] => {
+    if (!selectedDate) return [];
+    const selectedDateString = selectedDate.toLocaleDateString('en-CA');
+    return getFilteredEvents().filter((event) => {
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      return (
+        selectedDateString >= eventStart.toLocaleDateString('en-CA') &&
+        selectedDateString <= eventEnd.toLocaleDateString('en-CA')
+      );
+    });
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+    );
+  };
+
+  const formatTime = (dateTimeString: string): string => {
+    const date = new Date(dateTimeString);
+    if (Number.isNaN(date.getTime())) {
+      return '시간 정보 없음';
+    }
+    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const handleDeleteEvent = () => {
+    if (eventToDelete) {
+      dispatch(deleteEventAsync(eventToDelete.id));
+      setEventToDelete(null);
+      setIsDeleteModalOpen(false);
+    }
+  };
   const checkboxLabelStyle = (category: string) => css`
     display: flex;
     align-items: center;
@@ -187,56 +164,16 @@ const MyCalendar = () => {
       transform: rotate(45deg);
     }
   `;
-
-  const checkboxInputStyle = css`
-    &:checked + label:after {
-      display: block;
-    }
+  const liStyle = (category: string) => css`
+    position: relative;
+    margin-bottom: 15px;
+    background-color: white;
+    border-left: 5px solid ${categoryColors[category]};
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    cursor: pointer;
   `;
-
-  const buttonStyle = css`
-    position: absolute; // 버튼을 절대 위치로 설정
-    bottom: 20px; // 아래에서 20px
-    right: 20px; // 오른쪽에서 20px
-  `;
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-
-  const isAnyModalOpen = isAddModalOpen || isDeleteModalOpen || isDetailModalOpen;
-
-  const openDeleteModal = (event) => {
-    setEventToDelete(event);
-    setIsDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    if (eventToDelete) {
-      setEvents(events.filter((e) => e !== eventToDelete));
-      setIsDeleteModalOpen(false);
-      setEventToDelete(null);
-    }
-  };
-
-  const handleDateClick = (arg: { date: React.SetStateAction<Date> }) => {
-    setSelectedDate(arg.date);
-  };
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
-  };
-
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleEventClick = (event: Event) => {
-    setSelectedEvent(event);
-    setIsDetailModalOpen(true);
-  };
-
   const calendarContainerStyle = css`
     ${calendarStyle}
     ${isAnyModalOpen &&
@@ -244,37 +181,46 @@ const MyCalendar = () => {
       pointer-events: none;
     `}
   `;
-
-  const getFilteredEvents = () => events.filter((event) => selectedCategories.includes(event.category));
-
-  const getEventsForSelectedDate = () => {
-    if (!selectedDate) return [];
-    const selectedDateString = selectedDate.toLocaleDateString('en-CA');
-    return getFilteredEvents().filter((event) => {
-      const eventStart = new Date(event.start);
-      const eventEnd = new Date(event.end);
-      return (
-        selectedDateString >= eventStart.toLocaleDateString('en-CA') &&
-        selectedDateString <= eventEnd.toLocaleDateString('en-CA')
-      );
-    });
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+  if (isHomePage) {
+    return (
+      <div css={containerStyle}>
+        <div css={calendarContainerStyle}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={getFilteredEvents().map((event) => ({
+              ...event,
+              backgroundColor: categoryColors[event.category],
+              borderColor: categoryColors[event.category],
+            }))}
+            dateClick={handleDateClick}
+            headerToolbar={{
+              left: 'prev',
+              center: 'title',
+              right: 'next',
+            }}
+            eventContent={(eventInfo) => (
+              <div
+                css={css`
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                `}
+              >
+                {eventInfo.event.title}
+              </div>
+            )}
+          />
+        </div>
+      </div>
     );
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(`${dateString}T00:00:00`);
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
-  };
-
-  useEffect(() => {
-    setSelectedDate(new Date());
-  }, []);
-
+  }
   return (
     <div css={outerContainerStyle}>
       <div css={containerStyle}>
@@ -312,18 +258,19 @@ const MyCalendar = () => {
             }}
             eventContent={(eventInfo) => (
               <div
-                style={{
-                  color: 'white',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}
+                css={css`
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                `}
               >
-                <b>{eventInfo.timeText}</b>
-                <i>{eventInfo.event.title}</i>
+                {eventInfo.event.title}
               </div>
             )}
           />
@@ -336,33 +283,11 @@ const MyCalendar = () => {
               {getEventsForSelectedDate().length === 0 ? (
                 <p>이 날짜에는 일정이 없습니다.</p>
               ) : (
-                <ul
-                  css={css`
-                    list-style-type: none;
-                    padding: 0;
-                  `}
-                >
+                <ul css={ulStyle}>
                   {getEventsForSelectedDate().map((event, index) => (
-                    <li
-                      key={index}
-                      css={css`
-                        position: relative;
-                        margin-bottom: 15px;
-                        background-color: white;
-                        border-left: 5px solid ${categoryColors[event.category]};
-                        padding: 10px;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                        position: relative;
-                      `}
-                      onClick={() => handleEventClick(event)}
-                    >
+                    <li key={index} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
                       <span
-                        css={css`
-                          position: absolute;
-                          top: 5px;
-                          right: 5px;
-                          cursor: pointer;
-                        `}
+                        css={spanStyle}
                         onClick={(e) => {
                           e.stopPropagation();
                           openDeleteModal(event);
@@ -370,20 +295,8 @@ const MyCalendar = () => {
                       >
                         x
                       </span>
-                      <p
-                        css={css`
-                          margin: 0 0 5px 0;
-                          font-weight: bold;
-                        `}
-                      >
-                        {event.title}
-                      </p>
-                      <p
-                        css={css`
-                          margin: 0;
-                          color: var(--text-light-gray);
-                        `}
-                      >
+                      <p css={pTitleStyle}>{event.title}</p>
+                      <p css={pTimeStyle}>
                         {formatTime(event.start)} - {formatTime(event.end)}
                       </p>
                     </li>
@@ -391,7 +304,7 @@ const MyCalendar = () => {
                 </ul>
               )}
               <div css={buttonStyle}>
-                <Button customWidth="50px" customFontSize="40px" onClick={openAddModal}>
+                <Button customWidth="44px" customFontSize="30px" onClick={openAddModal}>
                   +
                 </Button>
               </div>
@@ -399,14 +312,14 @@ const MyCalendar = () => {
           )}
         </div>
       </div>
-      <CalendarAddModal isOpen={isAddModalOpen} onClose={closeAddModal} />
+      <CalendarAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAddEvent={handleAddEvent} />
       <CalendarDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
         }}
-        onConfirm={closeDeleteModal}
-        eventTitle={eventToDelete ? eventToDelete.title : ''}
+        onDelete={handleDeleteEvent}
+        eventId={eventToDelete?.id || 0}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}
@@ -414,9 +327,155 @@ const MyCalendar = () => {
           setIsDetailModalOpen(false);
         }}
         event={selectedEvent}
+        onSave={handleSaveEvent}
       />
     </div>
   );
 };
 
 export default MyCalendar;
+
+const outerContainerStyle = css`
+  padding: 50px 0;
+  box-sizing: border-box;
+  height: calc(100vh - 76px);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+`;
+
+const containerStyle = css`
+  display: flex;
+  position: relative;
+  flex: 3;
+  border-radius: 20px;
+  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
+  background-color: var(--background-sub);
+  height: 100%;
+  .fc {
+    height: 100%;
+  }
+  .fc-col-header-cell a {
+    color: var(--text-gray);
+  }
+  .fc-day-sat a,
+  .fc-col-header-cell.fc-day-sat {
+    color: #3a80e9;
+  }
+  .fc-day-sun a,
+  .fc-col-header-cell.fc-day-sun {
+    color: #f64d4d;
+  }
+  .fc-daygrid-day {
+    border: none;
+  }
+  .fc-col-header {
+    border-bottom: 1px solid #ddd;
+  }
+  .fc td,
+  .fc th {
+    border: none;
+  }
+  .fc-daygrid-day-frame {
+    padding: 2px;
+  }
+  .fc-theme-standard .fc-scrollgrid {
+    border: none;
+  }
+  .fc-theme-standard thead {
+    border-left: none;
+    border-right: none;
+  }
+  .fc-theme-standard td {
+    border-left: none;
+    border-right: none;
+  }
+  .fc-scrollgrid-section-body > td {
+    border-bottom: none;
+  }
+
+  .fc-prev-button,
+  .fc-next-button {
+    background-color: var(--background-main);
+    border: none;
+  }
+
+  .fc-icon-chevron-left::before,
+  .fc-icon-chevron-right::before {
+    color: var(--text-gray);
+  }
+`;
+
+const sidebarStyle = css`
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  div,
+  h3 {
+    margin-bottom: 15px;
+  }
+  label {
+    margin-left: 15px;
+  }
+`;
+
+const calendarStyle = css`
+  flex: 3;
+  padding: 20px;
+  cursor: pointer;
+  background-color: var(--background-main);
+  .fc {
+    height: 100%;
+  }
+`;
+
+const eventListStyle = css`
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  h3 {
+    margin-bottom: 15px;
+  }
+`;
+
+const checkboxStyle = (category: string) => css`
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+`;
+
+const checkboxInputStyle = css`
+  &:checked + label:after {
+    display: block;
+  }
+`;
+
+const buttonStyle = css`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+`;
+
+const ulStyle = css`
+  list-style-type: none;
+  padding: 0;
+`;
+
+const spanStyle = css`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+`;
+
+const pTitleStyle = css`
+  margin: 0 0 5px 0;
+  font-weight: bold;
+`;
+
+const pTimeStyle = css`
+  margin: 0;
+  color: var(--text-light-gray);
+`;
