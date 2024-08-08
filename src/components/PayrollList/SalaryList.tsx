@@ -81,8 +81,9 @@ const SalaryList: React.FC<SalaryListProps> = ({
     overflow: hidden;
     -webkit-line-clamp: 1;
     max-height: 100px;
-    line-height: 28px;
+    line-height: 29px;
     padding: 5px 0;
+    cursor: pointer;
     & .changeDisplay {
       display: ${contentDisplay ? '-webkit-box' : 'contents'};
     }
