@@ -92,7 +92,7 @@ const CalendarAddModal: React.FC<CalendarAddModalProps> = ({ isOpen, onClose, on
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={containerStyle}>
         <div css={titleStyle}>
-          <h2>스케줄 추가</h2>
+          <h3>스케줄 추가</h3>
         </div>
         <div css={sectionStyle}>
           <input
@@ -156,13 +156,14 @@ const containerStyle = css`
 `;
 
 const sectionStyle = css`
-  margin-top: 50px;
+  margin-top: 40px;
 `;
 
 const labelStyle = css`
-  font-size: 1.5em;
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 `;
 
 const inputStyle = css`
@@ -170,7 +171,7 @@ const inputStyle = css`
   width: 100%;
   margin-bottom: 20px;
   padding: 8px;
-  font-size: 2.5em;
+  font-size: var(--font-size-h2);
   border: none;
   color: var(--text-gray);
   &:focus {
@@ -211,7 +212,6 @@ const selectedColorCircleStyle = css`
 
 const buttonContainerStyle = css`
   margin-top: auto;
-  margin-bottom: 30px;
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
@@ -219,7 +219,7 @@ const buttonContainerStyle = css`
 
 const dateTimeInputStyle = css`
   padding: 8px;
-  font-size: 1.5em;
+  font-size: var(--font-size-h6);
   width: 45%;
   border: none;
   color: var(--text-gray);

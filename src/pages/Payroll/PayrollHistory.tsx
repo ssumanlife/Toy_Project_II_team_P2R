@@ -433,7 +433,7 @@ const red = css`
 const listTable = css`
   width: 100%;
   box-shadow: var(--shadow-default);
-  border-radius: 20px 20px 0 0;
+  border-radius: 20px;
 `;
 const trStyle = css`
   td {
