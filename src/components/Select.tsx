@@ -31,6 +31,7 @@ const selectBox = css`
     background: transparent;
     cursor: pointer;
     font-weight: var(--font-weight-medium);
+    z-index: 1000;
   }
 
   .optionList {
@@ -47,7 +48,7 @@ const selectBox = css`
     overflow-y: auto;
     max-height: 0;
     transition: max-height 0.3s ease-in;
-    z-index: 1;
+    z-index: 999;
 
     &::-webkit-scrollbar {
       width: 5px;
@@ -70,6 +71,7 @@ const selectBox = css`
   &.active .optionList {
     max-height: 150px;
     border-color: var(--primary-blue);
+    z-index: 1000;
   }
 
   .optionItem {
