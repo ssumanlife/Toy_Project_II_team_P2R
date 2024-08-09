@@ -9,7 +9,7 @@
 우리는 커뮤니케이션, 협상, 전략적 사고를 통해 긍정적인 변화를 추구합니다.
 |[<img src="https://avatars.githubusercontent.com/u/107895537?v=4" width="150" height="150"/>](https://github.com/HSjjs98)|[<img src="https://avatars.githubusercontent.com/u/169154369?v=4" width="150" height="150"/>](https://github.com/ssumanlife)|[<img src="https://avatars.githubusercontent.com/u/170381378?s=88&v=4" width="150" height="150"/>](https://github.com/miniseung)|[<img src="https://avatars.githubusercontent.com/u/170402797?v=4" width="150" height="150"/>](https://github.com/dyeongg)|
 |:-:|:-:|:-:|:-:|
-|🐯양해석<br/>[@HSjjs98](https://github.com/HSjjs98)<br/> 역할: 홈, 로그인, DB|🐰김수민<br/>[@ssumanlife](https://github.com/ssumanlife)<br/> 역할: 직원급여내역|🐶김승민<br/>[@miniseung](https://github.com/miniseung)<br/> 역할: 일정관리페이지|🐱임효정<br/>[@dyeongg](https://github.com/dyeongg)<br/> 역할: 직원리스트, 디자인|
+|🐯양해석<br/>[@HSjjs98](https://github.com/HSjjs98)<br/> 역할: 홈, 로그인, DB|🐰김수민<br/>[@ssumanlife](https://github.com/ssumanlife)<br/> 역할: 직원급여내역,<br/>  DB, 와이어프레임|🐶김승민<br/>[@miniseung](https://github.com/miniseung)<br/> 역할: 일정관리페이지,<br/>  ERD, 유저플로우|🐱임효정<br/>[@dyeongg](https://github.com/dyeongg)<br/> 역할: 직원리스트, 디자인|
 <br/>
 </div>
 
@@ -133,7 +133,7 @@
 
 #### 💻 Database 💻
 ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white) <br/>
-실시간 데이터베이스, 인증, 호스팅 등을 사용하여 빠르고 효율적인 개발을 위해 Firebase를 사용
+firestore, 인증, 호스팅 등을 사용하여 빠르고 효율적인 개발을 위해 Firebase를 사용
 
 <br/>
 
@@ -142,7 +142,8 @@
 ![eslint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white)
 ![prettier](https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E)
 ![fullcalendar](https://img.shields.io/badge/fullcalendar-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white) <br/>
-모던 웹 개발에서 스타일링, 코드 품질, 일관된 코드 포맷팅을 효율적으로 관리하기 위한 Emotion, eslint, prettier 설정<br/><br/>
+모던 웹 개발에서 스타일링, 코드 품질, 일관된 코드 포맷팅을 효율적으로 관리하기 위한 eslint, prettier 설정, 
+ Emotion 사용 <br/><br/>
 개발 기간이 제약적인 상황에서,<br/> **FullCalendar는 다양한 기능과 높은 커스터마이징** 가능성을 제공하여<br/>복잡한 일정 관리 인터페이스를 쉽게 구현할 수 있기 때문에 선택
 
 </div>
