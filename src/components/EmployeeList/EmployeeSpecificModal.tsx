@@ -8,6 +8,7 @@ import DaysOfWeek from './DaysOfWeek.tsx';
 import { inputStyles } from './EmployeeAdd.tsx';
 import updateEmployee from '../../API/Firebase/UpdateEmployeeList.tsx';
 import BankSelectComponent from './bankSelect.tsx';
+import WorkTimePicker from './WorkTimePicker.tsx';
 
 interface Employee {
   employeeId: string;
@@ -71,6 +72,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
   const [updatedEmployee, setUpdatedEmployee] = useState<Employee>({ ...employee });
   const [selectedBank, setSelectedBank] = useState<string>('');
   const [accountNumber, setAccountNumber] = useState<string>('');
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     setUpdatedEmployee({ ...employee });
@@ -92,11 +94,43 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
     setSelectedBank(bank);
   };
 
+  const handleDayClick = (clickedDay: string, index: number) => {
+    console.log('Clicked Day:', clickedDay);
+
+    // 클릭된 요일을 배열로 시작 (하나의 요일만 있는 배열)
+    let newDaysArray = [clickedDay];
+
+    // 요일 배열을 정렬합니다.
+    const dayOrder = ['월', '화', '수', '목', '금', '토', '일'];
+    const newDays = newDaysArray.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)).join('');
+
+    // 기존 시간 유지
+    const existingTimeRange = splitWorkDays[index].split(' ')[1] || ''; // 시간 부분만 유지
+    const updatedWorkDays = [...splitWorkDays];
+    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim(); // 시간 없을 때 처리
+
+    console.log('Updated WorkDays:', updatedWorkDays);
+
+    // 업데이트된 workDay 값을 상태로 저장합니다.
+    setUpdatedEmployee({
+      ...updatedEmployee,
+      workDay: updatedWorkDays.join(', '),
+    });
+  };
+
   const handleSave = async () => {
+    const workDayString = updatedEmployee.workDay;
+
     try {
-      await updateEmployee({ ...updatedEmployee, accountNumber: `${selectedBank} ${accountNumber}` });
+      await updateEmployee({
+        ...updatedEmployee,
+        workDay: workDayString,
+        accountNumber: `${selectedBank} ${accountNumber}`,
+      });
+
       setEditMode(false);
       onClose();
+      setKey((prevKey) => prevKey + 1);
     } catch (error) {
       console.error('Failed to update employee', error);
     }
@@ -106,7 +140,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
   const splitWorkDays = workDays.reduce<string[]>((acc, workDay) => acc.concat(workDay.split(',')), []);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal key={key} isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyles}>
         <div css={containerStyles}>
           <div>
@@ -165,13 +199,42 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
             )}
           </div>
           {splitWorkDays.map((workDay, index) => {
-            const [days, hours] = workDay.trim().split(' ');
+            const [days, timeRange] = workDay.trim().split(' ');
+            const [startTime, endTime] = timeRange.split('~');
             return (
               <div css={{ gridColumn: 'span 2' }} key={index}>
                 <div css={titleStyles}>근무 시간 {index + 1}</div>
                 <div css={workTimeStyles}>
-                  <DaysOfWeek workDay={days} />
-                  <div css={valueStyles}>{hours}</div>
+                  <DaysOfWeek workDay={days} editable={editMode} onDayClick={(days) => handleDayClick(days, index)} />
+                  {editMode ? (
+                    <>
+                      <WorkTimePicker
+                        value={startTime}
+                        onChange={(newStartTime) => {
+                          const updatedWorkDays = [...splitWorkDays];
+                          updatedWorkDays[index] = `${days} ${newStartTime}~${endTime}`;
+                          setUpdatedEmployee({
+                            ...updatedEmployee,
+                            workDay: updatedWorkDays.join(', '),
+                          });
+                        }}
+                      />
+                      <span css={valueStyles}>~</span>
+                      <WorkTimePicker
+                        value={endTime}
+                        onChange={(newEndTime) => {
+                          const updatedWorkDays = [...splitWorkDays];
+                          updatedWorkDays[index] = `${days} ${startTime}~${newEndTime}`;
+                          setUpdatedEmployee({
+                            ...updatedEmployee,
+                            workDay: updatedWorkDays.join(', '),
+                          });
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <div css={valueStyles}>{timeRange}</div>
+                  )}
                 </div>
               </div>
             );

@@ -3,26 +3,53 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
-import workcheck from '../../public/images/workcheck_logo_header.png';
+import workCheckLogo from '../../public/images/workcheck-logo-header.svg';
 import check from '../../public/images/check_logo.svg';
 import logout from '../../public/icons/logout.svg';
 import { useAuthContext } from '../Context/AuthContext.tsx';
 
 const headerStyles = css`
   background-color: #f8f9fa;
-  padding: 1rem 4rem;
+  padding: 0 4rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 1000px) {
+    padding: 0 2rem;
+  }
 `;
 
 const containerStyles = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+
+  .logo-img {
+    width: 250px;
+    height: auto;
+  }
+
+  @media (max-width: 1000px) {
+    .logo-style {
+      width: 300px;
+    }
+    .logo-img {
+      width: 200px;
+      height: auto;
+    }
+    .logo-v {
+      width: 35px;
+      height: auto;
+    }
 `;
 
 const listStyles = css`
@@ -36,7 +63,7 @@ const listStyles = css`
 const buttonStyles = css`
   background: none;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.3rem 1rem;
   cursor: pointer;
   font-size: 1rem;
   color: #373f41;
@@ -54,6 +81,8 @@ const logoutButtonStyles = css`
   box-shadow: 0px 4px 30px 0px rgba(215, 215, 215, 0.5);
   padding: 7px;
   margin-left: 10px;
+  display: flex;
+  align-items: center;
   &:hover {
     color: #0056b3;
     outline: none;
@@ -84,8 +113,8 @@ const Header: React.FC = () => {
       <header css={headerStyles}>
         <div css={containerStyles}>
           <div>
-            <img src={workcheck} alt="logo" />
-            <img src={check} alt="logo" />
+            <img src={workCheckLogo} alt="logo" className="logo-img" />
+            <img src={check} alt="logo" className="logo-v" />
           </div>
           <nav>
             <ul css={listStyles}>
@@ -113,7 +142,7 @@ const Header: React.FC = () => {
               </li>
             </ul>
           </nav>
-          <div>
+          <div css={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: '10000' }}>
             {user?.name} 님
             <button css={logoutButtonStyles} onClick={handleLogout}>
               <img src={logout} alt="로그아웃 버튼" />
