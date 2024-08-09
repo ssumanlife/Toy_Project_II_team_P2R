@@ -24,7 +24,7 @@ interface PayListProps {
   name: string;
   totalPay: number | string;
   handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
-  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
+  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | null) => void;
   month: number;
   isNull: boolean;
 }
@@ -87,7 +87,7 @@ const SpacificationModal: React.FC<PayListProps> = ({
         salaryStatementBtn = (
           <Button
             onClick={() => {
-              const textareaValue = textareaRef.current?.value;
+              const textareaValue = textareaRef.current?.value || null;
               addSalaryCorrectionList(name, reason, textareaValue);
             }}
             children={'제출'}
