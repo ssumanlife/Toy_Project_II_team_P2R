@@ -6,6 +6,7 @@ const getUserCalendarEvents = async (userId: string) => {
     const q = query(collection(db, `members/user${userId}/calendar`));
     const querySnapshot = await getDocs(q);
     const events: {
+      id: string;
       eventContent: string;
       eventEndDate: string;
       eventStartDate: string;
@@ -14,6 +15,7 @@ const getUserCalendarEvents = async (userId: string) => {
     }[] = [];
     querySnapshot.forEach((doc) =>
       events.push({
+        id: doc.id,
         ...(doc.data() as {
           eventContent: string;
           eventEndDate: string;

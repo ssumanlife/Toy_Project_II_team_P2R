@@ -2,6 +2,7 @@ import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from './Firebase_Config.tsx';
 
 const updateCalendarEvent = async (
+  id: string,
   eventContent: string,
   eventEndDate: string,
   eventStartDate: string,
@@ -15,7 +16,7 @@ const updateCalendarEvent = async (
       const updateEventPromises = collectionSnapshot.docs.map(async (eventDoc) => {
         const eventId = eventDoc.id;
         const event = eventDoc.data();
-        if (event.name === name) {
+        if (id === eventId && event.name === name) {
           await setDoc(doc(db, `members/${memberDoc.id}/calendar`, eventId), {
             eventContent,
             eventEndDate,
@@ -32,5 +33,4 @@ const updateCalendarEvent = async (
     console.log(error);
   }
 };
-
 export default updateCalendarEvent;
