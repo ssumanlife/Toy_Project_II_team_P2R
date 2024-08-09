@@ -312,7 +312,7 @@ const MyCalendar: React.FC = () => {
                 </ul>
               )}
               <div css={buttonStyle}>
-                <Button customWidth="44px" customFontSize="30px" onClick={openAddModal}>
+                <Button customWidth="40px" customFontSize="30px" onClick={openAddModal}>
                   +
                 </Button>
               </div>
@@ -357,7 +357,7 @@ const containerStyle = css`
   position: relative;
   flex: 3;
   border-radius: 20px;
-  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
+  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 1);
   background-color: var(--background-sub);
   height: 100%;
   .fc {
@@ -434,6 +434,7 @@ const calendarStyle = css`
   flex: 3;
   padding: 20px;
   cursor: pointer;
+  border-radius: 20px;
   background-color: var(--background-main);
   .fc {
     height: 100%;
