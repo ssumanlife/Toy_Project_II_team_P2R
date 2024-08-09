@@ -13,9 +13,7 @@
 <br/>
 </div>
 
-![토이2pr](https://github.com/user-attachments/assets/f4b5f49d-d180-4436-8c23-2fc7b9d98c7c)
-
-
+![토이2pr](https://github.com/user-attachments/assets/9389b52d-63a6-4637-82eb-0c36eadf9e1b)
 
 
 ---
