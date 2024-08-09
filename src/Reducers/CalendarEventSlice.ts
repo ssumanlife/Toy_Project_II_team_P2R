@@ -6,7 +6,7 @@ import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.tsx';
 import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.tsx';
 
 export interface CalendarEvent {
-  id: number;
+  id: string;
   title: string;
   start: string;
   end: string;
@@ -38,7 +38,7 @@ const calendarSlice = createSlice({
         state.events[index] = action.payload;
       }
     },
-    deleteEvent: (state, action: PayloadAction<number>) => {
+    deleteEvent: (state, action: PayloadAction<string>) => {
       state.events = state.events.filter((event) => event.id !== action.payload);
     },
   },
@@ -57,7 +57,7 @@ export const fetchEvents =
     try {
       const calendarEventData = await getUserCalendarEvents(userId);
       const events = calendarEventData.map((event, index) => ({
-        id: index + 1,
+        id: event.id,
         title: event.eventContent,
         start: event.eventStartDate,
         end: event.eventEndDate,
@@ -86,6 +86,7 @@ export const updateEventAsync =
   async (dispatch) => {
     try {
       await updateCalendarEvent(
+        updatedEvent.id,
         updatedEvent.title,
         updatedEvent.end,
         updatedEvent.start,
@@ -99,7 +100,7 @@ export const updateEventAsync =
   };
 
 export const deleteEventAsync =
-  (eventId: number): AppThunk =>
+  (eventId: string): AppThunk =>
   async (dispatch, getState) => {
     try {
       const eventToDelete = getState().calendar.events.find((event) => event.id === eventId);

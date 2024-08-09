@@ -65,6 +65,7 @@ const PayrollHistory: React.FC = () => {
     (state: RootState) => state.employeeSalary.employeeSalaryData,
   );
   const [salaryCorrectionLists, setSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
+  const [originalSalaryCorrectionLists, setOriginalSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [btnId, setBtnId] = useState<string>('');
   const [isNull, setIsNull] = useState(false);
@@ -111,6 +112,7 @@ const PayrollHistory: React.FC = () => {
       }
       setSalaryCorrectionData.sort((a, b) => b.month - a.month);
       setSalaryCorrectionLists(setSalaryCorrectionData);
+      setOriginalSalaryCorrectionLists(setSalaryCorrectionData);
     };
     setSalaryCorrectionListData();
   }, []);
@@ -151,9 +153,9 @@ const PayrollHistory: React.FC = () => {
 
   const stateFilter = (stateValue: string) => {
     const newStateList: SalaryCorrection[] = [];
-    for (let i = 0; i < salaryCorrectionLists.length; i++) {
-      if (salaryCorrectionLists[i].correctionState === stateValue) {
-        newStateList.push(salaryCorrectionLists[i]);
+    for (let i = 0; i < originalSalaryCorrectionLists.length; i++) {
+      if (originalSalaryCorrectionLists[i].correctionState === stateValue) {
+        newStateList.push(originalSalaryCorrectionLists[i]);
       }
     }
     setSalaryCorrectionLists(newStateList);
@@ -237,8 +239,8 @@ const PayrollHistory: React.FC = () => {
   const today = new Date();
   const currentDate = Number(new Date(today).toISOString().substring(6, 7));
 
-  const addSalaryCorrectionList = (name: string, reason: string, textareaValue: string | undefined) => {
-    if (reason !== '선택해주세요.' && textareaValue !== undefined && user?.name !== undefined) {
+  const addSalaryCorrectionList = (name: string, reason: string, textareaValue: string | null) => {
+    if (reason !== '선택해주세요.' && textareaValue !== null && user?.name !== undefined) {
       const newSalaryCorrectionLists = [...salaryCorrectionLists];
       const newId: number = newSalaryCorrectionLists.length + 1;
       newSalaryCorrectionLists.unshift({
@@ -324,11 +326,11 @@ const PayrollHistory: React.FC = () => {
               <table css={listTable}>
                 <thead>
                   <tr css={trStyle}>
-                    <td css={{ minWidth: '100px', paddingLeft: '40px' }}>요청자</td>
-                    <td css={{ minWidth: '140px' }}>월</td>
-                    <td css={{ minWidth: '180px' }}>정정 사유</td>
+                    <td css={{ minWidth: '120px', paddingLeft: '58px' }}>요청자</td>
+                    <td css={{ minWidth: '150px' }}>월</td>
+                    <td css={{ minWidth: '190px' }}>정정 사유</td>
                     <td>정정 내용</td>
-                    <td css={{ textAlign: 'center', minWidth: '195px' }}>상태</td>
+                    <td css={{ textAlign: 'center', minWidth: '190px' }}>상태</td>
                   </tr>
                 </thead>
                 <tbody>
