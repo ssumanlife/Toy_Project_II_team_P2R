@@ -62,6 +62,7 @@ const styles = {
     border-radius: 5px;
     background-color: #f9f9f9;
     cursor: pointer;
+    height: 30px;
     &:hover {
       background-color: #e9e9e9;
       transition: 0.3s;

@@ -30,19 +30,21 @@ export default Home;
 
 const layoutStyle = css`
   box-sizing: border-box;
-  height: calc(100vh - 76px);
+  height: calc(100vh - 176px);
   width: 100%;
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 50px 0;
+  margin: 50px auto;
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  border-radius: 20px;
   box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
 `;
 
 const calendarContainerStyle = css`
   flex: 5;
+  border-radius: 20px;
+  box-shadow: 10px 40px 300px 10px rgba(215, 215, 215, 0.5);
 `;
 
 const sideContainerStyle = css`
