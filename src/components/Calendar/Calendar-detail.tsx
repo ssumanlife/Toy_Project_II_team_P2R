@@ -9,14 +9,14 @@ interface CategoryColors {
 }
 
 const categoryColors: CategoryColors = {
-  pink: 'var(--calendar-pink)',
-  yellow: 'var(--calendar-yellow)',
-  peach: 'var(--calendar-peach)',
-  green: 'var(--calendar-green)',
-  skyblue: 'var(--calendar-skyblue)',
-  blue: 'var(--calendar-blue)',
-  purple: 'var(--calendar-purple)',
-  gray: 'var(--calendar-gray)',
+  공휴일: 'var(--calendar-pink)',
+  개인: 'var(--calendar-yellow)',
+  업무: 'var(--calendar-peach)',
+  학업: 'var(--calendar-green)',
+  가족행사: 'var(--calendar-skyblue)',
+  운동: 'var(--calendar-blue)',
+  문화: 'var(--calendar-purple)',
+  종교: 'var(--calendar-gray)',
 };
 
 interface CalendarDetailModalProps {
