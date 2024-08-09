@@ -152,7 +152,7 @@ const approvalState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #dceeff;
-  padding-top: 7px;
+  padding-top: 5px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
@@ -165,7 +165,7 @@ const rejectState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #ffe6e6;
-  padding-top: 7px;
+  padding-top: 5px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
@@ -179,7 +179,7 @@ const standByState = css`
   color: #333;
   font-size: 14px;
   background-color: #e6e6e6;
-  padding-top: 7px;
+  padding-top: 5px;
   box-sizing: border-box;
   &:hover {
     background-color: #adadad;

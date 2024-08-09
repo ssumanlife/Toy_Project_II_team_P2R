@@ -169,10 +169,11 @@ const MyCalendar: React.FC = () => {
     margin-bottom: 15px;
     background-color: white;
     border-left: 5px solid ${categoryColors[category]};
-    padding: 10px;
+    padding: 15px 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     cursor: pointer;
+    border-radius: 0 10px 10px 0;
   `;
   const calendarContainerStyle = css`
     ${calendarStyle}
@@ -229,7 +230,7 @@ const MyCalendar: React.FC = () => {
     <div css={outerContainerStyle}>
       <div css={containerStyle}>
         <div css={sidebarStyle}>
-          <h3>개인 캘린더</h3>
+          <h3 css={{ padding: '5px 10px 20px' }}>개인 캘린더</h3>
           {categories.map((category) => (
             <div key={category}>
               <input
@@ -446,7 +447,7 @@ const eventListStyle = css`
   padding: 20px;
   overflow-y: auto;
   h3 {
-    margin-bottom: 15px;
+    margin-bottom: 30px;
   }
 `;
 
@@ -477,8 +478,8 @@ const ulStyle = css`
 
 const spanStyle = css`
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 10px;
+  right: 10px;
   cursor: pointer;
 `;
 

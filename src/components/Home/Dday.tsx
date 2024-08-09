@@ -16,7 +16,7 @@ export const Dday: React.FC = () => (
 
 const contentContainerStyle = css`
   width: 400px;
-  height: 185px;
+  height: 100%;
   flex-shrink: 0;
   border-radius: 20px;
   background: linear-gradient(185deg, #a1c6fd 8.58%, #5988ff 87.93%);
