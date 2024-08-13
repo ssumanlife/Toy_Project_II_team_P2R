@@ -2,11 +2,11 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-continue */
 import { createSlice, createAsyncThunk, AsyncThunk } from '@reduxjs/toolkit';
-import { getCollectionData } from '../API/Firebase/GetUserData.tsx';
+import { getCollectionData } from '../API/Firebase/GetUserData.ts';
 import { EmployeeSalaryType } from '../Pages/Payroll/PayrollHistory.tsx';
-import { RootState } from '../store.tsx';
+import { RootState } from '../store.ts';
 
-interface EmployeeSalaryState {
+export interface EmployeeSalaryState {
   employeeSalaryData: EmployeeSalaryType[];
   status: 'idle' | 'loading' | 'failed';
   error: string | null;

@@ -1,5 +1,5 @@
 import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
-import { db } from './Firebase_Config.tsx';
+import { db } from './Firebase_Config.ts';
 
 const getStandByNames = async (): Promise<string[]> => {
   try {

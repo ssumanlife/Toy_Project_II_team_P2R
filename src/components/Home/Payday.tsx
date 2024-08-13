@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import Button from '../Button.tsx';
 import Polygon1 from '../../../public/images/Polygon 1.svg';
 import Polygon2 from '../../../public/images/Polygon 2.svg';
-import { getPayDay, updatePayDay } from '../../API/Firebase/Payday.tsx';
+import { getPayDay, updatePayDay } from '../../API/Firebase/Payday.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 
 const contentContainerStyle = css`

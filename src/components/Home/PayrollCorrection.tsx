@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-import getStandByNames from '../../API/Firebase/GetCorrectionData.tsx';
+import getStandByNames from '../../API/Firebase/GetCorrectionData.ts';
 
 const PayrollCorrection: React.FC = () => {
   const [data, setData] = useState<{ id: number; name: string }[]>([]);

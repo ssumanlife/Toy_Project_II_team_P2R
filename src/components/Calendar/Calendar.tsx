@@ -12,7 +12,7 @@ import Button from '../Button.tsx';
 import CalendarDeleteModal from './Calendar-delete.tsx';
 import CalendarDetailModal from './Calendar-detail.tsx';
 import CalendarAddModal from './Calendar-add.tsx';
-import { RootState, AppDispatch } from '../../store.tsx';
+import { RootState, AppDispatch } from '../../store.ts';
 import {
   fetchEvents,
   addEventAsync,

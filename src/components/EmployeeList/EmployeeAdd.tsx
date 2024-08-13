@@ -8,7 +8,7 @@ import { modalContentStyles, containerStyles, titleStyles } from './EmployeeSpec
 import BankSelectComponent from './bankSelect.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
-import { addEmployee } from '../../API/Firebase/AddEmployeeList.tsx';
+import { addEmployee } from '../../API/Firebase/AddEmployeeList.ts';
 
 const valueStyles = css`
   color: var(--text-light-gray);
@@ -39,7 +39,7 @@ export const inputStyles = css`
   }
 
   /* Firefox */
-  &[type=number] {
+  &[type='number'] {
     -moz-appearance: textfield;
   }
 `;
@@ -86,12 +86,12 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
     phoneNumber: '',
     workDay: '',
     accountNumber: '',
-    baseSalary: ''
+    baseSalary: '',
   });
 
   const [selectedBank, setSelectedBank] = useState<string>('');
-  const [workSchedules, setWorkSchedules] = useState<{ days: string, start: string | null, end: string | null }[]>([
-    { days: '', start: null, end: null }
+  const [workSchedules, setWorkSchedules] = useState<{ days: string; start: string | null; end: string | null }[]>([
+    { days: '', start: null, end: null },
   ]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,8 +121,8 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
 
   const handleSave = async () => {
     const workDayString = workSchedules
-      .filter(schedule => schedule.days && schedule.start && schedule.end)
-      .map(schedule => `${schedule.days} ${schedule.start}~${schedule.end}`)
+      .filter((schedule) => schedule.days && schedule.start && schedule.end)
+      .map((schedule) => `${schedule.days} ${schedule.start}~${schedule.end}`)
       .join(', ');
 
     const employeeToSave = { ...newEmployee, workDay: workDayString };
@@ -131,7 +131,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
       await addEmployee(employeeToSave);
       onSave(employeeToSave);
     } catch (error) {
-      console.error("Failed to save employee", error);
+      console.error('Failed to save employee', error);
     }
 
     onClose();
@@ -169,7 +169,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
           <div>
             <div css={titleStyles}>계좌 번호</div>
             <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
+              <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
               <input
                 type="number"
                 name="accountNumber"
@@ -191,32 +191,28 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
               css={inputStyles}
             />
             <span css={[valueStyles, { marginLeft: '6px' }]}>원</span>
+          </div>
+          {workSchedules.map((schedule, index) => (
+            <div css={{ gridColumn: 'span 2' }} key={index}>
+              <div css={{ display: 'flex', alignItems: 'center' }}>
+                <div css={titleStyles}>근무 시간 {index + 1}</div>
+                <button css={AddButton} onClick={handleAddSchedule}>
+                  +
+                </button>
+              </div>
+              <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <DaysOfWeek
+                  workDay={schedule.days}
+                  onDayClick={(days) => handleDayClick(index, days)}
+                  editable={true}
+                />
+                <WorkTimePicker value={schedule.start} onChange={(time) => handleTimeChange(index, 'start', time)} />
+                <div css={valueStyles}>~</div>
+                <WorkTimePicker value={schedule.end} onChange={(time) => handleTimeChange(index, 'end', time)} />
+              </div>
             </div>
-            {workSchedules.map((schedule, index) => (
-              <div css={{ gridColumn: 'span 2' }} key={index}>
-                <div css={{ display: 'flex', alignItems: 'center' }}>
-                  <div css={titleStyles}>근무 시간 {index + 1}</div>
-                  <button css={AddButton} onClick={handleAddSchedule}>+</button>
-              </div>
-                <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                  <DaysOfWeek
-                    workDay={schedule.days}
-                    onDayClick={(days) => handleDayClick(index, days)}
-                    editable={true}
-                  />
-                  <WorkTimePicker
-                    value={schedule.start}
-                    onChange={(time) => handleTimeChange(index, 'start', time)}
-                  />
-                  <div css={valueStyles}>~</div>
-                  <WorkTimePicker
-                    value={schedule.end}
-                    onChange={(time) => handleTimeChange(index, 'end', time)}
-                  />
-                </div>
-              </div>
-            ))}
-            
+          ))}
+
           <div css={ButtonStyles}>
             <Button onClick={handleSave}>저장</Button>
           </div>

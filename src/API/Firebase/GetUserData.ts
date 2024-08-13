@@ -1,5 +1,5 @@
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from './Firebase_Config.tsx';
+import { db } from './Firebase_Config.ts';
 
 interface CollectionData {
   [key: string]: any;

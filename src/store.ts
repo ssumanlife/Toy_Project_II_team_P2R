@@ -1,6 +1,6 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import modalSlice from './Reducers/ModalSlice.ts';
-import employeeSalarySlice from './Reducers/EmployeeSalarySlice.tsx';
+import employeeSalarySlice from './Reducers/EmployeeSalarySlice.ts';
 import calendarSlice from './Reducers/CalendarEventSlice.ts';
 
 const store = configureStore({
