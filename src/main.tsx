@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import store from './store.tsx';
+import store from './store.ts';
 import App from './App.tsx';
 import Error from './Pages/Error.tsx';
 import Home from './Pages/Home.tsx';

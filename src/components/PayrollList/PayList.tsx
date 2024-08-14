@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { PayData } from '../../Pages/Payroll/PayrollHistory.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import SpacificationModal from './SpacificationModal.tsx';
-import { getPayDay } from '../../API/Firebase/Payday.tsx';
+import { getPayDay } from '../../API/Firebase/Payday.ts';
 
 interface PayListProps {
   id: number;
@@ -19,9 +19,10 @@ interface PayListProps {
   addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | null) => void;
   month: number;
   isNull: boolean;
-  spacificationModal: boolean;
-  onSpacificationModal: () => void;
+  openModalName: string | null;
+  onSpacificationModal: (name: string | null) => void;
   adminViewed: boolean;
+  errText: string;
 }
 
 const PayList: React.FC<PayListProps> = ({
@@ -34,9 +35,10 @@ const PayList: React.FC<PayListProps> = ({
   addSalaryCorrectionList,
   month,
   isNull,
-  spacificationModal,
+  openModalName,
   onSpacificationModal,
   adminViewed,
+  errText,
 }) => {
   const [payDay, setPayDay] = useState<string | null>('');
   const { user } = useAuthContext();
@@ -71,7 +73,7 @@ const PayList: React.FC<PayListProps> = ({
 
   return (
     <li css={liItem}>
-      {spacificationModal ? (
+      {openModalName === name ? (
         <SpacificationModal
           id={id}
           payData={payData}
@@ -82,6 +84,7 @@ const PayList: React.FC<PayListProps> = ({
           addSalaryCorrectionList={addSalaryCorrectionList}
           month={month}
           isNull={isNull}
+          errText={errText}
         />
       ) : null}
       <p>
@@ -92,14 +95,14 @@ const PayList: React.FC<PayListProps> = ({
       </p>
       <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
       {viewedPm ? (
-        <button css={readBtn} onClick={onSpacificationModal}>
+        <button css={readBtn} onClick={() => onSpacificationModal(name)}>
           열람
         </button>
       ) : (
         <button
           css={unreadBtn}
           onClick={() => {
-            onSpacificationModal();
+            onSpacificationModal(name);
             handleIsViewd(id, name, month);
           }}
         >

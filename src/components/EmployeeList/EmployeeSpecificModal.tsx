@@ -6,7 +6,7 @@ import Button from '../Button.tsx';
 import EmployeeScheduleRequests from '../../Pages/EmployeeList/EmployeeScheduleRequests.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import { inputStyles } from './EmployeeAdd.tsx';
-import updateEmployee from '../../API/Firebase/UpdateEmployeeList.tsx';
+import updateEmployee from '../../API/Firebase/UpdateEmployeeList.ts';
 import BankSelectComponent from './bankSelect.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
 

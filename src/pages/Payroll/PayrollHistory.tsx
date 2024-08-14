@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable dot-notation */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
@@ -8,19 +9,19 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../store.tsx';
+import { RootState, AppDispatch } from '../../store.ts';
 import SalaryList from '../../Components/PayrollList/SalaryList.tsx';
 import PayList from '../../Components/PayrollList/PayList.tsx';
 import ApprovalModal from '../../Components/PayrollList/ApprovalModal.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../../Components/Select.tsx';
-import { getCollectionData } from '../../API/Firebase/GetUserData.tsx';
-import updatePayrollData from '../../API/Firebase/UpdatePayrollData.tsx';
-import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.tsx';
-import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.tsx';
-import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.tsx';
+import { getCollectionData } from '../../API/Firebase/GetUserData.ts';
+import updatePayrollData from '../../API/Firebase/UpdatePayrollData.ts';
+import updateCorrectionState from '../../API/Firebase/UpdatePayrollCorApp.ts';
+import createPayrollCorApp from '../../API/Firebase/CreatePayrollCorApp.ts';
+import deleteSalaryCorrectionAPI from '../../API/Firebase/DeleteSalaryCorrection.ts';
 import { showModal, hiddenModal } from '../../Reducers/ModalSlice.ts';
-import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.tsx';
+import { fetchEmployeeSalaryData, setEmployeeSalary } from '../../Reducers/EmployeeSalarySlice.ts';
 import LoadingAnimation from '../../Components/LodingAnimation.tsx';
 
 const SelectWidthCustom = css`
@@ -44,8 +45,6 @@ export interface SalaryCorrection {
   month: number;
   reasonForApplication: string;
   correctionDetails: string;
-  onModal?: any;
-  approval?: string;
   correctionState: string;
 }
 export interface EmployeeSalaryType {
@@ -60,7 +59,6 @@ export interface EmployeeSalaryType {
 const PayrollHistory: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const yesNoModal = useSelector((state: RootState) => state.modal.modals['yesNoModal']);
-  const spacificationModal = useSelector((state: RootState) => state.modal.modals['spacificationModal']);
   const employeeSalary: EmployeeSalaryType[] = useSelector(
     (state: RootState) => state.employeeSalary.employeeSalaryData,
   );
@@ -68,8 +66,10 @@ const PayrollHistory: React.FC = () => {
   const [originalSalaryCorrectionLists, setOriginalSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [btnId, setBtnId] = useState<string>('');
+  const [errText, setErrText] = useState<string>('');
   const [isNull, setIsNull] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [openModalName, setOpenModalName] = useState<string | null>(null);
   const { user } = useAuthContext();
   const isAdmin = Boolean(user?.isAdmin);
 
@@ -147,17 +147,18 @@ const PayrollHistory: React.FC = () => {
     setBtnId(id);
   };
 
-  const onSpacificationModal = () => {
-    spacificationModal ? dispatch(hiddenModal('spacificationModal')) : dispatch(showModal('spacificationModal'));
+  const onSpacificationModal = (name: string | null) => {
+    if (openModalName === name) {
+      setOpenModalName(null);
+    } else {
+      setOpenModalName(name);
+    }
   };
 
   const stateFilter = (stateValue: string) => {
-    const newStateList: SalaryCorrection[] = [];
-    for (let i = 0; i < originalSalaryCorrectionLists.length; i++) {
-      if (originalSalaryCorrectionLists[i].correctionState === stateValue) {
-        newStateList.push(originalSalaryCorrectionLists[i]);
-      }
-    }
+    const newStateList: SalaryCorrection[] = originalSalaryCorrectionLists.filter(
+      (item) => item.correctionState === stateValue,
+    );
     setSalaryCorrectionLists(newStateList);
   };
 
@@ -190,7 +191,7 @@ const PayrollHistory: React.FC = () => {
     try {
       await updatePayrollData(name, month, additionalPay, isAdmin);
     } catch (error) {
-      console.log(error, 'error');
+      console.error(new Error('faild to update'));
     }
   };
 
@@ -213,8 +214,9 @@ const PayrollHistory: React.FC = () => {
           });
           dispatch(setEmployeeSalary(newEmploySalary));
           additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
+          setErrText('');
         } else {
-          alert('숫자만 입력 가능합니다.');
+          setErrText('숫자만 입력 가능합니다.');
         }
       } else if (/^\d+$/.test(inputValue)) {
         const newFilterEmploySalary = employeeSalary.map((employee) => {
@@ -231,8 +233,9 @@ const PayrollHistory: React.FC = () => {
         });
         dispatch(setEmployeeSalary(newFilterEmploySalary));
         additionalPayUpdate(name, month, Number(inputValue), user?.isAdmin);
+        setErrText('');
       } else {
-        alert('숫자만 입력 가능합니다.');
+        setErrText('숫자만 입력 가능합니다.');
       }
   };
 
@@ -300,9 +303,10 @@ const PayrollHistory: React.FC = () => {
                   addSalaryCorrectionList={addSalaryCorrectionList}
                   month={item.month}
                   isNull={isNull}
-                  spacificationModal={spacificationModal}
+                  openModalName={openModalName}
                   onSpacificationModal={onSpacificationModal}
                   adminViewed={item.adminViewed}
+                  errText={errText}
                 />
               ))}
             </ul>

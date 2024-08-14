@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../store.tsx';
-import addCalendarEvent from '../API/Firebase/AddCalendarEvent.tsx';
-import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.tsx';
-import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.tsx';
-import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.tsx';
+import { AppThunk } from '../store.ts';
+import addCalendarEvent from '../API/Firebase/AddCalendarEvent.ts';
+import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.ts';
+import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.ts';
+import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.ts';
 
 export interface CalendarEvent {
   id: string;

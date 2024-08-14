@@ -1,13 +1,14 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { db } from './Firebase_Config.tsx';
+import { db } from './Firebase_Config.ts';
 
 const createPayrollCorApp = async (name: string, month: number, option: string, correctionDetails: string) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    const promises = membersSnapshot.docs.map(async (memberDoc) => {
+    for (const memberDoc of membersSnapshot.docs) {
       const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollCorApp`));
-      const payDataDocs = collectionSnapshot.docs;
-      const promises2 = payDataDocs.map(async (payDataDoc) => {
+      for (const payDataDoc of collectionSnapshot.docs) {
         const payData = payDataDoc.data();
         if (payData.name === name) {
           await addDoc(collection(db, `members/${memberDoc.id}/payrollCorApp`), {
@@ -17,11 +18,10 @@ const createPayrollCorApp = async (name: string, month: number, option: string, 
             correctionDetails,
             reasonForApplication: option,
           });
+          break;
         }
-      });
-      await Promise.all(promises2);
-    });
-    await Promise.all(promises);
+      }
+    }
   } catch (error) {
     console.log(error);
   }
