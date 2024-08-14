@@ -17,7 +17,7 @@ const modalOverlay = css`
 
 const modalContent = css`
   background: var(--background-main);
-  padding: 20px;
+  padding: 20px 10px;
   border-radius: var(--border-radius-medium);
   // width: 1063px;
   // height: 700px;

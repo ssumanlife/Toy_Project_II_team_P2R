@@ -90,29 +90,6 @@ const EmployeeList: React.FC = () => {
     const fetchData = async () => {
       const employeeData = await getEmployeeData();
 
-      if (employeeData.length === 0) {
-        // 데이터가 없을 때만 더미 데이터 추가
-        const dummyData: Employee[] = [
-          {
-            employeeId: 'dummy1',
-            name: '김더미',
-            phoneNumber: '010-1111-1111',
-            workDay: '월화수 09:00~18:00, 금 8:00~12:00',
-            accountNumber: '신한은행 1234567890',
-            baseSalary: '2500000',
-          },
-          {
-            employeeId: 'dummy2',
-            name: '이더미',
-            phoneNumber: '010-2222-2222',
-            workDay: '목금 10:00~19:00',
-            accountNumber: '카카오뱅크 0987654321',
-            baseSalary: '3000000',
-          },
-        ];
-        employeeData.push(...dummyData);
-      }
-
       setEmployees(employeeData);
       setData(employeeData.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
     };
@@ -140,9 +117,7 @@ const EmployeeList: React.FC = () => {
     const updatedEmployeeData = [...employees, employee];
     setEmployees(updatedEmployeeData);
     setIsAddModalOpen(false);
-    const newPage = Math.ceil(updatedEmployeeData.length / COUNT_PER_PAGE);
-    setPage(newPage);
-    setData(updatedEmployeeData.slice((newPage - 1) * COUNT_PER_PAGE, newPage * COUNT_PER_PAGE));
+    setData(updatedEmployeeData.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
   };
 
   const handleDeleteEmployee = async () => {
@@ -155,6 +130,7 @@ const EmployeeList: React.FC = () => {
         setPage(1);
         setData(updatedEmployeeData.slice(0, COUNT_PER_PAGE));
         setIsDeleteModalOpen(false);
+        setIsDeleteMode(false);
       } catch (error) {
         console.error('Failed to delete employee', error);
       }

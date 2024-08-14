@@ -24,9 +24,7 @@ const updateEmployee = async (employee: Employee): Promise<void> => {
       },
       { merge: true },
     );
-    console.log('Employee successfully updated!');
   } catch (error) {
-    console.error('Error updating employee: ', error);
     throw new Error('Failed to update employee');
   }
 };

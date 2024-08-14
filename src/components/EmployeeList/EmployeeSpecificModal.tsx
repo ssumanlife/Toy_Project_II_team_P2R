@@ -34,7 +34,7 @@ export const containerStyles = css`
   margin: 0 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 40px;
 `;
 
 export const titleStyles = css`
@@ -98,7 +98,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
     console.log('Clicked Day:', clickedDay);
 
     // 클릭된 요일을 배열로 시작 (하나의 요일만 있는 배열)
-    let newDaysArray = [clickedDay];
+    const newDaysArray = [clickedDay];
 
     // 요일 배열을 정렬합니다.
     const dayOrder = ['월', '화', '수', '목', '금', '토', '일'];
