@@ -7,7 +7,7 @@
 /* eslint-disable no-unused-expressions */
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Button from '../Button.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../Select.tsx';
@@ -27,7 +27,7 @@ interface PayListProps {
   addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | null) => void;
   month: number;
   isNull: boolean;
-  errText: string;
+  errText: string | null;
 }
 
 const SpacificationModal: React.FC<PayListProps> = ({
@@ -49,12 +49,20 @@ const SpacificationModal: React.FC<PayListProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthContext();
 
-  const handleSelect = (option: string) => {
-    setReason(option);
-  };
+  useEffect(() => {
+    errText !== null ? setReadOnly(false) : setReadOnly(true);
+  }, [errText]);
 
   const handleReadOnly = () => {
-    readOnly ? setReadOnly(false) : setReadOnly(true);
+    if (errText === null && readOnly) {
+      setReadOnly(false);
+    } else if (errText === null && !readOnly) {
+      setReadOnly(true);
+    }
+  };
+
+  const handleSelect = (option: string) => {
+    setReason(option);
   };
 
   const changePay = (pay: number): string => pay.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');

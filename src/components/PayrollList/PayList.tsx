@@ -22,7 +22,7 @@ interface PayListProps {
   openModalName: string | null;
   onSpacificationModal: (name: string | null) => void;
   adminViewed: boolean;
-  errText: string;
+  errText: string | null;
 }
 
 const PayList: React.FC<PayListProps> = ({
