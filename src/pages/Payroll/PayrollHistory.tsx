@@ -66,7 +66,7 @@ const PayrollHistory: React.FC = () => {
   const [originalSalaryCorrectionLists, setOriginalSalaryCorrectionLists] = useState<SalaryCorrection[]>([]);
   const [month, setMonth] = useState('2024 07월');
   const [btnId, setBtnId] = useState<string>('');
-  const [errText, setErrText] = useState<string>('');
+  const [errText, setErrText] = useState<string | null>(null);
   const [isNull, setIsNull] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [openModalName, setOpenModalName] = useState<string | null>(null);
@@ -214,7 +214,7 @@ const PayrollHistory: React.FC = () => {
           });
           dispatch(setEmployeeSalary(newEmploySalary));
           additionalPayUpdate(name, month, Number(additionalPayChange), user?.isAdmin);
-          setErrText('');
+          setErrText(null);
         } else {
           setErrText('숫자만 입력 가능합니다.');
         }
@@ -233,7 +233,7 @@ const PayrollHistory: React.FC = () => {
         });
         dispatch(setEmployeeSalary(newFilterEmploySalary));
         additionalPayUpdate(name, month, Number(inputValue), user?.isAdmin);
-        setErrText('');
+        setErrText(null);
       } else {
         setErrText('숫자만 입력 가능합니다.');
       }
@@ -255,7 +255,7 @@ const PayrollHistory: React.FC = () => {
         correctionState: 'standBy',
       });
       setIsNull(false);
-      dispatch(hiddenModal('spacificationModal'));
+      setOpenModalName(null);
       setSalaryCorrectionLists(newSalaryCorrectionLists);
       createPayrollCorApp(name, currentDate, reason, textareaValue);
     } else {

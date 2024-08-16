@@ -1,26 +1,22 @@
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 const deleteSalaryCorrectionAPI = async (name: string, month: number, correctionDetails: string) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-
-    const memberDeletionPromises = membersSnapshot.docs.map(async (memberDoc) => {
-      const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollCorApp`));
-
-      const payDataDocs = collectionSnapshot.docs.filter((payDataDoc) => {
-        const payData = payDataDoc.data();
-        return payData.name === name && payData.month === month && payData.correctionDetails === correctionDetails;
-      });
-
-      const deletePromises = payDataDocs.map((payDataDoc) =>
-        deleteDoc(doc(db, `members/${memberDoc.id}/payrollCorApp`, payDataDoc.id)),
+    const deletePromises = membersSnapshot.docs.map(async (memberDoc) => {
+      const q = query(
+        collection(db, 'members', memberDoc.id, 'payrollCorApp'),
+        where('name', '==', name),
+        where('month', '==', month),
+        where('correctionDetails', '==', correctionDetails),
       );
-
-      await Promise.all(deletePromises);
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(async (docSnapshot) => {
+        deleteDoc(doc(db, 'members', memberDoc.id, 'payrollCorApp', docSnapshot.id));
+      });
     });
-
-    await Promise.all(memberDeletionPromises);
+    await Promise.all(deletePromises);
   } catch (error) {
     console.error('Error deleting salary correction:', error);
   }

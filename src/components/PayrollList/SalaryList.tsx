@@ -121,7 +121,7 @@ const stateCheckBtn = css`
 
 const employee = css`
   position: absolute;
-  right: 0;
+  right: 10px;
   margin-top: 2px;
   span {
     font-size: 20px;

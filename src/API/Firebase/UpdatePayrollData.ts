@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 const updatePayrollData = async (
@@ -9,45 +9,26 @@ const updatePayrollData = async (
 ) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-
-    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
-      const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
-
-      const payDataPromises = collectionSnapshot.docs.map(async (payDataDoc) => {
-        const payDataId = payDataDoc.id;
-        const payData = payDataDoc.data();
+    const payDataSnapshot = membersSnapshot.docs.map(async (memberDoc) => {
+      const q = query(
+        collection(db, 'members', memberDoc.id, 'payrollDetails'),
+        where('name', '==', name),
+        where('month', '==', month),
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(async (docSnapshot) => {
+        const payData = docSnapshot.data();
         const additionalAllowanceValue = changeData === 'notChange' ? payData.additionalAllowance : changeData;
-
         const data4Update = {
+          ...payData,
           additionalAllowance: additionalAllowanceValue,
-          name: payData.name,
-          baseSalary: payData.baseSalary,
-          employmentInsurance: payData.employmentInsurance,
-          healthInsurance: payData.healthInsurance,
-          isViewed: payData.isViewed,
-          adminViewed: payData.adminViewed,
-          issueDate: payData.issueDate,
-          longTermCare: payData.longTermCare,
-          month: payData.month,
-          nationalPension: payData.nationalPension,
-          weeklyHolidayAllowance: payData.weeklyHolidayAllowance,
+          isViewed: !isAdmin ? true : payData.isViewed,
+          adminViewed: isAdmin ? true : payData.adminViewed,
         };
-
-        if (!isAdmin) {
-          data4Update.isViewed = true;
-        } else {
-          data4Update.adminViewed = true;
-        }
-
-        if (payData.name === name && payData.month === month) {
-          await setDoc(doc(db, `members/${memberDoc.id}/payrollDetails`, payDataId), data4Update);
-        }
+        setDoc(doc(db, 'members', memberDoc.id, 'payrollDetails', docSnapshot.id), data4Update);
       });
-
-      await Promise.all(payDataPromises);
     });
-
-    await Promise.all(memberPromises);
+    await Promise.all(payDataSnapshot);
   } catch (error) {
     console.error('Error updating payroll data:', error);
   }
