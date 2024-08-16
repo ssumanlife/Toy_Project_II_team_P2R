@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 const updateCalendarEvent = async (
   id: string,

@@ -7,7 +7,7 @@ import signinPageImage from '../../public/images/signin_page_image.svg';
 import workCheckLogo from '../../public/images/workcheck_logo_signin.svg';
 import Button from '../Components/Button.tsx';
 import triangle from '../../public/images/triangle.svg';
-import { login } from '../API/Firebase/Firebase.ts';
+import { login } from '../API/Firebase/LoginRegister.ts';
 import { useAuthContext } from '../Context/AuthContext.tsx';
 
 const Signin: React.FC = () => {

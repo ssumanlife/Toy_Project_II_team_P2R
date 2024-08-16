@@ -1,7 +1,7 @@
 import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 import shortid from 'shortid';
 import { comparePassword, hashPassword } from '../../Utils/passwordUtils.tsx';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 interface User {
   name: string;

@@ -1,5 +1,5 @@
 import { doc, deleteDoc } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 const deleteEmployee = async (employeeId: string): Promise<void> => {
   try {

@@ -1,5 +1,5 @@
 import { collection, query, getDocs } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 const getUserCalendarEvents = async (userId: string) => {
   try {

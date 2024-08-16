@@ -1,5 +1,5 @@
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 interface CollectionData {
   [key: string]: any;
@@ -31,7 +31,7 @@ const getCollectionData = async (collectionName: string) => {
 
     await Promise.all(memberPromises);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
   return allDocData;
 };

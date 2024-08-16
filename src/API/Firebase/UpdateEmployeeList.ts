@@ -1,5 +1,5 @@
 import { doc, setDoc } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts'; // Firebase 설정 파일을 가져옵니다.
+import { db } from './FirebaseConfig.ts'; // Firebase 설정 파일을 가져옵니다.
 
 interface Employee {
   employeeId: string;
