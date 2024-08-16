@@ -33,7 +33,7 @@ const updateCalendarEvent = async (
 
     await Promise.all(updatePromises);
   } catch (error) {
-    console.error('Error updating calendar event:', error);
+    console.warn('Error updating calendar event:', error);
   }
 };
 

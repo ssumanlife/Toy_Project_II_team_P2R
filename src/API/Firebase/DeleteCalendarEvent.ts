@@ -31,7 +31,7 @@ const deleteCalendarEvent = async (
 
     await Promise.all(memberDeletionPromises);
   } catch (error) {
-    console.error('Error deleting calendar event:', error);
+    console.warn('Error deleting calendar event:', error);
   }
 };
 
