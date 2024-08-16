@@ -1,4 +1,4 @@
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 interface Employee {
@@ -23,20 +23,30 @@ const formatPhoneNumber = (phoneNumber: string): string => {
   return fullPhoneNumber;
 };
 
-const addEmployee = async (employee: Employee): Promise<void> => {
+const addEmployee = async (employee: Employee): Promise<Employee> => {
   try {
     const formattedPhoneNumber = formatPhoneNumber(employee.phoneNumber);
     const fullAccount = employee.bankName ? `${employee.bankName} ${employee.accountNumber}` : employee.accountNumber;
-    await addDoc(collection(db, 'members'), {
+
+    const docRef = doc(collection(db, 'members'));
+
+    await setDoc(docRef, {
       ...employee,
+      employeeId: docRef.id,
       phoneNumber: formattedPhoneNumber,
       accountNumber: fullAccount,
       isAdmin: false,
     });
+
+    return {
+      ...employee,
+      employeeId: docRef.id,
+      phoneNumber: formattedPhoneNumber,
+      accountNumber: fullAccount,
+    };
   } catch (error) {
     throw new Error('Failed to add employee');
   }
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export { addEmployee };
+export default addEmployee;

@@ -19,27 +19,21 @@ const getEmployeeData = async (): Promise<Employee[]> => {
     const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
       const data = memberDoc.data();
 
-      // isAdmin이 false인 경우에만 처리
-      if (data.isAdmin === false) {
-        // 기본급 가져오기
+      if (!data.isAdmin) {
         const payrollDetailsSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
-        let salary = '2100000';
 
-        payrollDetailsSnapshot.forEach((doc) => {
-          const payrollData = doc.data();
-          salary = payrollData.baseSalary;
-        });
+        const salary = payrollDetailsSnapshot.empty
+          ? data.baseSalary || '2100000'
+          : payrollDetailsSnapshot.docs[0]?.data().baseSalary || '2100000';
 
-        const employee: Employee = {
+        employeeData.push({
           employeeId: memberDoc.id,
           name: data.name,
           phoneNumber: data.phoneNumber,
           workDay: data.workDay,
           accountNumber: data.accountNumber,
           baseSalary: salary,
-        };
-
-        employeeData.push(employee);
+        });
       }
     });
 
@@ -53,4 +47,4 @@ const getEmployeeData = async (): Promise<Employee[]> => {
   return employeeData;
 };
 
-export { getEmployeeData };
+export default getEmployeeData;

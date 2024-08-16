@@ -1,13 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Modal from '../Modal.tsx';
 import Button from '../Button.tsx';
 import { Employee, modalContentStyles, containerStyles, titleStyles } from './EmployeeSpecificModal.tsx';
 import BankSelectComponent from './bankSelect.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
-import { addEmployee } from '../../API/Firebase/AddEmployeeList.ts';
 
 const valueStyles = css`
   color: var(--text-light-gray);
@@ -167,13 +168,16 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
     const employeeToSave = { ...newEmployee, workDay: workDayString, accountNumber: fullAccountNumber };
 
     try {
-      await addEmployee(employeeToSave);
-      onSave(employeeToSave);
+      toast.success(`${newEmployee.name}님이 추가되었습니다!`, {
+        autoClose: 1000,
+        onClose: () => {
+          onSave(employeeToSave);
+          onClose();
+        },
+      });
     } catch (error) {
       console.error('Failed to save employee', error);
     }
-
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -181,6 +185,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyles}>
+        <ToastContainer position="bottom-center" style={{ zIndex: 9999 }} />
         <div css={[containerStyles, { paddingTop: '20px' }]}>
           <h3 css={modaltitleStyles}>직원 추가</h3>
           <div>
@@ -249,6 +254,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
             {errors.baseSalary && <div css={errorStyles}>{errors.baseSalary}</div>}
           </div>
           {workSchedules.map((schedule, index) => (
+            // eslint-disable-next-line react/no-array-index-key
             <div css={{ gridColumn: 'span 2' }} key={index}>
               <div css={{ display: 'flex', alignItems: 'center' }}>
                 <div css={titleStyles}>근무 시간 {index + 1}</div>

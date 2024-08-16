@@ -15,7 +15,6 @@ interface BankSelectComponentProps {
 
 const BankSelectComponent: React.FC<BankSelectComponentProps> = ({ selectedBank, onChange }) => {
   const handleSelect = (option: string) => {
-    console.log('Selected bank option:', option);
     onChange(option);
   };
 

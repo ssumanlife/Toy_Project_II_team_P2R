@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -5,9 +6,10 @@ import Button from '../../Components/Button.tsx';
 import Modal from '../../Components/Modal.tsx';
 import EmployeeSpecificModal, { Employee } from '../../Components/EmployeeList/EmployeeSpecificModal.tsx';
 import EmployeeAddModal from '../../Components/EmployeeList/EmployeeAdd.tsx';
-import PaginationComponent from '../../Components/pagination.tsx';
-import { getEmployeeData } from '../../API/Firebase/GetEmployeeData.ts';
+import PaginationComponent from '../../Components/Pagination.tsx';
+import getEmployeeData from '../../API/Firebase/GetEmployeeData.ts';
 import deleteEmployee from '../../API/Firebase/DeleteEmployeeList.ts';
+import addEmployee from '../../API/Firebase/AddEmployeeList.ts';
 
 const COUNT_PER_PAGE = 8;
 
@@ -98,7 +100,8 @@ const EmployeeList: React.FC = () => {
   }, [page]);
 
   useEffect(() => {
-    setData(employees.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
+    const updatedData = employees.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE);
+    setData(updatedData);
   }, [employees, page]);
 
   const handleRowClick = (employee: Employee) => {
@@ -113,11 +116,28 @@ const EmployeeList: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEmployee = (employee: Employee) => {
-    const updatedEmployeeData = [...employees, employee];
-    setEmployees(updatedEmployeeData);
-    setIsAddModalOpen(false);
-    setData(updatedEmployeeData.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
+  const handleSaveEmployee = async (employee: Employee) => {
+    try {
+      const savedEmployee = await addEmployee(employee);
+
+      // 새로운 직원 추가
+      const updatedEmployeeData = [...employees, savedEmployee];
+
+      // 알파벳 순으로 정렬
+      updatedEmployeeData.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR', { sensitivity: 'base' }));
+
+      // 현재 페이지 번호를 계산하여 업데이트
+      const employeeIndex = updatedEmployeeData.findIndex((emp) => emp.employeeId === savedEmployee.employeeId);
+      const newPage = Math.floor(employeeIndex / COUNT_PER_PAGE) + 1;
+
+      setEmployees(updatedEmployeeData);
+      setPage(newPage); // 해당 직원이 있는 페이지로 이동
+      setData(updatedEmployeeData.slice((newPage - 1) * COUNT_PER_PAGE, newPage * COUNT_PER_PAGE));
+
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Failed to save employee:', error);
+    }
   };
 
   const handleDeleteEmployee = async () => {
@@ -150,7 +170,7 @@ const EmployeeList: React.FC = () => {
 
   const LAST_PAGE = Math.ceil(employees.length / COUNT_PER_PAGE);
 
-  const formatSalary = (salary: string) => new Intl.NumberFormat('ko-KR').format(parseInt(salary));
+  const formatSalary = (salary: string) => new Intl.NumberFormat('ko-KR').format(parseInt(salary, 10));
 
   return (
     <div css={warper}>
@@ -194,6 +214,7 @@ const EmployeeList: React.FC = () => {
                   >
                     <td css={tdStyles}>
                       {isDeleteMode && (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                         <span css={deleteButtonStyles} onClick={(e) => handleDeleteClick(employee, e)}>
                           −
                         </span>
