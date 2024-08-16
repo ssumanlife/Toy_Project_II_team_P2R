@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -23,7 +27,7 @@ interface CalendarDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   event: CalendarEvent | null;
-  onSave: () => void;
+  onSave: (updateEvent: CalendarEvent) => Promise<void>;
 }
 interface CalendarEvent {
   title: string;
@@ -56,7 +60,7 @@ const CalendarDetailModal: React.FC<CalendarDetailModalProps> = ({ isOpen, onClo
     return localDate.toISOString().slice(0, 16);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!title || !startDateTime || !endDateTime) {
       setErrorMessage('모든 필드를 입력해주세요');
       return;
@@ -76,7 +80,7 @@ const CalendarDetailModal: React.FC<CalendarDetailModalProps> = ({ isOpen, onClo
         end: new Date(endDateTime).toISOString(),
         category: selectedColor,
       };
-      onSave(updatedEvent);
+      await onSave(updatedEvent);
       onClose();
     }
   };

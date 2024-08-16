@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unstable-nested-components */
 /** @jsxImportSource @emotion/react */
 /* eslint-disable react/no-unknown-property */
@@ -19,10 +23,12 @@ import {
   addEventAsync,
   updateEventAsync,
   deleteEventAsync,
-  CalendarEvent,
+  CalendarEvent as CalendarEventFromSlice,
 } from '../../Reducers/CalendarEventSlice.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import LoadingAnimation from '../LodingAnimation.tsx';
+
+type CalendarEvent = Omit<CalendarEventFromSlice, 'id'> & { id?: string };
 
 const MyCalendar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -80,8 +86,8 @@ const MyCalendar: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddEvent = (newEvent: CalendarEvent) => {
-    dispatch(addEventAsync(newEvent));
+  const handleAddEvent = async (newEvent: Omit<CalendarEvent, 'id'>) => {
+    dispatch(addEventAsync({ ...newEvent, id: '' }));
   };
 
   const openDetailModal = (event: CalendarEvent) => {
@@ -89,8 +95,8 @@ const MyCalendar: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleSaveEvent = (updatedEvent: CalendarEvent) => {
-    dispatch(updateEventAsync(updatedEvent));
+  const handleSaveEvent = async (updatedEvent: CalendarEvent) => {
+    dispatch(updateEventAsync({ ...updatedEvent, id: updatedEvent.id?.toString() || '' }));
   };
 
   const getFilteredEvents = () =>
@@ -122,9 +128,9 @@ const MyCalendar: React.FC = () => {
       minute: '2-digit',
     });
   };
-  const handleDeleteEvent = () => {
+  const handleDeleteEvent = async () => {
     if (eventToDelete) {
-      dispatch(deleteEventAsync(eventToDelete.id));
+      dispatch(deleteEventAsync(eventToDelete?.id || ''));
       setEventToDelete(null);
       setIsDeleteModalOpen(false);
     }
@@ -133,9 +139,8 @@ const MyCalendar: React.FC = () => {
     const eventDate = arg.event.start ? new Date(arg.event.start) : new Date();
     handleDateClick({ date: eventDate });
   };
-  const dayCellClassNames = (dayCellInfo) => {
-    return selectedDate && dayCellInfo.date.toDateString() === selectedDate.toDateString() ? ['selected-day'] : [];
-  };
+  const dayCellClassNames = (dayCellInfo: { date: Date }) =>
+    selectedDate && dayCellInfo.date.toDateString() === selectedDate.toDateString() ? ['selected-day'] : [];
 
   const checkboxLabelStyle = (category: string) => css`
     display: flex;
@@ -308,8 +313,8 @@ const MyCalendar: React.FC = () => {
                 <p>이 날짜에는 일정이 없습니다.</p>
               ) : (
                 <ul css={ulStyle}>
-                  {getEventsForSelectedDate().map((event, index) => (
-                    <li key={index} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
+                  {getEventsForSelectedDate().map((event) => (
+                    <li key={event.id} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
                       <span
                         css={spanStyle}
                         onClick={(e) => {
@@ -336,22 +341,26 @@ const MyCalendar: React.FC = () => {
           )}
         </div>
       </div>
-      <CalendarAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAddEvent={handleAddEvent} />
+      <CalendarAddModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddEvent={handleAddEvent as (newEvent: Omit<CalendarEvent, 'id'>) => Promise<void>}
+      />
       <CalendarDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
         }}
         onDelete={handleDeleteEvent}
-        eventId={eventToDelete?.id || 0}
+        eventId={eventToDelete?.id?.toString() || '0'}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
         }}
-        event={selectedEvent}
-        onSave={handleSaveEvent}
+        event={selectedEvent as CalendarEvent}
+        onSave={handleSaveEvent as (updatedEvent: CalendarEvent) => Promise<void>}
       />
     </div>
   );

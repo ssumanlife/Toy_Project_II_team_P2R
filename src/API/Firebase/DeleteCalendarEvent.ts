@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 const deleteCalendarEvent = async (
@@ -12,20 +12,19 @@ const deleteCalendarEvent = async (
     const membersSnapshot = await getDocs(collection(db, 'members'));
 
     const memberDeletionPromises = membersSnapshot.docs.map(async (memberDoc) => {
-      const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/calendar`));
+      const calendarQuery = query(
+        collection(db, `members/${memberDoc.id}/calendar`),
+        where('name', '==', name),
+        where('eventContent', '==', eventContent),
+        where('eventEndDate', '==', eventEndDate),
+        where('eventStartDate', '==', eventStartDate),
+        where('eventTag', '==', eventTag),
+      );
+      const collectionSnapshot = await getDocs(calendarQuery);
 
-      const eventDeletionPromises = collectionSnapshot.docs
-        .filter((eventDataDoc) => {
-          const eventData = eventDataDoc.data();
-          return (
-            eventData.name === name &&
-            eventData.eventContent === eventContent &&
-            eventData.eventEndDate === eventEndDate &&
-            eventData.eventStartDate === eventStartDate &&
-            eventData.eventTag === eventTag
-          );
-        })
-        .map((eventDataDoc) => deleteDoc(doc(db, `members/${memberDoc.id}/calendar`, eventDataDoc.id)));
+      const eventDeletionPromises = collectionSnapshot.docs.map((eventDataDoc) =>
+        deleteDoc(doc(db, `members/${memberDoc.id}/calendar`, eventDataDoc.id)),
+      );
 
       await Promise.all(eventDeletionPromises);
     });
