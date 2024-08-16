@@ -22,7 +22,7 @@ const categoryColors: CategoryColors = {
 interface CalendarAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEvent: (event: CalendarEvent) => void;
+  onAddEvent: () => void;
 }
 interface CalendarEvent {
   title: string;

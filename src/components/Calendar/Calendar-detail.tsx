@@ -23,7 +23,7 @@ interface CalendarDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   event: CalendarEvent | null;
-  onSave: (event: CalendarEvent) => void;
+  onSave: () => void;
 }
 interface CalendarEvent {
   title: string;
@@ -51,7 +51,9 @@ const CalendarDetailModal: React.FC<CalendarDetailModalProps> = ({ isOpen, onClo
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toISOString().slice(0, 16);
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().slice(0, 16);
   };
 
   const handleSave = (): void => {
@@ -70,8 +72,8 @@ const CalendarDetailModal: React.FC<CalendarDetailModalProps> = ({ isOpen, onClo
       const updatedEvent: CalendarEvent = {
         ...event,
         title,
-        start: startDateTime,
-        end: endDateTime,
+        start: new Date(startDateTime).toISOString(),
+        end: new Date(endDateTime).toISOString(),
         category: selectedColor,
       };
       onSave(updatedEvent);
