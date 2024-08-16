@@ -101,12 +101,10 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
     const dayOrder = ['월', '화', '수', '목', '금', '토', '일'];
     const newDays = newDaysArray.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)).join('');
 
-    // 기존 시간 유지
-    const existingTimeRange = splitWorkDays[index].split(' ')[1] || ''; // 시간 부분만 유지
+    const existingTimeRange = splitWorkDays[index].split(' ')[1] || '';
     const updatedWorkDays = [...splitWorkDays];
-    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim(); // 시간 없을 때 처리
+    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim();
 
-    // 업데이트된 workDay 값을 상태로 저장합니다.
     setUpdatedEmployee({
       ...updatedEmployee,
       workDay: updatedWorkDays.join(', '),

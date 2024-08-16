@@ -120,18 +120,15 @@ const EmployeeList: React.FC = () => {
     try {
       const savedEmployee = await addEmployee(employee);
 
-      // 새로운 직원 추가
       const updatedEmployeeData = [...employees, savedEmployee];
 
-      // 알파벳 순으로 정렬
       updatedEmployeeData.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR', { sensitivity: 'base' }));
 
-      // 현재 페이지 번호를 계산하여 업데이트
       const employeeIndex = updatedEmployeeData.findIndex((emp) => emp.employeeId === savedEmployee.employeeId);
       const newPage = Math.floor(employeeIndex / COUNT_PER_PAGE) + 1;
 
       setEmployees(updatedEmployeeData);
-      setPage(newPage); // 해당 직원이 있는 페이지로 이동
+      setPage(newPage);
       setData(updatedEmployeeData.slice((newPage - 1) * COUNT_PER_PAGE, newPage * COUNT_PER_PAGE));
 
       setIsAddModalOpen(false);
@@ -182,7 +179,7 @@ const EmployeeList: React.FC = () => {
               variant="secondary"
               onClick={() => {
                 setIsDeleteMode(!isDeleteMode);
-                setSelectedEmployee(null); // 삭제 모드 전환 시 선택된 직원 초기화
+                setSelectedEmployee(null);
               }}
             >
               직원 삭제

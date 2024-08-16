@@ -141,10 +141,24 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!newEmployee.name) newErrors.name = '이름을 입력해주세요.';
-    if (!newEmployee.phoneNumber) newErrors.phoneNumber = '연락처를 입력해주세요.';
+    if (!newEmployee.name) {
+      newErrors.name = '이름을 입력해주세요.';
+    } else if (newEmployee.name.length < 2) {
+      newErrors.name = '이름은 최소 2글자 이상이어야 합니다.';
+    }
+    if (!newEmployee.phoneNumber) {
+      newErrors.phoneNumber = '연락처를 입력해주세요.';
+    } else if (!/^\d{8}$/.test(newEmployee.phoneNumber)) {
+      newErrors.phoneNumber = '연락처는 8자리 숫자여야 합니다.';
+    }
     if (!selectedBank) newErrors.bankName = '은행을 선택해주세요.';
-    if (!newEmployee.accountNumber) newErrors.accountNumber = '계좌 번호를 입력해주세요.';
+
+    if (!newEmployee.accountNumber) {
+      newErrors.accountNumber = '계좌 번호를 입력해주세요.';
+    } else if (newEmployee.accountNumber.length < 10) {
+      newErrors.accountNumber = '올바른 계좌번호를 입력해주세요.';
+    }
+
     if (!newEmployee.baseSalary) newErrors.baseSalary = '기본 급여를 입력해주세요.';
 
     workSchedules.forEach((schedule, index) => {

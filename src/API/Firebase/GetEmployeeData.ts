@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 interface Employee {
@@ -14,27 +14,32 @@ const getEmployeeData = async (): Promise<Employee[]> => {
   const employeeData: Employee[] = [];
 
   try {
-    const membersSnapshot = await getDocs(collection(db, 'members'));
+    const membersQuery = query(collection(db, 'members'), where('isAdmin', '==', false));
+    const membersSnapshot = await getDocs(membersQuery);
 
-    const memberPromises = membersSnapshot.docs.map(async (memberDoc) => {
+    const memberPromises: Promise<void>[] = [];
+
+    membersSnapshot.forEach((memberDoc) => {
       const data = memberDoc.data();
 
-      if (!data.isAdmin) {
-        const payrollDetailsSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`));
+      const payrollDetailsPromise = getDocs(collection(db, `members/${memberDoc.id}/payrollDetails`)).then(
+        (payrollDetailsSnapshot) => {
+          const salary = payrollDetailsSnapshot.empty
+            ? data.baseSalary || '2100000'
+            : payrollDetailsSnapshot.docs[0]?.data().baseSalary || '2100000';
 
-        const salary = payrollDetailsSnapshot.empty
-          ? data.baseSalary || '2100000'
-          : payrollDetailsSnapshot.docs[0]?.data().baseSalary || '2100000';
+          employeeData.push({
+            employeeId: memberDoc.id,
+            name: data.name,
+            phoneNumber: data.phoneNumber,
+            workDay: data.workDay,
+            accountNumber: data.accountNumber,
+            baseSalary: salary,
+          });
+        },
+      );
 
-        employeeData.push({
-          employeeId: memberDoc.id,
-          name: data.name,
-          phoneNumber: data.phoneNumber,
-          workDay: data.workDay,
-          accountNumber: data.accountNumber,
-          baseSalary: salary,
-        });
-      }
+      memberPromises.push(payrollDetailsPromise);
     });
 
     await Promise.all(memberPromises);
