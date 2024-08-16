@@ -133,7 +133,7 @@ const EmployeeList: React.FC = () => {
 
       setIsAddModalOpen(false);
     } catch (error) {
-      console.error('Failed to save employee:', error);
+      console.warn('Failed to save employee:', error);
     }
   };
 
@@ -149,7 +149,7 @@ const EmployeeList: React.FC = () => {
         setIsDeleteModalOpen(false);
         setIsDeleteMode(false);
       } catch (error) {
-        console.error('Failed to delete employee', error);
+        console.warn('Failed to delete employee', error);
       }
     }
   };

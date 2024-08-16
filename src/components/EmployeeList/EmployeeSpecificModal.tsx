@@ -125,7 +125,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
       onClose();
       setKey((prevKey) => prevKey + 1);
     } catch (error) {
-      console.error('Failed to update employee', error);
+      console.warn('Failed to update employee', error);
     }
   };
 

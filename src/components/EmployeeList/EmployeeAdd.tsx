@@ -190,7 +190,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
         },
       });
     } catch (error) {
-      console.error('Failed to save employee', error);
+      console.warn('Failed to save employee', error);
     }
   };
 

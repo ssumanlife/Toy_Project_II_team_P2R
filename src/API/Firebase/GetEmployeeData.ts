@@ -46,7 +46,7 @@ const getEmployeeData = async (): Promise<Employee[]> => {
 
     employeeData.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR', { sensitivity: 'base' }));
   } catch (error) {
-    console.error('Error fetching employee data:', error);
+    console.warn('Error fetching employee data:', error);
   }
 
   return employeeData;
