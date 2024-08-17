@@ -2,12 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 
-interface DaysOfWeekProps {
-  workDay: string | string[];
-  onDayClick?: (day: string) => void;
-  editable?: boolean; // 편집 가능 여부
-}
-
 const dayStyles = css`
   display: flex;
   justify-content: center;
@@ -28,6 +22,12 @@ const selectedDayStyles = css`
   border-color: var(--primary-blue);
   color: var(--primary-blue);
 `;
+
+interface DaysOfWeekProps {
+  workDay: string | string[];
+  onDayClick?: (day: string) => void;
+  editable?: boolean; // 편집 가능 여부
+}
 
 const extractWorkDays = (workDay: string | string[]) => {
   const workDaysArray = Array.isArray(workDay) ? workDay : [workDay];
@@ -56,7 +56,7 @@ const DaysOfWeek: React.FC<DaysOfWeekProps> = ({ workDay, onDayClick, editable =
     if (editable) {
       let updatedDays: string[] = [];
       if (selectedDays.includes(day)) {
-        updatedDays = selectedDays.filter(d => d !== day);
+        updatedDays = selectedDays.filter((d) => d !== day);
       } else {
         updatedDays = [...selectedDays, day];
       }
@@ -66,16 +66,15 @@ const DaysOfWeek: React.FC<DaysOfWeekProps> = ({ workDay, onDayClick, editable =
     }
   };
 
-
   return (
     <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div css={{ display: 'flex', gap: '8px' }}>
-        {days.map(day => (
-          <span 
-            key={day} 
-            css={[dayStyles, selectedDays.includes(day) && selectedDayStyles, editable && clickableStyles]} 
+        {days.map((day) => (
+          <span
+            key={day}
+            css={[dayStyles, selectedDays.includes(day) && selectedDayStyles, editable && clickableStyles]}
             onClick={() => handleDayClick(day)}
-            >
+          >
             {day}
           </span>
         ))}

@@ -27,7 +27,7 @@ const getUserCalendarEvents = async (userId: string) => {
     );
     return events;
   } catch (error) {
-    console.error('Error fetching user calendar events: ', error);
+    console.warn('Error fetching user calendar events: ', error);
     return [];
   }
 };

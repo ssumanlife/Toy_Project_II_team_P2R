@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/require-default-props */
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
@@ -17,7 +21,7 @@ const modalOverlay = css`
 
 const modalContent = css`
   background: var(--background-main);
-  padding: 20px;
+  padding: 20px 10px;
   border-radius: var(--border-radius-medium);
   // width: 1063px;
   // height: 700px;

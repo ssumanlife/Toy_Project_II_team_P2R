@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -34,7 +35,7 @@ export const containerStyles = css`
   margin: 0 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 40px;
 `;
 
 export const titleStyles = css`
@@ -95,23 +96,15 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
   };
 
   const handleDayClick = (clickedDay: string, index: number) => {
-    console.log('Clicked Day:', clickedDay);
+    const newDaysArray = [clickedDay];
 
-    // 클릭된 요일을 배열로 시작 (하나의 요일만 있는 배열)
-    let newDaysArray = [clickedDay];
-
-    // 요일 배열을 정렬합니다.
     const dayOrder = ['월', '화', '수', '목', '금', '토', '일'];
     const newDays = newDaysArray.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)).join('');
 
-    // 기존 시간 유지
-    const existingTimeRange = splitWorkDays[index].split(' ')[1] || ''; // 시간 부분만 유지
+    const existingTimeRange = splitWorkDays[index].split(' ')[1] || '';
     const updatedWorkDays = [...splitWorkDays];
-    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim(); // 시간 없을 때 처리
+    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim();
 
-    console.log('Updated WorkDays:', updatedWorkDays);
-
-    // 업데이트된 workDay 값을 상태로 저장합니다.
     setUpdatedEmployee({
       ...updatedEmployee,
       workDay: updatedWorkDays.join(', '),
@@ -132,7 +125,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
       onClose();
       setKey((prevKey) => prevKey + 1);
     } catch (error) {
-      console.error('Failed to update employee', error);
+      console.warn('Failed to update employee', error);
     }
   };
 
@@ -194,7 +187,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
               />
             ) : (
               <div css={valueStyles}>
-                {new Intl.NumberFormat('ko-KR').format(parseInt(updatedEmployee.baseSalary))}원
+                {new Intl.NumberFormat('ko-KR').format(parseInt(updatedEmployee.baseSalary, 10))}원
               </div>
             )}
           </div>
@@ -202,6 +195,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
             const [days, timeRange] = workDay.trim().split(' ');
             const [startTime, endTime] = timeRange.split('~');
             return (
+              // eslint-disable-next-line react/no-array-index-key
               <div css={{ gridColumn: 'span 2' }} key={index}>
                 <div css={titleStyles}>근무 시간 {index + 1}</div>
                 <div css={workTimeStyles}>

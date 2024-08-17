@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
@@ -6,20 +8,34 @@ import Button from '../Button.tsx';
 interface CalendarDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
+  eventId: string;
 }
 
-const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onDelete }) => {
+const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onDelete, eventId }) => {
   if (!isOpen) return null;
 
-  const handleDelete = () => {
-    onDelete();
+  const handleDelete = async () => {
+    await onDelete();
     onClose();
   };
 
   return (
-    <div css={modalOverlay} onClick={onClose}>
-      <div css={modalContent} onClick={(e) => e.stopPropagation()}>
+    <div
+      css={modalOverlay}
+      onClick={onClose}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClose()}
+    >
+      <div
+        css={modalContent}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+        onKeyDown={(e) => e.key === 'Enter' && onClose()}
+      >
         <div css={modalContentStyle}>
           <div css={messageStyle}>삭제하시겠습니까?</div>
           <div css={buttonContainerStyle}>

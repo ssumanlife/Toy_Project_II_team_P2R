@@ -26,7 +26,7 @@ const addCalendarEvent = async (
       }
     });
   } catch (error) {
-    console.error(error);
+    console.warn(error);
   }
 };
 

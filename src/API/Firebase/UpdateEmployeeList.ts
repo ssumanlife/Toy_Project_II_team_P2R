@@ -1,5 +1,5 @@
 import { doc, setDoc } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts'; // Firebase 설정 파일을 가져옵니다.
+import { db } from './Firebase_Config.ts';
 
 interface Employee {
   employeeId: string;
@@ -24,9 +24,7 @@ const updateEmployee = async (employee: Employee): Promise<void> => {
       },
       { merge: true },
     );
-    console.log('Employee successfully updated!');
   } catch (error) {
-    console.error('Error updating employee: ', error);
     throw new Error('Failed to update employee');
   }
 };
