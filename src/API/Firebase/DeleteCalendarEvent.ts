@@ -1,5 +1,5 @@
 import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
-import { db } from './Firebase_Config.ts';
+import { db } from './FirebaseConfig.ts';
 
 const deleteCalendarEvent = async (
   name: string,

@@ -6,7 +6,7 @@ import Button from '../../Components/Button.tsx';
 import Modal from '../../Components/Modal.tsx';
 import EmployeeSpecificModal, { Employee } from '../../Components/EmployeeList/EmployeeSpecificModal.tsx';
 import EmployeeAddModal from '../../Components/EmployeeList/EmployeeAdd.tsx';
-import PaginationComponent from '../../Components/Pagination.tsx';
+import PaginationComponent from '../../Components/pagination.tsx';
 import getEmployeeData from '../../API/Firebase/GetEmployeeData.ts';
 import deleteEmployee from '../../API/Firebase/DeleteEmployeeList.ts';
 import addEmployee from '../../API/Firebase/AddEmployeeList.ts';

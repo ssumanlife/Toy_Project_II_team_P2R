@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unstable-nested-components */
 /** @jsxImportSource @emotion/react */
 /* eslint-disable react/no-unknown-property */
@@ -8,6 +12,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { css } from '@emotion/react';
 import { useLocation } from 'react-router-dom';
+import { EventApi } from '@fullcalendar/core';
 import Button from '../Button.tsx';
 import CalendarDeleteModal from './Calendar-delete.tsx';
 import CalendarDetailModal from './Calendar-detail.tsx';
@@ -18,10 +23,11 @@ import {
   addEventAsync,
   updateEventAsync,
   deleteEventAsync,
-  CalendarEvent,
+  CalendarEvent as CalendarEventFromSlice,
 } from '../../Reducers/CalendarEventSlice.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
-import LoadingAnimation from '../LodingAnimation.tsx';
+
+type CalendarEvent = Omit<CalendarEventFromSlice, 'id'> & { id?: string };
 
 const MyCalendar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -41,7 +47,6 @@ const MyCalendar: React.FC = () => {
     '종교',
   ]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -58,13 +63,10 @@ const MyCalendar: React.FC = () => {
     문화: 'var(--calendar-purple)',
     종교: 'var(--calendar-gray)',
   };
+
   useEffect(() => {
     dispatch(fetchEvents(user?.employeeId || ''));
   }, [dispatch]);
-
-  useEffect(() => {
-    setIsLoading(false);
-  }, [events]);
 
   const openDeleteModal = (event: CalendarEvent) => {
     setEventToDelete(event);
@@ -79,8 +81,8 @@ const MyCalendar: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddEvent = (newEvent: CalendarEvent) => {
-    dispatch(addEventAsync(newEvent));
+  const handleAddEvent = async (newEvent: Omit<CalendarEvent, 'id'>) => {
+    dispatch(addEventAsync({ ...newEvent, id: '' }));
   };
 
   const openDetailModal = (event: CalendarEvent) => {
@@ -88,8 +90,8 @@ const MyCalendar: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleSaveEvent = (updatedEvent: CalendarEvent) => {
-    dispatch(updateEventAsync(updatedEvent));
+  const handleSaveEvent = async (updatedEvent: CalendarEvent) => {
+    dispatch(updateEventAsync({ ...updatedEvent, id: updatedEvent.id?.toString() || '' }));
   };
 
   const getFilteredEvents = () =>
@@ -114,21 +116,30 @@ const MyCalendar: React.FC = () => {
     );
   };
 
-  const formatTime = (dateTimeString: string): string => {
-    const date = new Date(dateTimeString);
-    if (Number.isNaN(date.getTime())) {
-      return '시간 정보 없음';
-    }
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const formatTime = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  const handleDeleteEvent = () => {
+  const handleDeleteEvent = async () => {
     if (eventToDelete) {
-      dispatch(deleteEventAsync(eventToDelete.id));
+      dispatch(deleteEventAsync(eventToDelete?.id || ''));
       setEventToDelete(null);
       setIsDeleteModalOpen(false);
     }
   };
+
+  const handleEventClick = (arg: { event: EventApi }) => {
+    const eventDate = arg.event.start ? new Date(arg.event.start) : new Date();
+    handleDateClick({ date: eventDate });
+  };
+
+  const dayCellClassNames = (dayCellInfo: { date: Date }) =>
+    selectedDate && dayCellInfo.date.toDateString() === selectedDate.toDateString() ? ['selected-day'] : [];
+
   const checkboxLabelStyle = (category: string) => css`
     display: flex;
     align-items: center;
@@ -164,6 +175,7 @@ const MyCalendar: React.FC = () => {
       transform: rotate(45deg);
     }
   `;
+
   const liStyle = (category: string) => css`
     position: relative;
     margin-bottom: 15px;
@@ -175,6 +187,7 @@ const MyCalendar: React.FC = () => {
     cursor: pointer;
     border-radius: 0 10px 10px 0;
   `;
+
   const calendarContainerStyle = css`
     ${calendarStyle}
     ${isAnyModalOpen &&
@@ -182,50 +195,50 @@ const MyCalendar: React.FC = () => {
       pointer-events: none;
     `}
   `;
+
   if (isHomePage) {
     return (
       <div css={containerStyle}>
-        {isLoading ? (
-          <LoadingAnimation />
-        ) : (
-          <div css={calendarContainerStyle}>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={getFilteredEvents().map((event) => ({
-                ...event,
-                backgroundColor: categoryColors[event.category],
-                borderColor: categoryColors[event.category],
-              }))}
-              dateClick={handleDateClick}
-              headerToolbar={{
-                left: 'prev',
-                center: 'title',
-                right: 'next',
-              }}
-              eventContent={(eventInfo) => (
-                <div
-                  css={css`
-                    background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
-                    color: white;
-                    border-radius: 3px;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-align: center;
-                  `}
-                >
-                  {eventInfo.event.title}
-                </div>
-              )}
-            />
-          </div>
-        )}
+        <div css={calendarContainerStyle}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={getFilteredEvents().map((event) => ({
+              ...event,
+              backgroundColor: categoryColors[event.category],
+              borderColor: categoryColors[event.category],
+            }))}
+            dateClick={handleDateClick}
+            headerToolbar={{
+              left: 'prev',
+              center: 'title',
+              right: 'next',
+            }}
+            eventContent={(eventInfo) => (
+              <div
+                css={css`
+                  pointer-events: none;
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                  padding: 2px;
+                `}
+              >
+                {eventInfo.event.title}
+              </div>
+            )}
+          />
+        </div>
       </div>
     );
   }
+
   return (
     <div css={outerContainerStyle}>
       <div css={containerStyle}>
@@ -246,44 +259,44 @@ const MyCalendar: React.FC = () => {
             </div>
           ))}
         </div>
-        {isLoading ? (
-          <LoadingAnimation />
-        ) : (
-          <div css={calendarContainerStyle}>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={getFilteredEvents().map((event) => ({
-                ...event,
-                backgroundColor: categoryColors[event.category],
-                borderColor: categoryColors[event.category],
-              }))}
-              dateClick={handleDateClick}
-              headerToolbar={{
-                left: 'prev',
-                center: 'title',
-                right: 'next',
-              }}
-              eventContent={(eventInfo) => (
-                <div
-                  css={css`
-                    background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
-                    color: white;
-                    border-radius: 3px;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-align: center;
-                  `}
-                >
-                  {eventInfo.event.title}
-                </div>
-              )}
-            />
-          </div>
-        )}
+        <div css={calendarContainerStyle}>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={getFilteredEvents().map((event) => ({
+              ...event,
+              backgroundColor: categoryColors[event.category],
+              borderColor: categoryColors[event.category],
+            }))}
+            dateClick={handleDateClick}
+            eventClick={handleEventClick}
+            dayCellClassNames={dayCellClassNames}
+            headerToolbar={{
+              left: 'prev',
+              center: 'title',
+              right: 'next',
+            }}
+            eventContent={(eventInfo) => (
+              <div
+                css={css`
+                  pointer-events: none;
+                  background-color: ${categoryColors[eventInfo.event.extendedProps.category]};
+                  color: white;
+                  border-radius: 3px;
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  text-align: center;
+                  padding: 2px;
+                `}
+              >
+                {eventInfo.event.title}
+              </div>
+            )}
+          />
+        </div>
 
         <div css={eventListStyle}>
           {selectedDate && (
@@ -293,8 +306,8 @@ const MyCalendar: React.FC = () => {
                 <p>이 날짜에는 일정이 없습니다.</p>
               ) : (
                 <ul css={ulStyle}>
-                  {getEventsForSelectedDate().map((event, index) => (
-                    <li key={index} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
+                  {getEventsForSelectedDate().map((event) => (
+                    <li key={event.id} css={liStyle(event.category)} onClick={() => openDetailModal(event)}>
                       <span
                         css={spanStyle}
                         onClick={(e) => {
@@ -321,22 +334,26 @@ const MyCalendar: React.FC = () => {
           )}
         </div>
       </div>
-      <CalendarAddModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAddEvent={handleAddEvent} />
+      <CalendarAddModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddEvent={handleAddEvent as (newEvent: Omit<CalendarEvent, 'id'>) => Promise<void>}
+      />
       <CalendarDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
         }}
         onDelete={handleDeleteEvent}
-        eventId={eventToDelete?.id || 0}
+        eventId={eventToDelete?.id?.toString() || '0'}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
         }}
-        event={selectedEvent}
-        onSave={handleSaveEvent}
+        event={selectedEvent as CalendarEvent}
+        onSave={handleSaveEvent as (updatedEvent: CalendarEvent) => Promise<void>}
       />
     </div>
   );
@@ -408,13 +425,22 @@ const containerStyle = css`
     background-color: var(--background-main);
     border: none;
   }
+  .fc-prev-button:hover,
+  .fc-next-button:hover,
+  .fc-prev-button:active,
+  .fc-next-button:active {
+    background-color: transparent;
+    border: none;
+    transform: scale(1.3);
+    transition: transform 0.2s;
+  }
 
   .fc-icon-chevron-left::before,
   .fc-icon-chevron-right::before {
     color: var(--text-gray);
   }
-  .fc .fc-daygrid-event {
-    padding: 2px;
+  .selected-day {
+    background-color: var(--light-blue);
   }
 `;
 
@@ -478,11 +504,14 @@ const ulStyle = css`
 
 const spanStyle = css`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  right: 5px;
   cursor: pointer;
+  font-size: 1.5rem;
+  &:hover {
+    color: var(--primary-blue);
+  }
 `;
-
 const pTitleStyle = css`
   margin: 0 0 5px 0;
   font-weight: bold;
