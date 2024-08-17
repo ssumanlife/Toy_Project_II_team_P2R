@@ -1,4 +1,4 @@
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 interface Employee {
@@ -6,20 +6,47 @@ interface Employee {
   name: string;
   phoneNumber: string;
   workDay: string;
+  bankName: string;
   accountNumber: string;
   baseSalary: string;
 }
 
-const addEmployee = async (employee: Employee): Promise<void> => {
+const formatPhoneNumber = (phoneNumber: string): string => {
+  const fullPhoneNumber = `010${phoneNumber}`;
+
+  const regex = /(\d{3})(\d{4})(\d{4})/;
+  const match = fullPhoneNumber.match(regex);
+
+  if (match) {
+    return `${match[1]}-${match[2]}-${match[3]}`;
+  }
+  return fullPhoneNumber;
+};
+
+const addEmployee = async (employee: Employee): Promise<Employee> => {
   try {
-    await addDoc(collection(db, 'members'), {
+    const formattedPhoneNumber = formatPhoneNumber(employee.phoneNumber);
+    const fullAccount = employee.bankName ? `${employee.bankName} ${employee.accountNumber}` : employee.accountNumber;
+
+    const docRef = doc(collection(db, 'members'));
+
+    await setDoc(docRef, {
       ...employee,
-      isAdmin: false, // 기본값 설정
+      employeeId: docRef.id,
+      phoneNumber: formattedPhoneNumber,
+      accountNumber: fullAccount,
+      isAdmin: false,
     });
+
+    return {
+      ...employee,
+      employeeId: docRef.id,
+      phoneNumber: formattedPhoneNumber,
+      accountNumber: fullAccount,
+    };
   } catch (error) {
-    console.error('Error adding document: ', error);
     throw new Error('Failed to add employee');
   }
 };
 
-export { addEmployee };
+export default addEmployee;

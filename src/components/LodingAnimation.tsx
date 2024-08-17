@@ -1,5 +1,5 @@
+/* eslint-disable react/no-array-index-key */
 /** @jsxImportSource @emotion/react */
-import React from 'react';
 import { css } from '@emotion/react';
 
 const sectionStyle = css`
@@ -28,7 +28,6 @@ const spanStyle = css`
   display: block;
   transform: rotate(calc(45deg * var(--i)));
 
-
   &:before {
     content: '';
     position: absolute;
@@ -53,32 +52,30 @@ const rotate = css`
   }
 `;
 
-const LoadingAnimation = () => {
-  return (
-    <section css={sectionStyle}>
-      <svg css={{ width: '0', height: '0' }}>
-        <filter id="gooey">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="4" /> {/* stdDeviation 값을 더 줄임 */}
-          <feColorMatrix
-            values="
+const LoadingAnimation = () => (
+  <section css={sectionStyle}>
+    <svg css={{ width: '0', height: '0' }}>
+      <filter id="gooey">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="4" /> {/* stdDeviation 값을 더 줄임 */}
+        <feColorMatrix
+          values="
               1 0 0 0 0
               0 1 0 0 0
               0 0 1 0 0
               0 0 0 20 -10"
-          />
-        </filter>
-      </svg>
-      
-      <div css={loaderStyle}>
-        {[...Array(8)].map((_, i) => (
-          <span css={[spanStyle, rotate]} style={{ '--i': i + 1 }} key={i}></span>
-        ))}
-        {[...Array(5)].map((_, j) => (
-          <span css={[spanStyle, rotate]} style={{ '--i': j + 8 }} key={j + 8}></span>
-        ))}
-      </div>
-    </section>
-  );
-};
+        />
+      </filter>
+    </svg>
+
+    <div css={loaderStyle}>
+      {[...Array(8)].map((_, i) => (
+        <span css={[spanStyle, rotate]} style={{ '--i': i + 1 }} key={i} />
+      ))}
+      {[...Array(5)].map((_, j) => (
+        <span css={[spanStyle, rotate]} style={{ '--i': j + 8 }} key={j + 8} />
+      ))}
+    </div>
+  </section>
+);
 
 export default LoadingAnimation;
