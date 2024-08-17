@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -22,7 +26,7 @@ const categoryColors: CategoryColors = {
 interface CalendarAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEvent: (event: CalendarEvent) => void;
+  onAddEvent: (newEvent: Omit<CalendarEvent, 'id'>) => Promise<void>;
 }
 interface CalendarEvent {
   title: string;

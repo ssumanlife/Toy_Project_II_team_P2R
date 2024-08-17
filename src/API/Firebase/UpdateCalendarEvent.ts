@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from './Firebase_Config.ts';
 
 const updateCalendarEvent = async (
@@ -11,26 +11,34 @@ const updateCalendarEvent = async (
 ) => {
   try {
     const membersSnapshot = await getDocs(collection(db, 'members'));
-    const updatePromises = membersSnapshot.docs.map(async (memberDoc) => {
-      const collectionSnapshot = await getDocs(collection(db, `members/${memberDoc.id}/calendar`));
-      const updateEventPromises = collectionSnapshot.docs.map(async (eventDoc) => {
-        const eventId = eventDoc.id;
-        const event = eventDoc.data();
-        if (id === eventId && event.name === name) {
-          await setDoc(doc(db, `members/${memberDoc.id}/calendar`, eventId), {
-            eventContent,
-            eventEndDate,
-            eventStartDate,
-            eventTag,
-            name,
+    const updatePromises: Promise<void>[] = [];
+
+    membersSnapshot.docs.forEach((memberDoc) => {
+      const calendarQuery = query(collection(db, `members/${memberDoc.id}/calendar`), where('name', '==', name));
+
+      updatePromises.push(
+        getDocs(calendarQuery).then((collectionSnapshot) => {
+          collectionSnapshot.docs.forEach((eventDoc) => {
+            if (eventDoc.id === id) {
+              updatePromises.push(
+                setDoc(doc(db, `members/${memberDoc.id}/calendar`, eventDoc.id), {
+                  eventContent,
+                  eventEndDate,
+                  eventStartDate,
+                  eventTag,
+                  name,
+                }),
+              );
+            }
           });
-        }
-      });
-      await Promise.all(updateEventPromises);
+        }),
+      );
     });
+
     await Promise.all(updatePromises);
   } catch (error) {
-    console.log(error);
+    console.warn('Error updating calendar event:', error);
   }
 };
+
 export default updateCalendarEvent;
