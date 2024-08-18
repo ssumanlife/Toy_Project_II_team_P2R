@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -111,7 +112,7 @@ export const Payday: React.FC = () => {
       if (user) {
         const payDayData = await getPayDay(user.employeeId);
         if (payDayData) {
-          setPayday(payDayData.payDay); // payDay로 수정
+          setPayday(payDayData.payDay);
         }
       }
     };
@@ -130,7 +131,7 @@ export const Payday: React.FC = () => {
       setIsEditing(false);
 
       if (user) {
-        await updatePayDay(user.employeeId, payday);
+        await updatePayDay(payday);
       }
     } else {
       setIsEditing(true);

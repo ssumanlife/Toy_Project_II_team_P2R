@@ -1,4 +1,4 @@
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDoc, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { db } from './FirebaseConfig.ts';
 
 interface PayDayData {
@@ -22,12 +22,38 @@ const getPayDay = async (userId: string): Promise<PayDayData | null> => {
   }
 };
 
-const updatePayDay = async (userId: string, payDay: string): Promise<void> => {
+const updatePayDay = async (payDay: string): Promise<void> => {
   try {
-    const docRef = doc(db, `members/user${userId}`);
-    await updateDoc(docRef, { payDay: `${payDay}일` });
+    const membersCollectionRef = collection(db, 'members');
+    const snapshot = await getDocs(membersCollectionRef);
+
+    if (snapshot.empty) {
+      console.warn('No documents found in the members collection');
+      return;
+    }
+
+    const batch = writeBatch(db);
+    let batchCounter = 0;
+
+    snapshot.forEach((docSnapshot) => {
+      const docRef = doc(db, 'members', docSnapshot.id);
+      batch.update(docRef, { payDay: `${payDay}일` });
+
+      batchCounter += 1;
+
+      if (batchCounter === 500) {
+        batch.commit();
+        batchCounter = 0;
+      }
+    });
+
+    if (batchCounter > 0) {
+      await batch.commit();
+    }
+
+    console.log('All documents updated successfully');
   } catch (error) {
-    console.warn('Error updating document: ', error);
+    console.warn('Error updating documents: ', error);
   }
 };
 
