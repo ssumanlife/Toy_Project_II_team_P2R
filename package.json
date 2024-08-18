@@ -35,8 +35,7 @@
     "rollup": "^4.19.0",
     "shortid": "^2.2.16",
     "style-loader": "^4.0.0",
-    "uuid": "^10.0.0",
-    "vite": "^5.3.4"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.12.0",
@@ -56,6 +55,7 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vite": "^5.4.1"
   }
 }
