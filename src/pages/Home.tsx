@@ -64,9 +64,9 @@ const itemStyle = css`
 `;
 
 const adminHeightStyle = css`
-  height: 68%;
+  height: 58%;
 `;
 
 const userHeightStyle = css`
-  height: 28%;
+  height: 38%;
 `;

@@ -13,7 +13,7 @@ const contentContainerStyle = css`
   bottom: 0;
   transform: translateX(-50%);
   width: 304px;
-  height: 303px;
+  height: 95%;
   flex-shrink: 0;
   border-radius: var(--border-radius-medium);
   background: #f7f9fc; /* 연한 색상 */
@@ -21,7 +21,7 @@ const contentContainerStyle = css`
 
   .content-wrapper {
     width: 275px;
-    height: 288px;
+    height: 95%;
     border-radius: var(--border-radius-medium);
     background: var(--background-main, #fff);
     position: absolute;
@@ -162,9 +162,17 @@ export const Payday: React.FC = () => {
           일
         </h2>
         {error && <div css={errorMessageStyle}>{error}</div>}
-        <Button type="button" onClick={handleButtonClick}>
-          {isEditing ? '저장하기' : '수정하기'}
-        </Button>
+        {user?.isAdmin && (
+          <Button
+            type="button"
+            customWidth="80px"
+            customHeight="30px"
+            customFontSize="14px"
+            onClick={handleButtonClick}
+          >
+            {isEditing ? '저장하기' : '수정하기'}
+          </Button>
+        )}
       </div>
       <img src={Polygon1} alt="Polygon 1" />
       <img src={Polygon2} alt="Polygon 2" />

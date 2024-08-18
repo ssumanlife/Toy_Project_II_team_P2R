@@ -43,6 +43,7 @@ interface ButtonProps {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary';
   customWidth?: string;
+  customHeight?: string;
   customFontSize?: string;
   customBorderRadius?: string;
 }
@@ -55,6 +56,7 @@ const Button: React.FC<ButtonProps> = ({
   customWidth,
   customFontSize,
   customBorderRadius,
+  customHeight,
 }) => {
   let buttonStyle;
 
@@ -74,6 +76,7 @@ const Button: React.FC<ButtonProps> = ({
         ${customWidth && `width: ${customWidth};`}
         ${customFontSize && `font-size: ${customFontSize};`}
         ${customBorderRadius && `border-radius: ${customBorderRadius};`}
+        ${customHeight && `height: ${customHeight};`}
       `;
   }
 
