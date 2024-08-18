@@ -1,9 +1,10 @@
+/* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../store.tsx';
-import addCalendarEvent from '../API/Firebase/AddCalendarEvent.tsx';
-import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.tsx';
-import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.tsx';
-import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.tsx';
+import { AppThunk } from '../store.ts';
+import addCalendarEvent from '../API/Firebase/AddCalendarEvent.ts';
+import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.ts';
+import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.ts';
+import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.ts';
 
 export interface CalendarEvent {
   id: string;
@@ -50,13 +51,13 @@ export const fetchEvents =
   (userId: string): AppThunk =>
   async (dispatch) => {
     if (!userId) {
-      console.error('User ID is required to fetch events');
+      console.warn('User ID is required to fetch events');
       return;
     }
 
     try {
       const calendarEventData = await getUserCalendarEvents(userId);
-      const events = calendarEventData.map((event, index) => ({
+      const events = calendarEventData.map((event) => ({
         id: event.id,
         title: event.eventContent,
         start: event.eventStartDate,
@@ -66,7 +67,7 @@ export const fetchEvents =
       }));
       dispatch(setEvents(events));
     } catch (error) {
-      console.error('Failed to fetch events:', error);
+      console.warn('Failed to fetch events:', error);
     }
   };
 
@@ -95,7 +96,7 @@ export const updateEventAsync =
       );
       dispatch(updateEvent(updatedEvent));
     } catch (error) {
-      console.error('Failed to update event:', error);
+      console.warn('Failed to update event:', error);
     }
   };
 
@@ -115,7 +116,7 @@ export const deleteEventAsync =
         dispatch(deleteEvent(eventId));
       }
     } catch (error) {
-      console.error('Failed to delete event:', error);
+      console.warn('Failed to delete event:', error);
     }
   };
 
