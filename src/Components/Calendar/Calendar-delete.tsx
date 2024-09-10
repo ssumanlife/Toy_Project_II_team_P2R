@@ -9,10 +9,9 @@ interface CalendarDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete: () => Promise<void>;
-  eventId: string;
 }
 
-const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onDelete, eventId }) => {
+const CalendarDeleteModal: React.FC<CalendarDeleteModalProps> = ({ isOpen, onClose, onDelete }) => {
   if (!isOpen) return null;
 
   const handleDelete = async () => {

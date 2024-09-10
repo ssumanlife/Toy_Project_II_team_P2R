@@ -345,7 +345,6 @@ const MyCalendar: React.FC = () => {
           setIsDeleteModalOpen(false);
         }}
         onDelete={handleDeleteEvent}
-        eventId={eventToDelete?.id?.toString() || '0'}
       />
       <CalendarDetailModal
         isOpen={isDetailModalOpen}
