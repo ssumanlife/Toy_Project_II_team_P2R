@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -9,20 +13,20 @@ interface CategoryColors {
 }
 
 const categoryColors: CategoryColors = {
-  pink: 'var(--calendar-pink)',
-  yellow: 'var(--calendar-yellow)',
-  peach: 'var(--calendar-peach)',
-  green: 'var(--calendar-green)',
-  skyblue: 'var(--calendar-skyblue)',
-  blue: 'var(--calendar-blue)',
-  purple: 'var(--calendar-purple)',
-  gray: 'var(--calendar-gray)',
+  공휴일: 'var(--calendar-pink)',
+  개인: 'var(--calendar-yellow)',
+  업무: 'var(--calendar-peach)',
+  학업: 'var(--calendar-green)',
+  가족행사: 'var(--calendar-skyblue)',
+  운동: 'var(--calendar-blue)',
+  문화: 'var(--calendar-purple)',
+  종교: 'var(--calendar-gray)',
 };
 
 interface CalendarAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEvent: (event: CalendarEvent) => void;
+  onAddEvent: (newEvent: Omit<CalendarEvent, 'id'>) => Promise<void>;
 }
 interface CalendarEvent {
   title: string;
@@ -92,7 +96,7 @@ const CalendarAddModal: React.FC<CalendarAddModalProps> = ({ isOpen, onClose, on
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={containerStyle}>
         <div css={titleStyle}>
-          <h2>스케줄 추가</h2>
+          <h3>스케줄 추가</h3>
         </div>
         <div css={sectionStyle}>
           <input
@@ -156,13 +160,14 @@ const containerStyle = css`
 `;
 
 const sectionStyle = css`
-  margin-top: 50px;
+  margin-top: 40px;
 `;
 
 const labelStyle = css`
-  font-size: 1.5em;
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 `;
 
 const inputStyle = css`
@@ -170,7 +175,7 @@ const inputStyle = css`
   width: 100%;
   margin-bottom: 20px;
   padding: 8px;
-  font-size: 2.5em;
+  font-size: var(--font-size-h2);
   border: none;
   color: var(--text-gray);
   &:focus {
@@ -211,7 +216,6 @@ const selectedColorCircleStyle = css`
 
 const buttonContainerStyle = css`
   margin-top: auto;
-  margin-bottom: 30px;
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
@@ -219,7 +223,7 @@ const buttonContainerStyle = css`
 
 const dateTimeInputStyle = css`
   padding: 8px;
-  font-size: 1.5em;
+  font-size: var(--font-size-h6);
   width: 45%;
   border: none;
   color: var(--text-gray);

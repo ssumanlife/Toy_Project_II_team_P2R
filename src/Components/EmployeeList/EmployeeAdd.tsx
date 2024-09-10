@@ -1,19 +1,25 @@
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Modal from '../Modal.tsx';
 import Button from '../Button.tsx';
-import { Employee } from './EmployeeSpecificModal.tsx';
-import { modalContentStyles, containerStyles, titleStyles } from './EmployeeSpecificModal.tsx';
+import { Employee, modalContentStyles, containerStyles, titleStyles } from './EmployeeSpecificModal.tsx';
 import BankSelectComponent from './bankSelect.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import WorkTimePicker from './WorkTimePicker.tsx';
-import { addEmployee } from '../../API/Firebase/AddEmployeeList.tsx';
 
 const valueStyles = css`
   color: var(--text-light-gray);
   font-size: var(--font-size-h5);
   font-weight: var(--font-weight-medium);
+`;
+
+const errorStyles = css`
+  color: red;
+  font-size: 14px;
+  margin-top: 4px;
 `;
 
 export const inputStyles = css`
@@ -39,7 +45,7 @@ export const inputStyles = css`
   }
 
   /* Firefox */
-  &[type=number] {
+  &[type='number'] {
     -moz-appearance: textfield;
   }
 `;
@@ -76,6 +82,7 @@ const AddButton = css`
 interface EmployeeAddModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line no-unused-vars
   onSave: (employee: Employee) => void;
 }
 
@@ -86,17 +93,26 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
     phoneNumber: '',
     workDay: '',
     accountNumber: '',
-    baseSalary: ''
+    baseSalary: '',
   });
 
   const [selectedBank, setSelectedBank] = useState<string>('');
-  const [workSchedules, setWorkSchedules] = useState<{ days: string, start: string | null, end: string | null }[]>([
-    { days: '', start: null, end: null }
+  const [workSchedules, setWorkSchedules] = useState<{ days: string; start: string | null; end: string | null }[]>([
+    { days: '', start: null, end: null },
   ]);
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewEmployee({ ...newEmployee, [name]: value });
+
+    setNewEmployee((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+    if (value.trim()) {
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
+    }
   };
 
   const handleAddSchedule = () => {
@@ -117,24 +133,65 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
 
   const handleBankChange = (bank: string) => {
     setSelectedBank(bank);
+    if (bank) {
+      setErrors((prevErrors) => ({ ...prevErrors, bankName: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!newEmployee.name) {
+      newErrors.name = '이름을 입력해주세요.';
+    } else if (newEmployee.name.length < 2) {
+      newErrors.name = '이름은 최소 2글자 이상이어야 합니다.';
+    }
+    if (!newEmployee.phoneNumber) {
+      newErrors.phoneNumber = '연락처를 입력해주세요.';
+    } else if (!/^\d{8}$/.test(newEmployee.phoneNumber)) {
+      newErrors.phoneNumber = '연락처는 8자리 숫자여야 합니다.';
+    }
+    if (!selectedBank) newErrors.bankName = '은행을 선택해주세요.';
+
+    if (!newEmployee.accountNumber) {
+      newErrors.accountNumber = '계좌 번호를 입력해주세요.';
+    } else if (newEmployee.accountNumber.length < 10) {
+      newErrors.accountNumber = '올바른 계좌번호를 입력해주세요.';
+    }
+
+    if (!newEmployee.baseSalary) newErrors.baseSalary = '기본 급여를 입력해주세요.';
+
+    workSchedules.forEach((schedule, index) => {
+      if (!schedule.days) newErrors[`workDay${index}`] = '근무 요일을 선택해주세요.';
+      if (!schedule.start || !schedule.end) newErrors[`workTime${index}`] = '시간을 선택해주세요.';
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
-    const workDayString = workSchedules
-      .filter(schedule => schedule.days && schedule.start && schedule.end)
-      .map(schedule => `${schedule.days} ${schedule.start}~${schedule.end}`)
-      .join(', ');
+    if (!validateForm()) return;
 
-    const employeeToSave = { ...newEmployee, workDay: workDayString };
+    const workDayString = workSchedules
+      .filter((schedule) => schedule.days && schedule.start && schedule.end)
+      .map((schedule) => `${schedule.days} ${schedule.start}~${schedule.end}`)
+      .join(' ');
+
+    const fullAccountNumber = `${selectedBank} ${newEmployee.accountNumber}`;
+    const employeeToSave = { ...newEmployee, workDay: workDayString, accountNumber: fullAccountNumber };
 
     try {
-      await addEmployee(employeeToSave);
-      onSave(employeeToSave);
+      toast.success(`${newEmployee.name}님이 추가되었습니다!`, {
+        autoClose: 1000,
+        onClose: () => {
+          onSave(employeeToSave);
+          onClose();
+        },
+      });
     } catch (error) {
-      console.error("Failed to save employee", error);
+      console.warn('Failed to save employee', error);
     }
-
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -142,6 +199,7 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyles}>
+        <ToastContainer position="bottom-center" style={{ zIndex: 9999 }} />
         <div css={[containerStyles, { paddingTop: '20px' }]}>
           <h3 css={modaltitleStyles}>직원 추가</h3>
           <div>
@@ -154,30 +212,46 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
               onChange={handleChange}
               css={inputStyles}
             />
+            {errors.name && <div css={errorStyles}>{errors.name}</div>}
           </div>
           <div>
             <div css={titleStyles}>연락처</div>
-            <input
-              type="number"
-              name="phoneNumber"
-              placeholder="-없이 입력"
-              value={newEmployee.phoneNumber}
-              onChange={handleChange}
-              css={inputStyles}
-            />
+            <div css={{ display: 'flex', alignItems: 'center' }}>
+              <p css={[inputStyles, { width: 'auto', marginRight: '8px', padding: '0', border: 'none' }]}>010 - </p>
+              <input
+                type="number"
+                name="phoneNumber"
+                placeholder="숫자만 입력"
+                value={newEmployee.phoneNumber}
+                onChange={handleChange}
+                onInput={(e) => {
+                  if (e.target.value.length > 8) {
+                    e.target.value = e.target.value.slice(0, 8);
+                  }
+                }}
+                css={inputStyles}
+              />
+            </div>
+            {errors.phoneNumber && <div css={errorStyles}>{errors.phoneNumber}</div>}
           </div>
           <div>
             <div css={titleStyles}>계좌 번호</div>
             <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
-              <input
-                type="number"
-                name="accountNumber"
-                placeholder="-없이 입력"
-                value={newEmployee.accountNumber}
-                onChange={handleChange}
-                css={inputStyles}
-              />
+              <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <BankSelectComponent selectedBank={selectedBank} onChange={handleBankChange} />
+                {errors.bankName && <div css={errorStyles}>{errors.bankName}</div>}
+              </div>
+              <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <input
+                  type="text"
+                  name="accountNumber"
+                  placeholder="숫자만 입력"
+                  value={newEmployee.accountNumber}
+                  onChange={handleChange}
+                  css={inputStyles}
+                />
+                {errors.accountNumber && <div css={errorStyles}>{errors.accountNumber}</div>}
+              </div>
             </div>
           </div>
           <div>
@@ -191,32 +265,44 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
               css={inputStyles}
             />
             <span css={[valueStyles, { marginLeft: '6px' }]}>원</span>
-            </div>
-            {workSchedules.map((schedule, index) => (
-              <div css={{ gridColumn: 'span 2' }} key={index}>
-                <div css={{ display: 'flex', alignItems: 'center' }}>
-                  <div css={titleStyles}>근무 시간 {index + 1}</div>
-                  <button css={AddButton} onClick={handleAddSchedule}>+</button>
+            {errors.baseSalary && <div css={errorStyles}>{errors.baseSalary}</div>}
+          </div>
+          {workSchedules.map((schedule, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <div css={{ gridColumn: 'span 2' }} key={index}>
+              <div css={{ display: 'flex', alignItems: 'center' }}>
+                <div css={titleStyles}>근무 시간 {index + 1}</div>
+                <button css={AddButton} onClick={handleAddSchedule}>
+                  +
+                </button>
               </div>
-                <div css={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                  <DaysOfWeek
-                    workDay={schedule.days}
-                    onDayClick={(days) => handleDayClick(index, days)}
-                    editable={true}
-                  />
-                  <WorkTimePicker
-                    value={schedule.start}
-                    onChange={(time) => handleTimeChange(index, 'start', time)}
-                  />
+              <div css={{ display: 'flex', gap: '20px', alignItems: 'center', position: 'relative' }}>
+                <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'relative' }}>
+                  <DaysOfWeek workDay={schedule.days} onDayClick={(days) => handleDayClick(index, days)} editable />
+                  {errors[`workDay${index}`] && (
+                    <div css={[errorStyles, { position: 'absolute', top: '100%', left: '0' }]}>
+                      {errors[`workDay${index}`]}
+                    </div>
+                  )}
+                </div>
+                <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'relative' }}>
+                  <WorkTimePicker value={schedule.start} onChange={(time) => handleTimeChange(index, 'start', time)} />
+                  {errors[`workTime${index}`] && (
+                    <div css={[errorStyles, { position: 'absolute', top: '100%', left: '0' }]}>
+                      {errors[`workTime${index}`]}
+                    </div>
+                  )}
+                </div>
+                <div css={{ display: 'flex', alignItems: 'center' }}>
                   <div css={valueStyles}>~</div>
-                  <WorkTimePicker
-                    value={schedule.end}
-                    onChange={(time) => handleTimeChange(index, 'end', time)}
-                  />
+                </div>
+                <div css={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <WorkTimePicker value={schedule.end} onChange={(time) => handleTimeChange(index, 'end', time)} />
                 </div>
               </div>
-            ))}
-            
+            </div>
+          ))}
+
           <div css={ButtonStyles}>
             <Button onClick={handleSave}>저장</Button>
           </div>

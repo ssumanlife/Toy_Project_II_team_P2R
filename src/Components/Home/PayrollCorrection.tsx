@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-import getStandByNames from '../../API/Firebase/GetCorrectionData.tsx';
+import getStandByNames from '../../API/Firebase/GetCorrectionData.ts';
 
 const PayrollCorrection: React.FC = () => {
   const [data, setData] = useState<{ id: number; name: string }[]>([]);
@@ -62,6 +62,7 @@ const styles = {
     border-radius: 5px;
     background-color: #f9f9f9;
     cursor: pointer;
+    height: 30px;
     &:hover {
       background-color: #e9e9e9;
       transition: 0.3s;

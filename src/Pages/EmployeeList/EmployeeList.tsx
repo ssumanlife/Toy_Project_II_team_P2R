@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -6,8 +7,9 @@ import Modal from '../../Components/Modal.tsx';
 import EmployeeSpecificModal, { Employee } from '../../Components/EmployeeList/EmployeeSpecificModal.tsx';
 import EmployeeAddModal from '../../Components/EmployeeList/EmployeeAdd.tsx';
 import PaginationComponent from '../../Components/pagination.tsx';
-import { getEmployeeData } from '../../API/Firebase/GetEmployeeData.tsx';
-import deleteEmployee from '../../API/Firebase/DeleteEmployeeList.tsx';
+import getEmployeeData from '../../API/Firebase/GetEmployeeData.ts';
+import deleteEmployee from '../../API/Firebase/DeleteEmployeeList.ts';
+import addEmployee from '../../API/Firebase/AddEmployeeList.ts';
 
 const COUNT_PER_PAGE = 8;
 
@@ -90,29 +92,6 @@ const EmployeeList: React.FC = () => {
     const fetchData = async () => {
       const employeeData = await getEmployeeData();
 
-      if (employeeData.length === 0) {
-        // 데이터가 없을 때만 더미 데이터 추가
-        const dummyData: Employee[] = [
-          {
-            employeeId: 'dummy1',
-            name: '김더미',
-            phoneNumber: '010-1111-1111',
-            workDay: '월화수 09:00~18:00, 금 8:00~12:00',
-            accountNumber: '신한은행 1234567890',
-            baseSalary: '2500000',
-          },
-          {
-            employeeId: 'dummy2',
-            name: '이더미',
-            phoneNumber: '010-2222-2222',
-            workDay: '목금 10:00~19:00',
-            accountNumber: '카카오뱅크 0987654321',
-            baseSalary: '3000000',
-          },
-        ];
-        employeeData.push(...dummyData);
-      }
-
       setEmployees(employeeData);
       setData(employeeData.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
     };
@@ -121,7 +100,8 @@ const EmployeeList: React.FC = () => {
   }, [page]);
 
   useEffect(() => {
-    setData(employees.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE));
+    const updatedData = employees.slice((page - 1) * COUNT_PER_PAGE, page * COUNT_PER_PAGE);
+    setData(updatedData);
   }, [employees, page]);
 
   const handleRowClick = (employee: Employee) => {
@@ -136,13 +116,25 @@ const EmployeeList: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleSaveEmployee = (employee: Employee) => {
-    const updatedEmployeeData = [...employees, employee];
-    setEmployees(updatedEmployeeData);
-    setIsAddModalOpen(false);
-    const newPage = Math.ceil(updatedEmployeeData.length / COUNT_PER_PAGE);
-    setPage(newPage);
-    setData(updatedEmployeeData.slice((newPage - 1) * COUNT_PER_PAGE, newPage * COUNT_PER_PAGE));
+  const handleSaveEmployee = async (employee: Employee) => {
+    try {
+      const savedEmployee = await addEmployee(employee);
+
+      const updatedEmployeeData = [...employees, savedEmployee];
+
+      updatedEmployeeData.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR', { sensitivity: 'base' }));
+
+      const employeeIndex = updatedEmployeeData.findIndex((emp) => emp.employeeId === savedEmployee.employeeId);
+      const newPage = Math.floor(employeeIndex / COUNT_PER_PAGE) + 1;
+
+      setEmployees(updatedEmployeeData);
+      setPage(newPage);
+      setData(updatedEmployeeData.slice((newPage - 1) * COUNT_PER_PAGE, newPage * COUNT_PER_PAGE));
+
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.warn('Failed to save employee:', error);
+    }
   };
 
   const handleDeleteEmployee = async () => {
@@ -155,8 +147,9 @@ const EmployeeList: React.FC = () => {
         setPage(1);
         setData(updatedEmployeeData.slice(0, COUNT_PER_PAGE));
         setIsDeleteModalOpen(false);
+        setIsDeleteMode(false);
       } catch (error) {
-        console.error('Failed to delete employee', error);
+        console.warn('Failed to delete employee', error);
       }
     }
   };
@@ -174,7 +167,7 @@ const EmployeeList: React.FC = () => {
 
   const LAST_PAGE = Math.ceil(employees.length / COUNT_PER_PAGE);
 
-  const formatSalary = (salary: string) => new Intl.NumberFormat('ko-KR').format(parseInt(salary));
+  const formatSalary = (salary: string) => new Intl.NumberFormat('ko-KR').format(parseInt(salary, 10));
 
   return (
     <div css={warper}>
@@ -186,7 +179,7 @@ const EmployeeList: React.FC = () => {
               variant="secondary"
               onClick={() => {
                 setIsDeleteMode(!isDeleteMode);
-                setSelectedEmployee(null); // 삭제 모드 전환 시 선택된 직원 초기화
+                setSelectedEmployee(null);
               }}
             >
               직원 삭제
@@ -218,6 +211,7 @@ const EmployeeList: React.FC = () => {
                   >
                     <td css={tdStyles}>
                       {isDeleteMode && (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                         <span css={deleteButtonStyles} onClick={(e) => handleDeleteClick(employee, e)}>
                           −
                         </span>

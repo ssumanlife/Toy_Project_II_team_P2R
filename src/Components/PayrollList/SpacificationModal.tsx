@@ -7,7 +7,7 @@
 /* eslint-disable no-unused-expressions */
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Button from '../Button.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import Select from '../Select.tsx';
@@ -20,13 +20,14 @@ const SelectWidthCustom = css`
 interface PayListProps {
   id: number;
   payData: PayData;
-  onSpacificationModal: () => void;
+  onSpacificationModal: (name: string | null) => void;
   name: string;
   totalPay: number | string;
   handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
-  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
+  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | null) => void;
   month: number;
   isNull: boolean;
+  errText: string | null;
 }
 
 const SpacificationModal: React.FC<PayListProps> = ({
@@ -39,6 +40,7 @@ const SpacificationModal: React.FC<PayListProps> = ({
   addSalaryCorrectionList,
   month,
   isNull,
+  errText,
 }) => {
   const [readOnly, setReadOnly] = useState(true);
   const [isRequest, setRequest] = useState(false);
@@ -47,37 +49,34 @@ const SpacificationModal: React.FC<PayListProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuthContext();
 
+  useEffect(() => {
+    errText !== null ? setReadOnly(false) : setReadOnly(true);
+  }, [errText]);
+
+  const handleReadOnly = () => {
+    if (errText === null && readOnly) {
+      setReadOnly(false);
+    } else if (errText === null && !readOnly) {
+      setReadOnly(true);
+    }
+  };
+
   const handleSelect = (option: string) => {
     setReason(option);
   };
 
-  const handleReadOnly = () => {
-    readOnly ? setReadOnly(false) : setReadOnly(true);
-  };
+  const changePay = (pay: number): string => pay.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   // 총 지급액
-  const sumPay = (payData.baseSalary + payData.weeklyHolidayAllowance + payData.additionalAllowance)
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const provisionPay = changePay(payData.baseSalary + payData.weeklyHolidayAllowance + payData.additionalAllowance);
 
   // 총 공제액
-  const deductionPay = (
-    payData.nationalPension +
-    payData.healthInsurance +
-    payData.longTermCare +
-    payData.employmentInsurance
-  )
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const deductionPay = changePay(
+    payData.nationalPension + payData.healthInsurance + payData.longTermCare + payData.employmentInsurance,
+  );
 
   // 그 외 나머지 pay
-  const payArr = [];
-  for (let i = 0; i < Object.values(payData).length; i++) {
-    payArr.push(
-      Object.values(payData)
-        [i].toFixed(0)
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-    );
-  }
+  const payArr = Object.values(payData).map((value) => changePay(value));
 
   let salaryStatementBtn: React.ReactNode = null;
   if (readOnly) {
@@ -87,7 +86,7 @@ const SpacificationModal: React.FC<PayListProps> = ({
         salaryStatementBtn = (
           <Button
             onClick={() => {
-              const textareaValue = textareaRef.current?.value;
+              const textareaValue = textareaRef.current?.value || null;
               addSalaryCorrectionList(name, reason, textareaValue);
             }}
             children={'제출'}
@@ -143,7 +142,7 @@ const SpacificationModal: React.FC<PayListProps> = ({
           <h3 css={{ color: '#578aea' }}>
             2024년 {month}월 {name} 급여명세서
           </h3>
-          <button css={closeBtn} onClick={() => onSpacificationModal()}>
+          <button css={closeBtn} onClick={() => onSpacificationModal(null)}>
             <span css={{ color: '#888', fontSize: '36px' }} className="material-symbols-outlined">
               close
             </span>
@@ -196,9 +195,13 @@ const SpacificationModal: React.FC<PayListProps> = ({
                     <input ref={inputRef} defaultValue={payArr[2]} readOnly={readOnly} />원
                   </div>
                 </li>
+                <li>
+                  <span> </span>
+                  <span css={{ fontSize: '14px', color: 'red' }}>{errText}</span>
+                </li>
                 <li css={{ fontSize: '18px', fontWeight: '500' }}>
                   <p>총지급액</p>
-                  <p>{sumPay}원</p>
+                  <p>{provisionPay}원</p>
                 </li>
               </ul>
               <ul css={ulArea}>

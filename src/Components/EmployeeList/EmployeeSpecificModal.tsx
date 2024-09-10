@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
@@ -6,8 +7,9 @@ import Button from '../Button.tsx';
 import EmployeeScheduleRequests from '../../Pages/EmployeeList/EmployeeScheduleRequests.tsx';
 import DaysOfWeek from './DaysOfWeek.tsx';
 import { inputStyles } from './EmployeeAdd.tsx';
-import updateEmployee from '../../API/Firebase/UpdateEmployeeList.tsx';
+import updateEmployee from '../../API/Firebase/UpdateEmployeeList.ts';
 import BankSelectComponent from './bankSelect.tsx';
+import WorkTimePicker from './WorkTimePicker.tsx';
 
 interface Employee {
   employeeId: string;
@@ -33,7 +35,7 @@ export const containerStyles = css`
   margin: 0 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 40px;
 `;
 
 export const titleStyles = css`
@@ -71,6 +73,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
   const [updatedEmployee, setUpdatedEmployee] = useState<Employee>({ ...employee });
   const [selectedBank, setSelectedBank] = useState<string>('');
   const [accountNumber, setAccountNumber] = useState<string>('');
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     setUpdatedEmployee({ ...employee });
@@ -92,13 +95,37 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
     setSelectedBank(bank);
   };
 
+  const handleDayClick = (clickedDay: string, index: number) => {
+    const newDaysArray = [clickedDay];
+
+    const dayOrder = ['월', '화', '수', '목', '금', '토', '일'];
+    const newDays = newDaysArray.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)).join('');
+
+    const existingTimeRange = splitWorkDays[index].split(' ')[1] || '';
+    const updatedWorkDays = [...splitWorkDays];
+    updatedWorkDays[index] = `${newDays} ${existingTimeRange}`.trim();
+
+    setUpdatedEmployee({
+      ...updatedEmployee,
+      workDay: updatedWorkDays.join(', '),
+    });
+  };
+
   const handleSave = async () => {
+    const workDayString = updatedEmployee.workDay;
+
     try {
-      await updateEmployee({ ...updatedEmployee, accountNumber: `${selectedBank} ${accountNumber}` });
+      await updateEmployee({
+        ...updatedEmployee,
+        workDay: workDayString,
+        accountNumber: `${selectedBank} ${accountNumber}`,
+      });
+
       setEditMode(false);
       onClose();
+      setKey((prevKey) => prevKey + 1);
     } catch (error) {
-      console.error('Failed to update employee', error);
+      console.warn('Failed to update employee', error);
     }
   };
 
@@ -106,7 +133,7 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
   const splitWorkDays = workDays.reduce<string[]>((acc, workDay) => acc.concat(workDay.split(',')), []);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal key={key} isOpen={isOpen} onClose={onClose}>
       <div css={modalContentStyles}>
         <div css={containerStyles}>
           <div>
@@ -160,18 +187,48 @@ const EmployeeSpecificModal: React.FC<{ isOpen: boolean; onClose: () => void; em
               />
             ) : (
               <div css={valueStyles}>
-                {new Intl.NumberFormat('ko-KR').format(parseInt(updatedEmployee.baseSalary))}원
+                {new Intl.NumberFormat('ko-KR').format(parseInt(updatedEmployee.baseSalary, 10))}원
               </div>
             )}
           </div>
           {splitWorkDays.map((workDay, index) => {
-            const [days, hours] = workDay.trim().split(' ');
+            const [days, timeRange] = workDay.trim().split(' ');
+            const [startTime, endTime] = timeRange.split('~');
             return (
+              // eslint-disable-next-line react/no-array-index-key
               <div css={{ gridColumn: 'span 2' }} key={index}>
                 <div css={titleStyles}>근무 시간 {index + 1}</div>
                 <div css={workTimeStyles}>
-                  <DaysOfWeek workDay={days} />
-                  <div css={valueStyles}>{hours}</div>
+                  <DaysOfWeek workDay={days} editable={editMode} onDayClick={(days) => handleDayClick(days, index)} />
+                  {editMode ? (
+                    <>
+                      <WorkTimePicker
+                        value={startTime}
+                        onChange={(newStartTime) => {
+                          const updatedWorkDays = [...splitWorkDays];
+                          updatedWorkDays[index] = `${days} ${newStartTime}~${endTime}`;
+                          setUpdatedEmployee({
+                            ...updatedEmployee,
+                            workDay: updatedWorkDays.join(', '),
+                          });
+                        }}
+                      />
+                      <span css={valueStyles}>~</span>
+                      <WorkTimePicker
+                        value={endTime}
+                        onChange={(newEndTime) => {
+                          const updatedWorkDays = [...splitWorkDays];
+                          updatedWorkDays[index] = `${days} ${startTime}~${newEndTime}`;
+                          setUpdatedEmployee({
+                            ...updatedEmployee,
+                            workDay: updatedWorkDays.join(', '),
+                          });
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <div css={valueStyles}>{timeRange}</div>
+                  )}
                 </div>
               </div>
             );

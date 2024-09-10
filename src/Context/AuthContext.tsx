@@ -8,6 +8,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
@@ -19,19 +20,34 @@ interface AuthContextProviderProps {
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error('Failed to parse user from localStorage:', error);
+      return null;
+    }
   });
 
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('user');
+      }
+    } catch (error) {
+      console.error('Failed to save user to localStorage:', error);
     }
   }, [user]);
 
-  const contextValue = useMemo(() => ({ user, setUser }), [user]);
+  const contextValue = useMemo(() => ({ user, loading, setUser }), [user, loading]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

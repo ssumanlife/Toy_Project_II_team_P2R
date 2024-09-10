@@ -1,11 +1,13 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PayData } from '../../Pages/Payroll/PayrollHistory.tsx';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 import SpacificationModal from './SpacificationModal.tsx';
+import { getPayDay } from '../../API/Firebase/Payday.ts';
 
 interface PayListProps {
   id: number;
@@ -14,12 +16,13 @@ interface PayListProps {
   handleAdditionalPay: (inputValue: string | undefined, id: number, name: string, month: number) => void;
   isViewed: boolean;
   handleIsViewd: (id: number, name: string, month: number) => void;
-  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | undefined) => void;
+  addSalaryCorrectionList: (name: string, reason: string, textareaValue: string | null) => void;
   month: number;
   isNull: boolean;
-  spacificationModal: boolean;
-  onSpacificationModal: () => void;
+  openModalName: string | null;
+  onSpacificationModal: (name: string | null) => void;
   adminViewed: boolean;
+  errText: string | null;
 }
 
 const PayList: React.FC<PayListProps> = ({
@@ -32,12 +35,23 @@ const PayList: React.FC<PayListProps> = ({
   addSalaryCorrectionList,
   month,
   isNull,
-  spacificationModal,
+  openModalName,
   onSpacificationModal,
   adminViewed,
+  errText,
 }) => {
+  const [payDay, setPayDay] = useState<string | null>('');
   const { user } = useAuthContext();
+  const userId = String(user?.employeeId);
   const viewedPm = user?.isAdmin ? adminViewed : isViewed;
+
+  useEffect(() => {
+    const getUserPayDay = async () => {
+      const userPayDay = await getPayDay(userId);
+      userPayDay ? setPayDay(userPayDay.payDay) : setPayDay(null);
+    };
+    getUserPayDay();
+  }, [user]);
 
   let totalPay: number | string =
     payData.baseSalary +
@@ -59,7 +73,7 @@ const PayList: React.FC<PayListProps> = ({
 
   return (
     <li css={liItem}>
-      {spacificationModal ? (
+      {openModalName === name ? (
         <SpacificationModal
           id={id}
           payData={payData}
@@ -70,24 +84,25 @@ const PayList: React.FC<PayListProps> = ({
           addSalaryCorrectionList={addSalaryCorrectionList}
           month={month}
           isNull={isNull}
+          errText={errText}
         />
       ) : null}
       <p>
         {month}월 {name} 급여명세서
       </p>
       <p css={{ color: '#666' }}>
-        2024 {month}월 15일 지급 {text}
+        2024 {month}월 {payDay}일 지급 {text}
       </p>
       <p css={{ color: '#ff3737', width: '100px' }}>{totalPay}원</p>
       {viewedPm ? (
-        <button css={readBtn} onClick={onSpacificationModal}>
+        <button css={readBtn} onClick={() => onSpacificationModal(name)}>
           열람
         </button>
       ) : (
         <button
           css={unreadBtn}
           onClick={() => {
-            onSpacificationModal();
+            onSpacificationModal(name);
             handleIsViewd(id, name, month);
           }}
         >

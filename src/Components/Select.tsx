@@ -1,3 +1,10 @@
+/* eslint-disable no-shadow */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/require-default-props */
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
@@ -31,6 +38,7 @@ const selectBox = css`
     background: transparent;
     cursor: pointer;
     font-weight: var(--font-weight-medium);
+    z-index: 1000;
   }
 
   .optionList {
@@ -47,7 +55,7 @@ const selectBox = css`
     overflow-y: auto;
     max-height: 0;
     transition: max-height 0.3s ease-in;
-    z-index: 1;
+    z-index: 999;
 
     &::-webkit-scrollbar {
       width: 5px;
@@ -70,6 +78,7 @@ const selectBox = css`
   &.active .optionList {
     max-height: 150px;
     border-color: var(--primary-blue);
+    z-index: 1000;
   }
 
   .optionItem {

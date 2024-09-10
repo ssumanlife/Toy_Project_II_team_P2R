@@ -1,7 +1,8 @@
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import store from './store.tsx';
+import { useMemo } from 'react';
+import store from './store.ts';
 import App from './App.tsx';
 import Error from './Pages/Error.tsx';
 import Home from './Pages/Home.tsx';
@@ -11,8 +12,10 @@ import ScheduleManage from './Pages/Schedule-Manage/Schedule-Manage.tsx';
 import PayrollHistory from './Pages/Payroll/PayrollHistory.tsx';
 import EmployeeList from './Pages/EmployeeList/EmployeeList.tsx';
 import Signin from './Pages/Signin.tsx';
+import Loading from './Components/LoadingAnimation.tsx';
+import useLoading from './CustomHooks/useLoading.tsx';
 
-const adminRouter = createBrowserRouter([
+const adminRoutes = [
   {
     path: '/',
     element: <App />,
@@ -56,9 +59,9 @@ const adminRouter = createBrowserRouter([
       },
     ],
   },
-]);
+];
 
-const userRouter = createBrowserRouter([
+const userRoutes = [
   {
     path: '/',
     element: <App />,
@@ -94,11 +97,25 @@ const userRouter = createBrowserRouter([
       },
     ],
   },
-]);
+];
 
 function Root() {
-  const { user } = useAuthContext();
-  return <RouterProvider router={user?.isAdmin ? adminRouter : userRouter} />;
+  const { user, loading } = useAuthContext();
+  const displayLoading = useLoading({ loading, minimumLoadTime: 1500 });
+
+  const router = useMemo(() => {
+    if (loading) {
+      return null;
+    }
+    const selectedRoutes = user?.isAdmin ? adminRoutes : userRoutes;
+    return createBrowserRouter(selectedRoutes);
+  }, [user, loading]);
+
+  if (displayLoading || !router) {
+    return <Loading />;
+  }
+
+  return <RouterProvider router={router} />;
 }
 
 const rootElement = document.getElementById('root');
@@ -112,5 +129,5 @@ if (rootElement) {
     </Provider>,
   );
 } else {
-  console.log('No root element found');
+  console.warn('No root element found');
 }

@@ -1,12 +1,13 @@
+/* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../store.tsx';
-import addCalendarEvent from '../API/Firebase/AddCalendarEvent.tsx';
-import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.tsx';
-import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.tsx';
-import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.tsx';
+import { AppThunk } from '../store.ts';
+import addCalendarEvent from '../API/Firebase/AddCalendarEvent.ts';
+import updateCalendarEvent from '../API/Firebase/UpdateCalendarEvent.ts';
+import deleteCalendarEvent from '../API/Firebase/DeleteCalendarEvent.ts';
+import getUserCalendarEvents from '../API/Firebase/GetUserCalendarEvents.ts';
 
 export interface CalendarEvent {
-  id: number;
+  id: string;
   title: string;
   start: string;
   end: string;
@@ -38,7 +39,7 @@ const calendarSlice = createSlice({
         state.events[index] = action.payload;
       }
     },
-    deleteEvent: (state, action: PayloadAction<number>) => {
+    deleteEvent: (state, action: PayloadAction<string>) => {
       state.events = state.events.filter((event) => event.id !== action.payload);
     },
   },
@@ -50,14 +51,14 @@ export const fetchEvents =
   (userId: string): AppThunk =>
   async (dispatch) => {
     if (!userId) {
-      console.error('User ID is required to fetch events');
+      console.warn('User ID is required to fetch events');
       return;
     }
 
     try {
       const calendarEventData = await getUserCalendarEvents(userId);
-      const events = calendarEventData.map((event, index) => ({
-        id: index + 1,
+      const events = calendarEventData.map((event) => ({
+        id: event.id,
         title: event.eventContent,
         start: event.eventStartDate,
         end: event.eventEndDate,
@@ -66,7 +67,7 @@ export const fetchEvents =
       }));
       dispatch(setEvents(events));
     } catch (error) {
-      console.error('Failed to fetch events:', error);
+      console.warn('Failed to fetch events:', error);
     }
   };
 
@@ -86,6 +87,7 @@ export const updateEventAsync =
   async (dispatch) => {
     try {
       await updateCalendarEvent(
+        updatedEvent.id,
         updatedEvent.title,
         updatedEvent.end,
         updatedEvent.start,
@@ -94,12 +96,12 @@ export const updateEventAsync =
       );
       dispatch(updateEvent(updatedEvent));
     } catch (error) {
-      console.error('Failed to update event:', error);
+      console.warn('Failed to update event:', error);
     }
   };
 
 export const deleteEventAsync =
-  (eventId: number): AppThunk =>
+  (eventId: string): AppThunk =>
   async (dispatch, getState) => {
     try {
       const eventToDelete = getState().calendar.events.find((event) => event.id === eventId);
@@ -114,7 +116,7 @@ export const deleteEventAsync =
         dispatch(deleteEvent(eventId));
       }
     } catch (error) {
-      console.error('Failed to delete event:', error);
+      console.warn('Failed to delete event:', error);
     }
   };
 

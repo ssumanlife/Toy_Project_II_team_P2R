@@ -1,3 +1,5 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable react/require-default-props */
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';

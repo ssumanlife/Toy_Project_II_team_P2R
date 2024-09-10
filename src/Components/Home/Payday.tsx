@@ -1,10 +1,11 @@
+/* eslint-disable no-restricted-globals */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
 import Button from '../Button.tsx';
 import Polygon1 from '../../../public/images/Polygon 1.svg';
 import Polygon2 from '../../../public/images/Polygon 2.svg';
-import { getPayDay, updatePayDay } from '../../API/Firebase/Payday.tsx';
+import { getPayDay, updatePayDay } from '../../API/Firebase/Payday.ts';
 import { useAuthContext } from '../../Context/AuthContext.tsx';
 
 const contentContainerStyle = css`
@@ -13,7 +14,7 @@ const contentContainerStyle = css`
   bottom: 0;
   transform: translateX(-50%);
   width: 304px;
-  height: 303px;
+  height: 95%;
   flex-shrink: 0;
   border-radius: var(--border-radius-medium);
   background: #f7f9fc; /* 연한 색상 */
@@ -21,7 +22,7 @@ const contentContainerStyle = css`
 
   .content-wrapper {
     width: 275px;
-    height: 288px;
+    height: 95%;
     border-radius: var(--border-radius-medium);
     background: var(--background-main, #fff);
     position: absolute;
@@ -111,7 +112,7 @@ export const Payday: React.FC = () => {
       if (user) {
         const payDayData = await getPayDay(user.employeeId);
         if (payDayData) {
-          setPayday(payDayData.payDay); // payDay로 수정
+          setPayday(payDayData.payDay);
         }
       }
     };
@@ -130,7 +131,7 @@ export const Payday: React.FC = () => {
       setIsEditing(false);
 
       if (user) {
-        await updatePayDay(user.employeeId, payday);
+        await updatePayDay(payday);
       }
     } else {
       setIsEditing(true);
@@ -162,9 +163,17 @@ export const Payday: React.FC = () => {
           일
         </h2>
         {error && <div css={errorMessageStyle}>{error}</div>}
-        <Button type="button" onClick={handleButtonClick}>
-          {isEditing ? '저장하기' : '수정하기'}
-        </Button>
+        {user?.isAdmin && (
+          <Button
+            type="button"
+            customWidth="80px"
+            customHeight="30px"
+            customFontSize="14px"
+            onClick={handleButtonClick}
+          >
+            {isEditing ? '저장하기' : '수정하기'}
+          </Button>
+        )}
       </div>
       <img src={Polygon1} alt="Polygon 1" />
       <img src={Polygon2} alt="Polygon 2" />

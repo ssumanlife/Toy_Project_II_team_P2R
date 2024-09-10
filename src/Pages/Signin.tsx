@@ -7,7 +7,7 @@ import signinPageImage from '../../public/images/signin_page_image.svg';
 import workCheckLogo from '../../public/images/workcheck_logo_signin.svg';
 import Button from '../Components/Button.tsx';
 import triangle from '../../public/images/triangle.svg';
-import { login } from '../API/Firebase/Firebase.tsx';
+import { login } from '../API/Firebase/LoginRegister.ts';
 import { useAuthContext } from '../Context/AuthContext.tsx';
 
 const Signin: React.FC = () => {
@@ -116,12 +116,31 @@ const Signin: React.FC = () => {
     .workcheck-logo {
       width: 65%;
       height: auto;
+      margin: 20px 0;
     }
 
     @media (max-width: 768px) {
       width: 100%;
+      margin: 0;
       .signin-image {
         width: 60%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      width: 100%;
+      margin: 100px 0 0 0;
+
+      .signin-image {
+        width: 60%;
+        margin-bottom: 0;
+      }
+      .description {
+        font-weight: 400;
+        font-size: var(--font-size-h6);
+      }
+      .workcheck-logo {
+        margin: 5px 0 20px;
       }
     }
   `;
@@ -136,12 +155,6 @@ const Signin: React.FC = () => {
     background: white;
     border-radius: var(--border-radius-medium);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-    @media (max-width: 768px) {
-      width: 100%;
-      max-width: 400px;
-      margin-top: 20px;
-    }
 
     .triangle {
       position: absolute;
@@ -170,6 +183,26 @@ const Signin: React.FC = () => {
       color: red;
       letter-spacing: -0.5px;
     }
+
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      max-width: 250px;
+      min-height: 280px;
+      margin: 0 0 100px;
+      padding: 30px;
+
+      .login-header {
+        height: 70px;
+      }
+      .signin-options {
+        margin: 7px 0 10px;
+      }
+    }
   `;
 
   const inputContainerStyle = css`
@@ -177,6 +210,7 @@ const Signin: React.FC = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 1;
   `;
 
   const inputStyle = css`
@@ -191,6 +225,10 @@ const Signin: React.FC = () => {
       border: 1.5px solid var(--text-blue);
       transition: 0.3s;
     }
+
+    @media (max-width: 600px) {
+      margin: 5px;
+    }
   `;
 
   return (
@@ -198,7 +236,7 @@ const Signin: React.FC = () => {
       <div css={imageContainerStyle}>
         <img src={signinPageImage} alt="로그인 페이지 이미지" className="signin-image" />
         <p className="description">급여 및 스케줄 관리 플랫폼</p>
-        <img src={workCheckLogo} style={{ margin: '20px 0' }} alt="근무 로고" className="workcheck-logo" />
+        <img src={workCheckLogo} alt="근무 로고" className="workcheck-logo" />
       </div>
       <form css={contentsContainerStyle} onSubmit={handleLogin}>
         <img src={triangle} alt="삼각형" className="triangle" />

@@ -91,7 +91,7 @@ const SalaryList: React.FC<SalaryListProps> = ({
 
   return (
     <tr css={tr}>
-      <td>{name}</td>
+      <td css={{ paddingLeft: '60px' }}>{name}</td>
       <td>24년 0{month}월</td>
       <td>{reasonForApplication}</td>
       <td>
@@ -121,7 +121,7 @@ const stateCheckBtn = css`
 
 const employee = css`
   position: absolute;
-  right: 0;
+  right: 10px;
   margin-top: 2px;
   span {
     font-size: 20px;
@@ -134,7 +134,6 @@ const tr = css`
   td {
     border-top: 1px solid #eeeeee;
     vertical-align: middle;
-    padding-left: 15px;
     position: relative;
   }
 `;
@@ -153,7 +152,7 @@ const approvalState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #dceeff;
-  padding-top: 7px;
+  padding-top: 5px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
@@ -166,7 +165,7 @@ const rejectState = css`
   border-radius: var(--border-radius-small);
   color: #333;
   background-color: #ffe6e6;
-  padding-top: 7px;
+  padding-top: 5px;
   font-size: 14px;
   box-sizing: border-box;
   &:hover {
@@ -180,7 +179,7 @@ const standByState = css`
   color: #333;
   font-size: 14px;
   background-color: #e6e6e6;
-  padding-top: 7px;
+  padding-top: 5px;
   box-sizing: border-box;
   &:hover {
     background-color: #adadad;
