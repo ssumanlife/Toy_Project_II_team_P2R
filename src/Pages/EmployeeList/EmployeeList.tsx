@@ -118,7 +118,11 @@ const EmployeeList: React.FC = () => {
 
   const handleSaveEmployee = async (employee: Employee) => {
     try {
-      const savedEmployee = await addEmployee(employee);
+      const savedEmployee = await addEmployee({
+        ...employee,
+        workDay: Array.isArray(employee.workDay) ? employee.workDay.join(', ') : employee.workDay,
+        bankName: employee.bankName ?? '',
+      });
 
       const updatedEmployeeData = [...employees, savedEmployee];
 

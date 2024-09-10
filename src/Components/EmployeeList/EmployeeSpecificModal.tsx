@@ -18,6 +18,7 @@ interface Employee {
   workDay: string | string[];
   accountNumber: string;
   baseSalary: string;
+  bankName?: string;
 }
 
 export const modalContentStyles = css`

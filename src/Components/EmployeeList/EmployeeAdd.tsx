@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /** @jsxImportSource @emotion/react */
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
@@ -225,8 +226,9 @@ const EmployeeAddModal: React.FC<EmployeeAddModalProps> = ({ isOpen, onClose, on
                 value={newEmployee.phoneNumber}
                 onChange={handleChange}
                 onInput={(e) => {
-                  if (e.target.value.length > 8) {
-                    e.target.value = e.target.value.slice(0, 8);
+                  const target = e.target as HTMLInputElement;
+                  if (target.value.length > 8) {
+                    target.value = target.value.slice(0, 8);
                   }
                 }}
                 css={inputStyles}

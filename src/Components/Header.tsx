@@ -50,6 +50,7 @@ const containerStyles = css`
       width: 35px;
       height: auto;
     }
+  }
 `;
 
 const listStyles = css`

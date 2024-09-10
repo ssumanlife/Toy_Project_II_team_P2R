@@ -1,3 +1,7 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/require-default-props */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';

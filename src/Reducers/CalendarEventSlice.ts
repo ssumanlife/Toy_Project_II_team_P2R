@@ -121,3 +121,4 @@ export const deleteEventAsync =
   };
 
 export default calendarSlice.reducer;
+export type { CalendarState };

@@ -70,6 +70,7 @@ const styles = {
     span:nth-of-type(2) {
       font-size: 12px;
       // font-weight: 600;
+    }
   `,
 };
 

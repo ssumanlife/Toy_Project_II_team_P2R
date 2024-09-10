@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /** @jsxImportSource @emotion/react */
-import React, { useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import Select from '../Select';
+import Select from '../Select.tsx';
 
 const customSelectStyles = css`
   width: 130px; /* 원하는 너비로 설정 */
@@ -10,7 +11,7 @@ const customSelectStyles = css`
 
 interface BankSelectComponentProps {
   selectedBank: string;
-  onChange: (bank: string) => void;
+  onChange: (option: string) => void;
 }
 
 const BankSelectComponent: React.FC<BankSelectComponentProps> = ({ selectedBank, onChange }) => {
