@@ -1,5 +1,5 @@
 import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts';
+import { db } from './Firebase_Config.ts';
 
 const deleteSalaryCorrectionAPI = async (name: string, month: number, correctionDetails: string) => {
   try {

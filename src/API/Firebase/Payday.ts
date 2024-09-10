@@ -1,5 +1,5 @@
 import { collection, getDoc, getDocs, doc, writeBatch } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts';
+import { db } from './Firebase_Config.ts';
 
 interface PayDayData {
   payDay: string;

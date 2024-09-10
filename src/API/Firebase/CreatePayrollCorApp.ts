@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts';
+import { db } from './Firebase_Config.ts';
 
 const createPayrollCorApp = async (name: string, month: number, option: string, correctionDetails: string) => {
   try {

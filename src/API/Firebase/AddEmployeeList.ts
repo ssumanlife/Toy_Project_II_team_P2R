@@ -1,5 +1,5 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts';
+import { db } from './Firebase_Config.ts';
 
 interface Employee {
   employeeId: string;

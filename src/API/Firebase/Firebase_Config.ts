@@ -12,6 +12,7 @@ declare global {
       readonly VITE_FIREBASE_STORAGE_BUCKET: string;
       readonly VITE_FIREBASE_MESSAGING_ID: string;
       readonly VITE_FIREBASE_APP_ID: string;
+      readonly VITE_FIREBASE_DATABASEURL: string;
     };
   }
 }
@@ -23,6 +24,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASEURL,
 };
 
 const firebase = initializeApp(firebaseConfig);

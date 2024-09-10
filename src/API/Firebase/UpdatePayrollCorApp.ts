@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
-import { db } from './FirebaseConfig.ts';
+import { db } from './Firebase_Config.ts';
 
 const updateCorrectionState = async (name: string, month: number, state: string, correctionDetails: string) => {
   try {
