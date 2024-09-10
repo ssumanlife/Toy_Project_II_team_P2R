@@ -5,7 +5,7 @@ declare global {
   // eslint-disable-next-line no-unused-vars
   interface ImportMeta {
     readonly env: {
-      readonly VITE_FIREBASE_DATABASE_URL: string;
+      readonly VITE_FIREBASE_MEASUREMENT_ID: string;
       readonly VITE_FIREBASE_API_KEY: string;
       readonly VITE_FIREBASE_AUTH_DOMAIN: string;
       readonly VITE_FIREBASE_PROJECT_ID: string;
@@ -25,6 +25,7 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASEURL,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const firebase = initializeApp(firebaseConfig);
