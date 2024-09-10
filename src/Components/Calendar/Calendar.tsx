@@ -251,7 +251,7 @@ const MyCalendar: React.FC = () => {
                 id={category}
                 checked={selectedCategories.includes(category)}
                 onChange={() => handleCategoryChange(category)}
-                css={[checkboxStyle(category), checkboxInputStyle]}
+                css={[checkboxStyle, checkboxInputStyle]}
               />
               <label htmlFor={category} css={checkboxLabelStyle(category)}>
                 {category}
@@ -476,7 +476,7 @@ const eventListStyle = css`
   }
 `;
 
-const checkboxStyle = (category: string) => css`
+const checkboxStyle = css`
   position: absolute;
   opacity: 0;
   cursor: pointer;
